@@ -1,0 +1,94 @@
+import { defineMessages } from 'react-intl'
+
+import type { PlanLimitResource } from '@/hooks'
+
+/**
+ * One meter, three vocabularies. The draft copy is verbatim what the Borradores
+ * home already said — the meter moved, the words did not.
+ */
+export const planUsageMeterMessages = defineMessages({
+  usage: {
+    id: 'planUsageMeter.usage',
+    defaultMessage: '{current} of {limit}',
+    description: 'How every plan meter renders usage against its cap',
+  },
+  draftsLabel: {
+    id: 'planUsageMeter.draftsLabel',
+    defaultMessage: 'Draft slots used',
+    description: 'Label of the drafts meter on the Borradores home',
+  },
+  draftsRemaining: {
+    id: 'planUsageMeter.draftsRemaining',
+    defaultMessage:
+      '{count, plural, one {# import left before the cap} other {# imports left before the cap}}',
+    description: 'Headroom left on the plan draft cap',
+  },
+  draftsFull: {
+    id: 'planUsageMeter.draftsFull',
+    defaultMessage:
+      'Your plan allows {limit} pending drafts. Activate or delete one to import again.',
+    description:
+      'Shown when the plan draft cap is reached, before an import can fail',
+  },
+
+  projectsLabel: {
+    id: 'planUsageMeter.projectsLabel',
+    defaultMessage: 'Live project slots used',
+    description: 'Label of the live-project meter on the projects home',
+  },
+  projectsRemaining: {
+    id: 'planUsageMeter.projectsRemaining',
+    defaultMessage:
+      '{count, plural, one {# project left before the cap} other {# projects left before the cap}}',
+    description: 'Headroom left on the plan live-project cap',
+  },
+  projectsFull: {
+    id: 'planUsageMeter.projectsFull',
+    defaultMessage:
+      'Your plan allows {limit} live projects. Delete one or upgrade to activate another.',
+    description:
+      'Shown when the plan live-project cap is reached, before go-live can fail',
+  },
+
+  membersLabel: {
+    id: 'planUsageMeter.membersLabel',
+    defaultMessage: 'Team seats used',
+    description: 'Label of the team-size meter on the team home',
+  },
+  membersRemaining: {
+    id: 'planUsageMeter.membersRemaining',
+    defaultMessage:
+      '{count, plural, one {# seat left before the cap} other {# seats left before the cap}}',
+    description: 'Headroom left on the plan team-size cap',
+  },
+  membersFull: {
+    id: 'planUsageMeter.membersFull',
+    defaultMessage:
+      'Your plan allows {limit} team members. Remove one or upgrade to add another.',
+    description:
+      'Shown when the plan team-size cap is reached, before an invite can fail',
+  },
+})
+
+type MessageKey = keyof typeof planUsageMeterMessages
+
+export const PLAN_METER_COPY: Record<
+  PlanLimitResource,
+  { label: MessageKey; remaining: MessageKey; full: MessageKey }
+> = {
+  drafts: {
+    label: 'draftsLabel',
+    remaining: 'draftsRemaining',
+    full: 'draftsFull',
+  },
+  projects: {
+    label: 'projectsLabel',
+    remaining: 'projectsRemaining',
+    full: 'projectsFull',
+  },
+  members: {
+    label: 'membersLabel',
+    remaining: 'membersRemaining',
+    full: 'membersFull',
+  },
+}

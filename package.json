@@ -1,0 +1,100 @@
+{
+  "name": "lennix-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "Innovacores SpA",
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  },
+  "lint-staged": {
+    "*": "prettier --ignore-unknown --write",
+    "*.{js,ts,jsx,tsx,cjs,mjs}": [
+      "eslint --fix --max-warnings 0 --no-warn-ignored --pass-on-no-patterns"
+    ]
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "serve dist",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --coverage",
+    "build:e2e": "vite build --mode e2e",
+    "e2e": "bddgen && playwright test",
+    "e2e:report": "playwright show-report e2e/.report",
+    "seed:sync": "node scripts/seed-sync/sync-seed-manifest.mjs",
+    "seed:check": "node scripts/seed-sync/sync-seed-manifest.mjs --check",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "typecheck": "tsc --noEmit",
+    "prettier": "prettier --ignore-unknown --write .",
+    "clean": "rimraf node_modules pnpm-lock.yaml dist",
+    "validate": "./scripts/validate",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.36.0",
+    "@emotion/react": "^11.14.0",
+    "@hookform/resolvers": "^5.2.2",
+    "@reduxjs/toolkit": "2.11.2",
+    "@tanstack/react-table": "^8.21.3",
+    "async-mutex": "^0.5.0",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^1.16.0",
+    "next-themes": "^0.4.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-dropzone": "^15.0.0",
+    "react-error-boundary": "^6.1.2",
+    "react-hook-form": "^7.75.0",
+    "react-hot-toast": "^2.6.0",
+    "react-intl": "^10.1.5",
+    "react-number-format": "^5.4.5",
+    "react-redux": "^9.2.0",
+    "react-router": "^7.15.1",
+    "react-select": "^5.10.2",
+    "redux": "5.0.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^25.8.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react-swc": "^4.3.1",
+    "@vitest/coverage-v8": "4.0.16",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.2",
+    "eslint-config-ts-prefixer": "^4.2.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "lint-staged": "^17.0.4",
+    "msw": "^2.14.6",
+    "node-fetch": "^3.3.2",
+    "playwright-bdd": "^9.2.0",
+    "postcss": "^8.5.14",
+    "prettier": "^3.8.3",
+    "serve": "^14.2.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
+    "vitest": "^4.0.16"
+  },
+  "volta": {
+    "node": "22.16.0"
+  }
+}

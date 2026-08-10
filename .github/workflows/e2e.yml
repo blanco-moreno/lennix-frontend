@@ -1,0 +1,45 @@
+name: E2E
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/prepare
+      # Downloading Chromium is the bulk of this job; the cache key follows the
+      # Playwright version, which is the only thing that invalidates it.
+      - name: Resolve Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Install system dependencies
+        run: pnpm exec playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+      # The scenarios run against the production build served locally with the
+      # mock worker on — the dev server is not what ships.
+      - name: Run scenarios
+        run: pnpm e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            e2e/.report
+            e2e/.results
+          retention-days: 7

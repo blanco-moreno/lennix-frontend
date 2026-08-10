@@ -1,0 +1,12 @@
+/**
+ * Paginated response envelope mirroring `app.shared.pagination.Page` on
+ * the backend.
+ */
+
+export interface Page<T> {
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}

@@ -1,0 +1,17 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.idea
+coverage
+.env
+.env.*
+!.env.example
+# The e2e build's flags — no secrets, and CI needs them to build the mock app.
+!.env.e2e
+
+# e2e (playwright-bdd generates specs; the runner writes reports and traces)
+.features-gen
+e2e/.report
+e2e/.results

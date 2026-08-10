@@ -1,0 +1,33 @@
+Lennix — Proprietary Software License
+
+Copyright © 2026 Innovacores SpA. All rights reserved.
+
+This software, its source code and its accompanying documentation (the
+"Software") are the confidential and proprietary property of Innovacores SpA.
+The Software is not open-source software.
+
+No license or right to use, copy, reproduce, modify, adapt, translate, merge,
+publish, distribute, sublicense, sell, lease, host, disclose, reverse engineer
+or create derivative works from the Software, in whole or in part, is granted,
+whether expressly, by implication, by estoppel or otherwise, except under a
+separate written agreement signed by an authorized representative of
+Innovacores SpA. Any use outside the scope of such an agreement is prohibited.
+
+Access to the Software — including access to this repository — does not
+constitute a grant of any right in the Software, and does not transfer any
+ownership interest, patent, copyright, trademark or trade secret.
+
+Portions of the Software derive from third-party open-source components whose
+licenses require that their copyright notices and license texts be preserved.
+Those notices are reproduced in `THIRD_PARTY_LICENSES.md`, which forms part of
+this license and remains in force regardless of the proprietary terms above.
+Each such component stays governed by its own license.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+INNOVACORES SPA BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Inquiries: Innovacores SpA.

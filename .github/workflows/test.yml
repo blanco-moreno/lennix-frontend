@@ -1,0 +1,20 @@
+name: Test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/prepare
+      # Enforces the Phase-6 coverage floor on the redesigned surface and the
+      # fixture <-> lennix_pro seed drift check (see docs/TESTING.md).
+      - run: pnpm test:coverage
