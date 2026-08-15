@@ -40,12 +40,6 @@ const COPY_BY_CODE: Record<
     action: m.goToDrafts,
     target: PATHS.DRAFTS,
   },
-  plan_ai_limit_exceeded: {
-    title: m.aiLimitTitle,
-    body: m.aiLimitBody,
-    action: m.upgradePlan,
-    target: PATHS.SETTINGS,
-  },
 }
 
 export interface PlanQuotaNoticeProps {
