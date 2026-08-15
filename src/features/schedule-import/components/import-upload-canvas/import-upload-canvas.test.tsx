@@ -101,6 +101,45 @@ describe('ImportUploadCanvas', () => {
     ).not.toBeInTheDocument()
   })
 
+  it.each([
+    {
+      code: 'invalid_file_signature',
+      title: 'This file is not what its extension says',
+    },
+    {
+      code: 'prompt_injection_detected',
+      title: 'This file was not processed',
+    },
+  ])(
+    'names a $code refusal instead of a generic read failure',
+    async ({ code, title }) => {
+      server.use(
+        http.post('*/v1/schedule/import', () =>
+          HttpResponse.json(
+            {
+              detail: {
+                code,
+                import_job_id: FIXTURE_DIVERTED_JOB_ID,
+                message: 'refused',
+              },
+            },
+            { status: 422 },
+          ),
+        ),
+      )
+      renderCanvas()
+      await uploadFile()
+
+      expect(await screen.findByText(title)).toBeInTheDocument()
+      expect(
+        screen.queryByText('Lennix could not read this file'),
+      ).not.toBeInTheDocument()
+      expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent(
+        '/projects/import',
+      )
+    },
+  )
+
   it('names the plan draft cap instead of failing generically', async () => {
     server.use(
       http.post('*/v1/schedule/import', () =>

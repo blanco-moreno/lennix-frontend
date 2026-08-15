@@ -19,6 +19,7 @@ import type { ApiError } from '@/services'
 import { useGetMeQuery } from '@/services/auth'
 import {
   readAssistedMappingDivert,
+  readImportFailureCode,
   readPlanQuotaFailure,
   useUploadScheduleFileMutation,
 } from '@/services/schedule-import'
@@ -29,7 +30,12 @@ import { PlanQuotaNotice } from '../plan-quota-notice'
 
 import { importUploadCanvasMessages as m } from './import-upload-canvas-messages'
 
-type UploadFailure = 'unreadable' | 'too_large' | 'generic'
+type UploadFailure =
+  | 'unreadable'
+  | 'invalid_signature'
+  | 'prompt_injection'
+  | 'too_large'
+  | 'generic'
 
 export function ImportUploadCanvas() {
   const intl = useIntl()
@@ -74,6 +80,15 @@ export function ImportUploadCanvas() {
       const quota = readPlanQuotaFailure(error)
       if (quota) {
         setQuotaFailure(quota)
+        return
+      }
+      const failureCode = readImportFailureCode(error)
+      if (failureCode === 'invalid_file_signature') {
+        setFailure('invalid_signature')
+        return
+      }
+      if (failureCode === 'prompt_injection_detected') {
+        setFailure('prompt_injection')
         return
       }
       const apiError = error as ApiError
@@ -141,7 +156,25 @@ export function ImportUploadCanvas() {
       {failure && (
         <Alert variant="error" icon={AlertTriangle}>
           <Stack gap={2} align="flex-start">
-            {failure === 'unreadable' ? (
+            {failure === 'invalid_signature' ? (
+              <>
+                <Text weight="medium" size="sm">
+                  {intl.formatMessage(m.invalidSignatureTitle)}
+                </Text>
+                <Text size="sm">
+                  {intl.formatMessage(m.invalidSignatureBody)}
+                </Text>
+              </>
+            ) : failure === 'prompt_injection' ? (
+              <>
+                <Text weight="medium" size="sm">
+                  {intl.formatMessage(m.promptInjectionTitle)}
+                </Text>
+                <Text size="sm">
+                  {intl.formatMessage(m.promptInjectionBody)}
+                </Text>
+              </>
+            ) : failure === 'unreadable' ? (
               <>
                 <Text weight="medium" size="sm">
                   {intl.formatMessage(m.unreadableTitle)}

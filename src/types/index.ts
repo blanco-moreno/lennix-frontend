@@ -89,6 +89,7 @@ export {
   type DateColumnCode,
   type DateEvidence,
   type DroppedRow,
+  type ImportFailureCode,
   type ImportJob,
   type ImportJobStatus,
   type ImportUploadResult,

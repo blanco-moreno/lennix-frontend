@@ -18,6 +18,7 @@ import type {
   DateAssumption,
   DateEvidence,
   DroppedRow,
+  ImportFailureCode,
   ImportJob,
   ImportJobStatus,
   ImportUploadResult,
@@ -445,6 +446,21 @@ export function readAssistedMappingDivert(
     importJobId,
     message: text(detail.message),
   }
+}
+
+const IMPORT_FAILURE_CODES: readonly ImportFailureCode[] = [
+  'needs_normalization',
+  'invalid_file_signature',
+  'prompt_injection_detected',
+]
+
+/** Read the failure code of a 422 that ended the import job in `failed`. */
+export function readImportFailureCode(
+  error: ApiError | unknown,
+): ImportFailureCode | null {
+  if (asRecord(error).status !== 422) return null
+  const code = text(errorDetail(error).code) as ImportFailureCode
+  return IMPORT_FAILURE_CODES.includes(code) ? code : null
 }
 
 /** Money arrives as a string on some fields and a number on others. */

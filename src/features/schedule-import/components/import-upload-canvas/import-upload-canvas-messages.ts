@@ -34,4 +34,26 @@ export const importUploadCanvasMessages = defineMessages({
     description:
       'Action that clears the failed upload and reopens the dropzone',
   },
+  invalidSignatureTitle: {
+    id: 'importUploadCanvas.invalidSignatureTitle',
+    defaultMessage: 'This file is not what its extension says',
+    description: 'Headline when file magic bytes fail verification',
+  },
+  invalidSignatureBody: {
+    id: 'importUploadCanvas.invalidSignatureBody',
+    defaultMessage:
+      "The file's contents do not match its extension. Executables and renamed binaries are refused; upload the original .xlsx, .xlsm or .csv.",
+    description: 'Body when file signature validation fails',
+  },
+  promptInjectionTitle: {
+    id: 'importUploadCanvas.promptInjectionTitle',
+    defaultMessage: 'This file was not processed',
+    description: 'Headline when a prompt injection attempt is detected',
+  },
+  promptInjectionBody: {
+    id: 'importUploadCanvas.promptInjectionBody',
+    defaultMessage:
+      'The file contains text that reads as instructions to the AI, so it was not processed. Remove that text and upload it again.',
+    description: 'Body when prompt injection is detected',
+  },
 })

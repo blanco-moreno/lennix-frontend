@@ -14,6 +14,7 @@ import {
   mapLedgerEntry,
   mapScheduleReviewStateDTO,
   readAssistedMappingDivert,
+  readImportFailureCode,
   readPlanQuotaFailure,
 } from './schedule-import-mappers'
 
@@ -204,6 +205,43 @@ describe('readPlanQuotaFailure', () => {
     expect(
       readPlanQuotaFailure({ status: 400, data: { detail: 'plain string' } }),
     ).toBeNull()
+  })
+})
+
+describe('readImportFailureCode', () => {
+  it('reads a known code off a 422', () => {
+    expect(
+      readImportFailureCode({
+        status: 422,
+        data: {
+          detail: { code: 'invalid_file_signature', import_job_id: 'x' },
+        },
+      }),
+    ).toBe('invalid_file_signature')
+  })
+
+  it.each([
+    {
+      name: 'a 400 carrying a known code',
+      error: {
+        status: 400,
+        data: { detail: { code: 'invalid_file_signature' } },
+      },
+    },
+    {
+      name: 'an unknown code',
+      error: {
+        status: 422,
+        data: { detail: { code: 'needs_assisted_mapping' } },
+      },
+    },
+    {
+      name: 'a string detail',
+      error: { status: 422, data: { detail: 'Unprocessable' } },
+    },
+    { name: 'no data at all', error: { status: 422 } },
+  ])('is null for $name', ({ error }) => {
+    expect(readImportFailureCode(error)).toBeNull()
   })
 })
 

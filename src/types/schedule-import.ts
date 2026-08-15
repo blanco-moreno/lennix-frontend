@@ -433,6 +433,12 @@ export interface PlanQuotaFailure {
   message: string
 }
 
+/** Why a 422 upload landed the job in `failed`; ms-bk's closed set. */
+export type ImportFailureCode =
+  | 'needs_normalization'
+  | 'invalid_file_signature'
+  | 'prompt_injection_detected'
+
 /** The 422 that routes an upload to assisted mapping (Lane F). */
 export interface AssistedMappingDivert {
   code: 'needs_assisted_mapping'
