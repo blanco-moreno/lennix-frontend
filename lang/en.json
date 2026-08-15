@@ -422,6 +422,8 @@
   "importUploadCanvas.tryAnother": "Try another file",
   "importUploadCanvas.unreadableBody": "Nothing was imported. Try the file your team actually plans with — a schedule with task names and dates — or export it again as .xlsx or .csv.",
   "importUploadCanvas.unreadableTitle": "Lennix could not read this file",
+  "importUploadCanvas.unsupportedTypeBody": "Only .xlsx, .xlsm and .csv schedules can be imported. Export your schedule to one of those formats and upload it again.",
+  "importUploadCanvas.unsupportedTypeTitle": "This file type cannot be imported",
   "importUploadCanvas.uploadFailed": "The file could not be uploaded. Nothing was imported.",
   "inlineRowEdit.cancel": "Cancel",
   "inlineRowEdit.dueLabel": "Finish",

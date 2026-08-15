@@ -437,6 +437,7 @@ export interface PlanQuotaFailure {
 export type ImportFailureCode =
   | 'needs_normalization'
   | 'invalid_file_signature'
+  | 'unsupported_file_type'
   | 'prompt_injection_detected'
 
 /** The 422 that routes an upload to assisted mapping (Lane F). */

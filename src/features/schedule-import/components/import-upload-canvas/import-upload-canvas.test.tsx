@@ -107,6 +107,10 @@ describe('ImportUploadCanvas', () => {
       title: 'This file is not what its extension says',
     },
     {
+      code: 'unsupported_file_type',
+      title: 'This file type cannot be imported',
+    },
+    {
       code: 'prompt_injection_detected',
       title: 'This file was not processed',
     },

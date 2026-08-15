@@ -33,6 +33,7 @@ import { importUploadCanvasMessages as m } from './import-upload-canvas-messages
 type UploadFailure =
   | 'unreadable'
   | 'invalid_signature'
+  | 'unsupported_type'
   | 'prompt_injection'
   | 'too_large'
   | 'generic'
@@ -85,6 +86,10 @@ export function ImportUploadCanvas() {
       const failureCode = readImportFailureCode(error)
       if (failureCode === 'invalid_file_signature') {
         setFailure('invalid_signature')
+        return
+      }
+      if (failureCode === 'unsupported_file_type') {
+        setFailure('unsupported_type')
         return
       }
       if (failureCode === 'prompt_injection_detected') {
@@ -163,6 +168,15 @@ export function ImportUploadCanvas() {
                 </Text>
                 <Text size="sm">
                   {intl.formatMessage(m.invalidSignatureBody)}
+                </Text>
+              </>
+            ) : failure === 'unsupported_type' ? (
+              <>
+                <Text weight="medium" size="sm">
+                  {intl.formatMessage(m.unsupportedTypeTitle)}
+                </Text>
+                <Text size="sm">
+                  {intl.formatMessage(m.unsupportedTypeBody)}
                 </Text>
               </>
             ) : failure === 'prompt_injection' ? (

@@ -45,6 +45,19 @@ export const importUploadCanvasMessages = defineMessages({
       "The file's contents do not match its extension. Executables and renamed binaries are refused; upload the original .xlsx, .xlsm or .csv.",
     description: 'Body when file signature validation fails',
   },
+  unsupportedTypeTitle: {
+    id: 'importUploadCanvas.unsupportedTypeTitle',
+    defaultMessage: 'This file type cannot be imported',
+    description:
+      'Headline when the upload extension is not a supported schedule format',
+  },
+  unsupportedTypeBody: {
+    id: 'importUploadCanvas.unsupportedTypeBody',
+    defaultMessage:
+      'Only .xlsx, .xlsm and .csv schedules can be imported. Export your schedule to one of those formats and upload it again.',
+    description:
+      'Body when the upload extension is not a supported schedule format',
+  },
   promptInjectionTitle: {
     id: 'importUploadCanvas.promptInjectionTitle',
     defaultMessage: 'This file was not processed',

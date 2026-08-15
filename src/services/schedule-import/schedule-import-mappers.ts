@@ -451,6 +451,7 @@ export function readAssistedMappingDivert(
 const IMPORT_FAILURE_CODES: readonly ImportFailureCode[] = [
   'needs_normalization',
   'invalid_file_signature',
+  'unsupported_file_type',
   'prompt_injection_detected',
 ]
 

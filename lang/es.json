@@ -422,6 +422,8 @@
   "importUploadCanvas.tryAnother": "Probar con otro archivo",
   "importUploadCanvas.unreadableBody": "No se importó nada. Probá con el archivo con el que tu equipo realmente planifica — un cronograma con nombres de tarea y fechas — o exportalo de nuevo como .xlsx o .csv.",
   "importUploadCanvas.unreadableTitle": "Lennix no pudo leer este archivo",
+  "importUploadCanvas.unsupportedTypeBody": "Solo se importan cronogramas .xlsx, .xlsm y .csv. Exportá el cronograma a uno de esos formatos y volvé a subirlo.",
+  "importUploadCanvas.unsupportedTypeTitle": "Este tipo de archivo no se puede importar",
   "importUploadCanvas.uploadFailed": "No se pudo subir el archivo. No se importó nada.",
   "inlineRowEdit.cancel": "Cancelar",
   "inlineRowEdit.dueLabel": "Fin",
