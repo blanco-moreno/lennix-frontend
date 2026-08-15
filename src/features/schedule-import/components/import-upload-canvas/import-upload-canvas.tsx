@@ -13,6 +13,7 @@ import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 
 import { Alert, Button, Heading, Text } from '@/components'
+import { PlanUsageMeter } from '@/features'
 import { buildAssistedMappingPath, buildDraftReviewPath } from '@/router'
 import type { ApiError } from '@/services'
 import { useGetMeQuery } from '@/services/auth'
@@ -101,6 +102,8 @@ export function ImportUploadCanvas() {
           {intl.formatMessage(importDropzoneMessages.subtitle)}
         </Text>
       </Stack>
+
+      <PlanUsageMeter resource="ai" />
 
       {isLoading ? (
         <Flex

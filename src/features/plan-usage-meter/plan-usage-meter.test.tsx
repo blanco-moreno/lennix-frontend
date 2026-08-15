@@ -66,6 +66,29 @@ describe('PlanUsageMeter', () => {
     ).toBeInTheDocument()
   })
 
+  it('reads monthly AI requests against the plan cap', async () => {
+    serveUsage({ current_ai_requests: 80, max_ai_requests: 100 })
+    renderMeter('ai')
+
+    expect(await screen.findByText('Monthly AI requests used')).toBeVisible()
+    expect(screen.getByText('80 of 100')).toBeInTheDocument()
+    expect(
+      screen.getByText('20 AI requests left this month'),
+    ).toBeInTheDocument()
+  })
+
+  it('warns at the AI cap and points at the plan, not at a slot to free', async () => {
+    serveUsage({ current_ai_requests: 100, max_ai_requests: 100 })
+    renderMeter('ai')
+
+    expect(
+      await screen.findByText(
+        'Your plan allows 100 monthly AI requests. Upgrade your plan to perform more AI imports.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/left this month/)).toBeNull()
+  })
+
   it('draws nothing on an unlimited plan — a bar that can never fill is worry, not information', async () => {
     serveUsage({ current_projects: 40, max_projects: null })
     renderWithProviders(

@@ -40,10 +40,12 @@ const ENTERPRISE_ALL_NULL = {
   max_projects: null,
   current_drafts: 120,
   max_drafts: null,
+  current_ai_requests: 3000,
+  max_ai_requests: null,
 }
 
 describe('usePlanLimit', () => {
-  it.each<PlanLimitResource>(['projects', 'drafts', 'members'])(
+  it.each<PlanLimitResource>(['projects', 'drafts', 'members', 'ai'])(
     'never blocks %s on an all-null Enterprise plan',
     async (resource) => {
       serveUsage(ENTERPRISE_ALL_NULL)
@@ -60,6 +62,16 @@ describe('usePlanLimit', () => {
     const { result } = renderLimit('drafts')
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.max).toBeNull()
+    expect(result.current.isAtLimit).toBe(false)
+  })
+
+  it('reads the monthly AI meter, and `max_ai_requests: 0` as unlimited', async () => {
+    serveUsage({ current_ai_requests: 12, max_ai_requests: 0 })
+    const { result } = renderLimit('ai')
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.used).toBe(12)
     expect(result.current.max).toBeNull()
     expect(result.current.isAtLimit).toBe(false)
   })

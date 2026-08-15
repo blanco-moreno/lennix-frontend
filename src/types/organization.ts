@@ -105,7 +105,7 @@ export interface OrganizationMember {
  * The plan's counters and their ceilings.
  *
  * Every `maxX` is nullable, and `null` means UNLIMITED, never "unknown":
- * Enterprise carries no ceiling on any of the three. `usePlanLimit` is the one
+ * Enterprise carries no ceiling on any of them. `usePlanLimit` is the one
  * place that reads these — nothing else should re-derive the rule.
  */
 export interface OrganizationUsage {
@@ -121,4 +121,6 @@ export interface OrganizationUsage {
    */
   currentDrafts: number
   maxDrafts: number | null
+  currentAiRequests: number
+  maxAiRequests: number | null
 }

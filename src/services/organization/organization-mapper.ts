@@ -75,6 +75,8 @@ export function mapOrganizationUsageResponseDTOToOrganizationUsage(
     maxProjects: dto.max_projects,
     currentDrafts: dto.current_drafts,
     maxDrafts: dto.max_drafts,
+    currentAiRequests: dto.current_ai_requests,
+    maxAiRequests: dto.max_ai_requests,
   }
 }
 

@@ -9,14 +9,44 @@
 
 import { Stack } from '@chakra-ui/react'
 import { AlertTriangle } from 'lucide-react'
-import { useIntl } from 'react-intl'
+import { type MessageDescriptor, useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 
 import { Alert, Button, Text } from '@/components'
 import { PATHS } from '@/constants'
-import type { PlanQuotaFailure } from '@/types'
+import type { PlanQuotaCode, PlanQuotaFailure } from '@/types'
 
 import { planQuotaNoticeMessages as m } from './plan-quota-notice-messages'
+
+/** Each cap names itself and points at the place where a slot is freed. */
+const COPY_BY_CODE: Record<
+  PlanQuotaCode,
+  {
+    title: MessageDescriptor
+    body: MessageDescriptor
+    action: MessageDescriptor
+    target: string
+  }
+> = {
+  plan_project_limit_exceeded: {
+    title: m.projectLimitTitle,
+    body: m.projectLimitBody,
+    action: m.goToProjects,
+    target: PATHS.PROJECTS,
+  },
+  plan_draft_limit_exceeded: {
+    title: m.draftLimitTitle,
+    body: m.draftLimitBody,
+    action: m.goToDrafts,
+    target: PATHS.DRAFTS,
+  },
+  plan_ai_limit_exceeded: {
+    title: m.aiLimitTitle,
+    body: m.aiLimitBody,
+    action: m.upgradePlan,
+    target: PATHS.SETTINGS,
+  },
+}
 
 export interface PlanQuotaNoticeProps {
   failure: PlanQuotaFailure
@@ -26,7 +56,7 @@ export function PlanQuotaNotice({ failure }: PlanQuotaNoticeProps) {
   const intl = useIntl()
   const navigate = useNavigate()
 
-  const isDraftCap = failure.code === 'plan_draft_limit_exceeded'
+  const { title, body, action, target } = COPY_BY_CODE[failure.code]
   const limit = failure.limit ?? 0
 
   return (
@@ -37,18 +67,9 @@ export function PlanQuotaNotice({ failure }: PlanQuotaNoticeProps) {
     >
       <Stack gap={2} align="flex-start">
         <Text weight="medium" size="sm">
-          {intl.formatMessage(
-            isDraftCap ? m.draftLimitTitle : m.projectLimitTitle,
-            {
-              limit,
-            },
-          )}
+          {intl.formatMessage(title, { limit })}
         </Text>
-        <Text size="sm">
-          {intl.formatMessage(
-            isDraftCap ? m.draftLimitBody : m.projectLimitBody,
-          )}
-        </Text>
+        <Text size="sm">{intl.formatMessage(body)}</Text>
         {failure.limit !== null && (
           <Text size="xs" color="muted">
             {intl.formatMessage(m.currentUsage, {
@@ -60,11 +81,9 @@ export function PlanQuotaNotice({ failure }: PlanQuotaNoticeProps) {
         <Button
           variant="outline"
           size="sm"
-          onClick={async () =>
-            navigate(isDraftCap ? PATHS.DRAFTS : PATHS.PROJECTS)
-          }
+          onClick={async () => navigate(target)}
         >
-          {intl.formatMessage(isDraftCap ? m.goToDrafts : m.goToProjects)}
+          {intl.formatMessage(action)}
         </Button>
       </Stack>
     </Alert>

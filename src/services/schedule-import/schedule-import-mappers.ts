@@ -407,6 +407,7 @@ function errorDetail(error: unknown): Json {
 const QUOTA_CODES: readonly PlanQuotaCode[] = [
   'plan_project_limit_exceeded',
   'plan_draft_limit_exceeded',
+  'plan_ai_limit_exceeded',
 ]
 
 /**

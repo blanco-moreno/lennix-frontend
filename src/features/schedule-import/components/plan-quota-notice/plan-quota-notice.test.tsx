@@ -66,4 +66,27 @@ describe('PlanQuotaNotice', () => {
 
     expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/drafts')
   })
+
+  it('names the monthly AI cap and sends the user to upgrade the plan', async () => {
+    renderWithProviders(
+      <PlanQuotaNotice
+        failure={{
+          code: 'plan_ai_limit_exceeded',
+          limit: 100,
+          current: 100,
+          message: 'Plan limit exceeded',
+        }}
+      />,
+      { store: makeStore(), route: '/projects/import' },
+    )
+
+    expect(
+      screen.getByText('Monthly AI request limit reached (100 requests)'),
+    ).toBeInTheDocument()
+    expect(screen.getByText('You are using 100 of 100.')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Upgrade plan' }))
+
+    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/settings')
+  })
 })

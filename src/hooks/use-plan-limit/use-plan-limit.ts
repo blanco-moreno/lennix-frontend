@@ -14,8 +14,8 @@
 import { useGetMeQuery } from '@/services/auth'
 import { useGetOrgUsageQuery } from '@/services/organization'
 
-/** The three resources `usage` actually counts. Storage and AI have no meter. */
-export type PlanLimitResource = 'projects' | 'drafts' | 'members'
+/** The resources `usage` counts. */
+export type PlanLimitResource = 'projects' | 'drafts' | 'members' | 'ai'
 
 export interface PlanLimitState {
   /** Usage has not resolved yet — decide nothing, block nothing. */
@@ -48,9 +48,11 @@ export function usePlanLimit(resource: PlanLimitResource): PlanLimitState {
       ? [usage.currentTeamSize, usage.maxTeamSize]
       : resource === 'projects'
         ? [usage.currentProjects, usage.maxProjects]
-        : [usage.currentDrafts, usage.maxDrafts]
+        : resource === 'drafts'
+          ? [usage.currentDrafts, usage.maxDrafts]
+          : [usage.currentAiRequests, usage.maxAiRequests]
 
-  // Enterprise carries no ceiling on any of the three, and "unlimited" reaches
+  // Enterprise carries no ceiling on any resource, and "unlimited" reaches
   // us in two spellings: `null` on every `max_*`, and `0` from the backend's
   // `max_drafts: limit or 0`. Both mean no ceiling — reading either as "zero
   // allowed" would block every button on the plan with the fewest restrictions.

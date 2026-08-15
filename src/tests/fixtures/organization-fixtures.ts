@@ -149,5 +149,7 @@ export function seedOrganizationUsageDTO(): OrganizationUsageResponseDTO {
     // meter renders.
     current_drafts: SEED_PROJECTS.filter((project) => project.isDraft).length,
     max_drafts: plan.maxDraftProjects,
+    current_ai_requests: 0,
+    max_ai_requests: plan.aiRequests,
   }
 }

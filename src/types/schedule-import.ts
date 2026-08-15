@@ -425,6 +425,7 @@ export interface ActivateScheduleResult {
 export type PlanQuotaCode =
   | 'plan_project_limit_exceeded'
   | 'plan_draft_limit_exceeded'
+  | 'plan_ai_limit_exceeded'
 
 export interface PlanQuotaFailure {
   code: PlanQuotaCode

@@ -42,4 +42,21 @@ export const planQuotaNoticeMessages = defineMessages({
     description:
       'Action that takes the user to the project list to free a live slot',
   },
+  aiLimitTitle: {
+    id: 'planQuotaNotice.aiLimitTitle',
+    defaultMessage:
+      'Monthly AI request limit reached ({limit, plural, one {# request} other {# requests}})',
+    description: 'Headline when an upload fails because AI quota is exhausted',
+  },
+  aiLimitBody: {
+    id: 'planQuotaNotice.aiLimitBody',
+    defaultMessage:
+      'Your organization has used all allocated AI requests for your current plan this month. Upgrade your plan to continue using AI imports.',
+    description: 'Recovery options for the AI request cap',
+  },
+  upgradePlan: {
+    id: 'planQuotaNotice.upgradePlan',
+    defaultMessage: 'Upgrade plan',
+    description: 'Action taking the user to settings to upgrade their plan',
+  },
 })

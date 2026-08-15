@@ -3,8 +3,8 @@ import { defineMessages } from 'react-intl'
 import type { PlanLimitResource } from '@/hooks'
 
 /**
- * One meter, three vocabularies. The draft copy is verbatim what the Borradores
- * home already said — the meter moved, the words did not.
+ * One meter, one vocabulary per resource. Each names the slot and where a
+ * slot is freed — or, for AI requests, that the way out is the plan.
  */
 export const planUsageMeterMessages = defineMessages({
   usage: {
@@ -68,6 +68,25 @@ export const planUsageMeterMessages = defineMessages({
     description:
       'Shown when the plan team-size cap is reached, before an invite can fail',
   },
+
+  aiLabel: {
+    id: 'planUsageMeter.aiLabel',
+    defaultMessage: 'Monthly AI requests used',
+    description: 'Label of the AI requests meter',
+  },
+  aiRemaining: {
+    id: 'planUsageMeter.aiRemaining',
+    defaultMessage:
+      '{count, plural, one {# AI request left this month} other {# AI requests left this month}}',
+    description: 'Headroom left on the plan AI requests cap',
+  },
+  aiFull: {
+    id: 'planUsageMeter.aiFull',
+    defaultMessage:
+      'Your plan allows {limit} monthly AI requests. Upgrade your plan to perform more AI imports.',
+    description:
+      'Shown when the plan AI request cap is reached, before an import can fail',
+  },
 })
 
 type MessageKey = keyof typeof planUsageMeterMessages
@@ -90,5 +109,10 @@ export const PLAN_METER_COPY: Record<
     label: 'membersLabel',
     remaining: 'membersRemaining',
     full: 'membersFull',
+  },
+  ai: {
+    label: 'aiLabel',
+    remaining: 'aiRemaining',
+    full: 'aiFull',
   },
 }

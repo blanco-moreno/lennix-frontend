@@ -1,10 +1,10 @@
 /**
  * A plan ceiling, made legible *before* it bites.
  *
- * Generalised out of the Borradores home, which had the only one: the same bar
- * now reads projects and team seats, off the same `usePlanLimit` verdict the
- * gated buttons use — so the number under the bar and the number in the
- * blocked button's tooltip can never disagree.
+ * One bar for every metered resource — projects, drafts, team seats, monthly
+ * AI requests — off the same `usePlanLimit` verdict the gated buttons use, so
+ * the number under the bar and the number in the blocked button's tooltip can
+ * never disagree. From 80% of the cap the copy turns amber.
  */
 
 import { Flex, Stack } from '@chakra-ui/react'
@@ -35,6 +35,7 @@ export function PlanUsageMeter({ resource }: PlanUsageMeterProps) {
   if (isLoading || max === null) return null
 
   const remaining = Math.max(max - used, 0)
+  const isNearLimit = !isAtLimit && max > 0 && used / max >= 0.8
 
   return (
     <Card size="compact" data-testid={`plan-usage-meter-${resource}`}>
@@ -43,7 +44,7 @@ export function PlanUsageMeter({ resource }: PlanUsageMeterProps) {
           <Text size="sm" weight="medium" color="primary">
             <FormattedMessage {...m[copy.label]} />
           </Text>
-          <Text size="sm" color="muted">
+          <Text size="sm" color={isNearLimit ? 'warning' : 'muted'}>
             <FormattedMessage
               {...m.usage}
               values={{ current: used, limit: max }}
@@ -54,7 +55,13 @@ export function PlanUsageMeter({ resource }: PlanUsageMeterProps) {
         <Progress
           value={Math.min((used / max) * 100, 100)}
           h={2}
-          indicatorProps={{ bg: isAtLimit ? 'overBudget' : 'complementary' }}
+          indicatorProps={{
+            bg: isAtLimit
+              ? 'overBudget'
+              : isNearLimit
+                ? 'warning'
+                : 'complementary',
+          }}
         />
 
         {isAtLimit ? (
@@ -62,7 +69,7 @@ export function PlanUsageMeter({ resource }: PlanUsageMeterProps) {
             <FormattedMessage {...m[copy.full]} values={{ limit: max }} />
           </Alert>
         ) : (
-          <Text size="xs" color="muted">
+          <Text size="xs" color={isNearLimit ? 'warning' : 'muted'}>
             <FormattedMessage
               {...m[copy.remaining]}
               values={{ count: remaining }}

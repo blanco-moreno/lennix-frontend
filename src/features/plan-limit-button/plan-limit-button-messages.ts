@@ -27,4 +27,11 @@ export const planLimitButtonMessages = defineMessages({
     description:
       'Tooltip on the add-member action blocked by the team-size plan ceiling',
   },
+  ai: {
+    id: 'planLimit.aiBlocked',
+    defaultMessage:
+      'You reached your plan’s AI request limit ({used} of {max}). Upgrade your plan to perform more AI imports.',
+    description:
+      'Tooltip on an AI action blocked by the monthly AI request ceiling',
+  },
 })
