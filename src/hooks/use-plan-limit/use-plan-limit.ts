@@ -22,7 +22,7 @@ export interface PlanLimitState {
   isLoading: boolean
   isAtLimit: boolean
   used: number
-  /** `null` means unlimited (Enterprise), never "unknown". */
+  /** `null` means unlimited, never "unknown". */
   max: number | null
 }
 
@@ -52,10 +52,10 @@ export function usePlanLimit(resource: PlanLimitResource): PlanLimitState {
           ? [usage.currentDrafts, usage.maxDrafts]
           : [usage.currentAiRequests, usage.maxAiRequests]
 
-  // Enterprise carries no ceiling on any resource, and "unlimited" reaches
-  // us in two spellings: `null` on every `max_*`, and `0` from the backend's
-  // `max_drafts: limit or 0`. Both mean no ceiling — reading either as "zero
-  // allowed" would block every button on the plan with the fewest restrictions.
+  // The backend spells unlimited as `null` on every `max_*`, and any plan
+  // whose overrides say so can be unlimited on any resource. `0` is treated
+  // the same way for safety — reading either as "zero allowed" would block
+  // every gated button on a plan that has no ceiling at all.
   const max = rawMax !== null && rawMax > 0 ? rawMax : null
 
   return {

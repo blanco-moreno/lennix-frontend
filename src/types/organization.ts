@@ -33,13 +33,18 @@ export interface PlanSummary {
   maxProjects: number | null
 }
 
+/**
+ * The organization's effective ceilings: the plan template under the org's
+ * overrides. Every ceiling is nullable and `null` means UNLIMITED;
+ * `source` says whether an overrides row took part.
+ */
 export interface ResolvedLimits {
   maxTeamSize: number | null
   maxProjects: number | null
-  storageMb: number
-  aiRequests: number
-  source: 'plan' | 'enterprise_terms'
-  pendingEnterpriseConfiguration: boolean
+  maxDraftProjects: number | null
+  storageMb: number | null
+  aiRequests: number | null
+  source: 'plan' | 'overrides'
 }
 
 export interface Organization {
@@ -105,8 +110,9 @@ export interface OrganizationMember {
  * The plan's counters and their ceilings.
  *
  * Every `maxX` is nullable, and `null` means UNLIMITED, never "unknown":
- * Enterprise carries no ceiling on any of them. `usePlanLimit` is the one
- * place that reads these — nothing else should re-derive the rule.
+ * any plan whose overrides say so carries no ceiling on that resource.
+ * `usePlanLimit` is the one place that reads these — nothing else should
+ * re-derive the rule.
  */
 export interface OrganizationUsage {
   organizationId: string

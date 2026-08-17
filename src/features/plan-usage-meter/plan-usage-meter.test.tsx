@@ -105,6 +105,17 @@ describe('PlanUsageMeter', () => {
     expect(screen.queryByTestId('plan-usage-meter-projects')).toBeNull()
   })
 
+  it('shows the count and "no limit" for an unlimited resource when asked to', async () => {
+    serveUsage({ current_projects: 40, max_projects: null })
+    renderWithProviders(<PlanUsageMeter resource="projects" showUnlimited />, {
+      store: makeStore(),
+    })
+
+    expect(await screen.findByText('Live project slots used')).toBeVisible()
+    expect(screen.getByText('40 · No limit')).toBeInTheDocument()
+    expect(screen.queryByText(/left before the cap/)).toBeNull()
+  })
+
   it('draws nothing while usage is still in flight', async () => {
     server.use(
       http.get('*/v1/organizations/*/usage', async () => {

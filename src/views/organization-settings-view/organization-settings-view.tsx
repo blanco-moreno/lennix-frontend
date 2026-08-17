@@ -15,6 +15,8 @@ import {
   Text,
 } from '@/components'
 import { Input } from '@/components/ui/input'
+import { PlanUsageMeter } from '@/features'
+import type { PlanLimitResource } from '@/hooks'
 import { useZodResolverIntl } from '@/i18n'
 import {
   orgCreateSchema,
@@ -29,7 +31,16 @@ import {
 } from '@/services/organization'
 
 import { TransferOwnershipCard } from './components/transfer-ownership-card'
+import { UpgradeNudge } from './components/upgrade-nudge'
 import { organizationSettingsViewMessages as m } from './organization-settings-view-messages'
+
+/** The four metered resources, in the order the section reads them. */
+const PLAN_USAGE_RESOURCES: readonly PlanLimitResource[] = [
+  'projects',
+  'drafts',
+  'members',
+  'ai',
+]
 
 export function OrganizationSettingsView() {
   const intl = useIntl()
@@ -156,7 +167,6 @@ export function OrganizationSettingsView() {
   }
 
   const limits = organization.resolvedLimits
-  const isPendingEnterprise = limits.pendingEnterpriseConfiguration
   const isOwner = user?.userId === organization.ownerId
 
   const formatLimit = (value: number | null, suffix = ''): string => {
@@ -189,7 +199,7 @@ export function OrganizationSettingsView() {
           <ReadOnlyField label={intl.formatMessage(m.planLabel)}>
             <Flex align="center" gap="tight" wrap="wrap">
               <Badge variant="secondary">{organization.plan.name}</Badge>
-              {limits.source === 'enterprise_terms' && (
+              {limits.source === 'overrides' && (
                 <Badge variant="complementary">
                   <FormattedMessage {...m.customPlanBadge} />
                 </Badge>
@@ -197,30 +207,22 @@ export function OrganizationSettingsView() {
             </Flex>
           </ReadOnlyField>
 
-          {/* An enterprise plan still being configured has no limits yet. */}
-          {!isPendingEnterprise && (
-            <>
-              <ReadOnlyField label={intl.formatMessage(m.maxTeamSize)}>
-                {formatLimit(limits.maxTeamSize)}
-              </ReadOnlyField>
-              <ReadOnlyField label={intl.formatMessage(m.maxProjects)}>
-                {formatLimit(limits.maxProjects)}
-              </ReadOnlyField>
-              <ReadOnlyField label={intl.formatMessage(m.storage)}>
-                {formatLimit(limits.storageMb, 'MB')}
-              </ReadOnlyField>
-              <ReadOnlyField label={intl.formatMessage(m.aiRequests)}>
-                {limits.aiRequests}
-              </ReadOnlyField>
-            </>
-          )}
+          {/* Storage is the one entitlement nothing measures, so it stays a
+              field; every ceiling a meter carries is not repeated here. */}
+          <ReadOnlyField label={intl.formatMessage(m.storage)}>
+            {formatLimit(limits.storageMb, 'MB')}
+          </ReadOnlyField>
         </SimpleGrid>
 
-        {isPendingEnterprise && (
-          <Text color="muted" size="sm">
-            <FormattedMessage {...m.pendingEnterprise} />
-          </Text>
-        )}
+        <Stack gap="tight" pt={2}>
+          <Heading as="h3" fontSize="sm" fontWeight="semibold">
+            <FormattedMessage {...m.planUsageTitle} />
+          </Heading>
+          {PLAN_USAGE_RESOURCES.map((resource) => (
+            <PlanUsageMeter key={resource} resource={resource} showUnlimited />
+          ))}
+          <UpgradeNudge planName={organization.plan.name} />
+        </Stack>
       </Card>
 
       {isOwner && <TransferOwnershipCard organization={organization} />}

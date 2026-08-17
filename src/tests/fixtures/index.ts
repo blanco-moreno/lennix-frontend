@@ -27,6 +27,7 @@ export {
   seedOrganizationUsageDTO,
   seedPlanSummaryDTO,
   seedPlanListDTO,
+  seedResolvedLimitsDTO,
   seedRoleListDTO,
 } from './organization-fixtures'
 export {

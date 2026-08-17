@@ -99,6 +99,22 @@ two places** unless it is an explicit overview → drill-down.
 - **Quota failures render as guidance**, not as an error: the backend returns a
   machine-readable refusal saying what was hit; the UI says what to do about it
   (`PLN-3`).
+- **The plan is shown as usage, never as a specification.** The Organization
+  card in `/settings` meters the four countable resources — projects, drafts,
+  seats and AI requests this month — each as its count against its ceiling. No
+  ceiling is printed on its own: a number the user cannot place against their
+  own usage tells them nothing. Storage is the exception and stays a plain
+  entitlement field, because nothing measures it.
+- **An unlimited resource is shown, not omitted.** It reads as its count and
+  "no limit"; hiding it would leave the user to guess whether the resource is
+  unmetered or merely broken.
+- **A plan that was negotiated says so.** Overridden limits carry a "custom
+  plan" badge beside the plan name, so the numbers on screen are never read as
+  the published tier's.
+- **One upgrade notice, triggered by usage.** It appears when a resource is at
+  its cap or two or more are at 80% of theirs, and it names the next tier —
+  every tier has finite ceilings, so the notice promises higher limits, never
+  their removal.
 - **The risk register stays first-class** — a real 3×3 register (`RSK-2`), not an
   at-risk footnote inside another surface.
 - **The project team tab labels the manager; it never edits leadership.** The

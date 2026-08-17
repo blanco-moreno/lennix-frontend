@@ -6,11 +6,24 @@ import { PATHS } from '@/constants'
 import { server } from '@/mocks/server'
 import { makeStore } from '@/stores'
 import { setUser } from '@/stores/slices/auth-slice'
-import { seedOrganizationDTO, seedUserDTO } from '@/tests/fixtures'
+import {
+  seedOrganizationDTO,
+  seedOrganizationUsageDTO,
+  seedResolvedLimitsDTO,
+  seedUserDTO,
+} from '@/tests/fixtures'
 import { renderWithProviders } from '@/tests/render-with-providers'
 import { SEED_IDS, SEED_ORGANIZATION } from '@/tests/seed'
 
 import { OrganizationSettingsView } from './organization-settings-view'
+
+function serveUsage(overrides: Record<string, number | null> = {}) {
+  server.use(
+    http.get('*/v1/organizations/*/usage', () =>
+      HttpResponse.json({ ...seedOrganizationUsageDTO(), ...overrides }),
+    ),
+  )
+}
 
 /** Role ids: 1 owner, 5 user. */
 function renderSettings(roleId = 1) {
@@ -42,9 +55,82 @@ describe('OrganizationSettingsView', () => {
     expect(await screen.findByText(SEED_ORGANIZATION.name)).toBeInTheDocument()
     // Plan 2 in the seed is Pro; its limits resolve from the plan.
     expect(screen.getByText('Pro')).toBeInTheDocument()
-    expect(screen.getByText('Maximum team size')).toBeInTheDocument()
+    // Storage is the only entitlement still shown as a field.
+    expect(screen.getByText('Storage')).toBeInTheDocument()
     // The owner sees the transfer-ownership card.
     expect(screen.getByText('Current owner')).toBeInTheDocument()
+  })
+
+  it('shows one meter per metered resource and no static ceiling fields', async () => {
+    renderSettings()
+
+    expect(await screen.findByText('Plan usage')).toBeInTheDocument()
+    for (const resource of ['projects', 'drafts', 'members', 'ai']) {
+      expect(
+        await screen.findByTestId(`plan-usage-meter-${resource}`),
+      ).toBeVisible()
+    }
+    expect(screen.queryByText('Maximum team size')).not.toBeInTheDocument()
+    expect(screen.queryByText('Maximum projects')).not.toBeInTheDocument()
+    expect(screen.queryByText('AI requests')).not.toBeInTheDocument()
+  })
+
+  it('renders an unlimited resource as its count with no limit, and no bar', async () => {
+    serveUsage({ current_drafts: 7, max_drafts: null })
+    renderSettings()
+
+    expect(await screen.findByText('7 · No limit')).toBeInTheDocument()
+  })
+
+  it('marks the plan as custom when the limits come from overrides', async () => {
+    server.use(
+      http.get('*/v1/organizations/:organizationId', () =>
+        HttpResponse.json(
+          seedOrganizationDTO({
+            resolved_limits: seedResolvedLimitsDTO({ source: 'overrides' }),
+          }),
+        ),
+      ),
+    )
+
+    renderSettings()
+
+    expect(await screen.findByText('Custom')).toBeInTheDocument()
+  })
+
+  it('nudges towards the next tier when a resource sits at its ceiling', async () => {
+    serveUsage({ current_projects: 10, max_projects: 10 })
+    renderSettings()
+
+    expect(
+      await screen.findByText(
+        'You are running out of room on Pro. Enterprise raises every limit.',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('stays quiet while only one resource is near its ceiling', async () => {
+    serveUsage({ current_projects: 8, max_projects: 10 })
+    renderSettings()
+
+    expect(await screen.findByText('Plan usage')).toBeInTheDocument()
+    expect(screen.queryByText(/running out of room/)).not.toBeInTheDocument()
+  })
+
+  it('nudges once two resources cross 80% of their ceilings', async () => {
+    serveUsage({
+      current_projects: 8,
+      max_projects: 10,
+      current_team_size: 12,
+      max_team_size: 15,
+    })
+    renderSettings()
+
+    expect(
+      await screen.findByText(
+        'You are running out of room on Pro. Enterprise raises every limit.',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('hides the transfer-ownership card from a member who is not the owner', async () => {

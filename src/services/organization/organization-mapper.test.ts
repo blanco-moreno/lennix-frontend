@@ -2,6 +2,7 @@ import {
   seedOrganizationDTO,
   seedOrganizationMemberListDTO,
   seedOrganizationUsageDTO,
+  seedResolvedLimitsDTO,
 } from '@/tests/fixtures'
 import { SEED_IDS, SEED_ORGANIZATION } from '@/tests/seed'
 
@@ -45,12 +46,26 @@ describe('mapOrganizationResponseDTOToOrganization', () => {
 
     expect(limits.maxTeamSize).toBe(dto.resolved_limits.max_team_size)
     expect(limits.maxProjects).toBe(dto.resolved_limits.max_projects)
+    expect(limits.maxDraftProjects).toBe(dto.resolved_limits.max_draft_projects)
     expect(limits.storageMb).toBe(dto.resolved_limits.storage_mb)
     expect(limits.aiRequests).toBe(dto.resolved_limits.ai_requests)
     expect(limits.source).toBe('plan')
-    expect(limits.pendingEnterpriseConfiguration).toBe(
-      dto.resolved_limits.pending_enterprise_configuration,
-    )
+  })
+
+  it('keeps an unlimited ceiling null', () => {
+    const dto = seedOrganizationDTO({
+      resolved_limits: seedResolvedLimitsDTO({
+        max_projects: null,
+        ai_requests: null,
+        source: 'overrides',
+      }),
+    })
+
+    const limits = mapOrganizationResponseDTOToOrganization(dto).resolvedLimits
+
+    expect(limits.maxProjects).toBeNull()
+    expect(limits.aiRequests).toBeNull()
+    expect(limits.source).toBe('overrides')
   })
 
   it('maps an organization array one to one', () => {

@@ -20,5 +20,6 @@ describe('OrganizationSettingsView', () => {
     })
 
     expect(await screen.findByText(SEED_ORGANIZATION.name)).toBeInTheDocument()
+    expect(await screen.findByTestId('plan-usage-meter-projects')).toBeVisible()
   })
 })

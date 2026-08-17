@@ -21,18 +21,44 @@ import {
 
 export interface PlanUsageMeterProps {
   resource: PlanLimitResource
+  /**
+   * Render the resource even when it has no ceiling, as its count plus a
+   * "no limit" label and no bar. For the settings section, where the whole
+   * point is the complete picture; contextual placements leave it off.
+   */
+  showUnlimited?: boolean
 }
 
-export function PlanUsageMeter({ resource }: PlanUsageMeterProps) {
+export function PlanUsageMeter({
+  resource,
+  showUnlimited = false,
+}: PlanUsageMeterProps) {
   const { isLoading, isAtLimit, used, max } = usePlanLimit(resource)
   const copy = PLAN_METER_COPY[resource]
 
   // Nothing to be transparent about yet — and a bar that pops in at zero and
   // jumps reads worse than one that arrives filled.
-  //
-  // `max === null` is Enterprise: no ceiling, so there is no bar to draw. A
-  // meter that can never fill is a decoration that asks the user to worry.
-  if (isLoading || max === null) return null
+  if (isLoading) return null
+
+  // `max === null` is no ceiling, so there is no bar to draw. Beside an action
+  // a meter that can never fill is a decoration that asks the user to worry;
+  // in settings the count itself is the answer.
+  if (max === null) {
+    if (!showUnlimited) return null
+
+    return (
+      <Card size="compact" data-testid={`plan-usage-meter-${resource}`}>
+        <Flex align="center" justify="space-between" gap={4} wrap="wrap">
+          <Text size="sm" weight="medium" color="primary">
+            <FormattedMessage {...m[copy.label]} />
+          </Text>
+          <Text size="sm" color="muted">
+            {used} · <FormattedMessage {...m.noLimit} />
+          </Text>
+        </Flex>
+      </Card>
+    )
+  }
 
   const remaining = Math.max(max - used, 0)
   const isNearLimit = !isAtLimit && max > 0 && used / max >= 0.8

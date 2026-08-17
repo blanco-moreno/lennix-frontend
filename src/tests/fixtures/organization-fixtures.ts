@@ -76,19 +76,22 @@ export function seedOwnerDTO(): OwnerResponseDTO {
 }
 
 /**
- * The org sits on plan 2 (Pro), so its limits resolve from the plan.
- * `enterprise_terms` exist but stay inert until the org moves to plan 3 — see
- * `SEED_ENTERPRISE_TERMS` for that variant.
+ * The default limits are the Pro template: the demo org's overrides row
+ * (`SEED_PLAN_OVERRIDES`) only raises seats, so tests that
+ * need `source: 'overrides'` pass it with those numbers explicitly.
  */
-export function seedResolvedLimitsDTO(): ResolvedLimitsResponseDTO {
+export function seedResolvedLimitsDTO(
+  overrides?: Partial<ResolvedLimitsResponseDTO>,
+): ResolvedLimitsResponseDTO {
   const plan = seedPlan(SEED_ORGANIZATION.planId)
   return {
     max_team_size: plan.maxTeamSize,
     max_projects: plan.maxProjects,
+    max_draft_projects: plan.maxDraftProjects,
     storage_mb: plan.storageMb,
     ai_requests: plan.aiRequests,
     source: 'plan',
-    pending_enterprise_configuration: false,
+    ...overrides,
   }
 }
 

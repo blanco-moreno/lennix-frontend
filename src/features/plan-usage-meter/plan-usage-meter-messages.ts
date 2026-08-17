@@ -80,6 +80,12 @@ export const planUsageMeterMessages = defineMessages({
       '{count, plural, one {# AI request left this month} other {# AI requests left this month}}',
     description: 'Headroom left on the plan AI requests cap',
   },
+  noLimit: {
+    id: 'planUsageMeter.noLimit',
+    defaultMessage: 'No limit',
+    description:
+      'Replaces the bar and the headroom line when the resource has no ceiling',
+  },
   aiFull: {
     id: 'planUsageMeter.aiFull',
     defaultMessage:

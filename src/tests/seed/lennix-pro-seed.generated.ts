@@ -11,7 +11,7 @@
  */
 
 /** Content hash of every backend seed file this manifest was derived from. */
-export const SEED_SOURCE_DIGEST = '2dc879c0d432d712'
+export const SEED_SOURCE_DIGEST = '91a3484ceeab8fbf'
 
 /** Stable IDs, mirroring `app/seeds/lennix_pro/constants.py`. */
 export const SEED_IDS = {
@@ -229,14 +229,15 @@ export interface SeedPlan {
   aiRequests: number
 }
 
-export interface SeedEnterpriseTerms {
+export interface SeedPlanOverrides {
   organizationId: string
-  maxTeamSize: number
+  maxTeamSize: number | null
   maxProjects: number | null
-  storageMb: number
-  aiRequests: number
-  contractStart: string
-  notes: string
+  maxDraftProjects: number | null
+  storageMb: number | null
+  aiRequests: number | null
+  contractStart: string | null
+  notes: string | null
 }
 
 export interface SeedUser {
@@ -481,38 +482,39 @@ export const SEED_PLANS: readonly SeedPlan[] = [
     name: 'Basic',
     maxTeamSize: 5,
     maxProjects: 3,
-    maxDraftProjects: 10,
+    maxDraftProjects: 5,
     storageMb: 1000,
     aiRequests: 100,
   },
   {
     id: 2,
     name: 'Pro',
-    maxTeamSize: 15,
-    maxProjects: 10,
-    maxDraftProjects: 25,
-    storageMb: 5000,
-    aiRequests: 500,
+    maxTeamSize: 20,
+    maxProjects: 12,
+    maxDraftProjects: 15,
+    storageMb: 10000,
+    aiRequests: 1000,
   },
   {
     id: 3,
     name: 'Enterprise',
-    maxTeamSize: null,
-    maxProjects: null,
-    maxDraftProjects: null,
-    storageMb: 25000,
-    aiRequests: 2000,
+    maxTeamSize: 75,
+    maxProjects: 50,
+    maxDraftProjects: 40,
+    storageMb: 100000,
+    aiRequests: 10000,
   },
 ]
 
-export const SEED_ENTERPRISE_TERMS: SeedEnterpriseTerms = {
+export const SEED_PLAN_OVERRIDES: SeedPlanOverrides = {
   organizationId: 'a0000000-0000-0001-0000-000000000000',
   maxTeamSize: 250,
-  maxProjects: 120,
-  storageMb: 500000,
-  aiRequests: 25000,
+  maxProjects: null,
+  maxDraftProjects: null,
+  storageMb: null,
+  aiRequests: null,
   contractStart: '2026-01-01',
-  notes: 'Enterprise demo contract for Constructora Lennix S.A.',
+  notes: 'Negotiated contract for Constructora Lennix S.A.',
 }
 
 export const SEED_USERS: readonly SeedUser[] = [

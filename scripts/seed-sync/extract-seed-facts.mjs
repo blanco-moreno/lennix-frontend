@@ -39,7 +39,7 @@ export const SEED_SOURCE_FILES = [
   `${SEED_DIR}/05_dependencies.py`,
   `${SEED_DIR}/06_expenses.py`,
   `${SEED_DIR}/08_subtask_notes.py`,
-  `${SEED_DIR}/10_enterprise_terms.py`,
+  `${SEED_DIR}/10_plan_overrides.py`,
   `${SEED_DIR}/11_broken_dependency.py`,
   `${SEED_DIR}/13_force_start.py`,
   `${SEED_DIR}/15_schedule_import.py`,
@@ -154,22 +154,23 @@ export function extractSeedFacts(msBkRoot) {
     aiRequests: plan.ai_requests,
   }))
 
-  // ── Enterprise terms (inert until the org moves to plan 3) ────────────
-  const termsData = requireValue(
-    evaluateModuleAssignments(read(`${SEED_DIR}/10_enterprise_terms.py`), {
+  // ── Plan overrides (any field absent inherits the plan) ───────────────
+  const overridesData = requireValue(
+    evaluateModuleAssignments(read(`${SEED_DIR}/10_plan_overrides.py`), {
       symbols,
       calls,
-    }).assigned.TERMS_DATA,
-    'TERMS_DATA',
+    }).assigned.OVERRIDES_DATA,
+    'OVERRIDES_DATA',
   )
-  const enterpriseTerms = {
-    organizationId: termsData.organization_id,
-    maxTeamSize: termsData.max_team_size,
-    maxProjects: termsData.max_projects,
-    storageMb: termsData.storage_mb,
-    aiRequests: termsData.ai_requests,
-    contractStart: termsData.contract_start,
-    notes: termsData.notes,
+  const planOverrides = {
+    organizationId: overridesData.organization_id,
+    maxTeamSize: overridesData.max_team_size ?? null,
+    maxProjects: overridesData.max_projects ?? null,
+    maxDraftProjects: overridesData.max_draft_projects ?? null,
+    storageMb: overridesData.storage_mb ?? null,
+    aiRequests: overridesData.ai_requests ?? null,
+    contractStart: overridesData.contract_start ?? null,
+    notes: overridesData.notes ?? null,
   }
 
   // ── Users ─────────────────────────────────────────────────────────────
@@ -492,7 +493,7 @@ export function extractSeedFacts(msBkRoot) {
     ids,
     roles,
     plans,
-    enterpriseTerms,
+    planOverrides,
     users,
     organization,
     projects,

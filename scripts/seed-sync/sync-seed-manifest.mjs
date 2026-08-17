@@ -43,14 +43,15 @@ export interface SeedPlan {
   aiRequests: number
 }
 
-export interface SeedEnterpriseTerms {
+export interface SeedPlanOverrides {
   organizationId: string
-  maxTeamSize: number
+  maxTeamSize: number | null
   maxProjects: number | null
-  storageMb: number
-  aiRequests: number
-  contractStart: string
-  notes: string
+  maxDraftProjects: number | null
+  storageMb: number | null
+  aiRequests: number | null
+  contractStart: string | null
+  notes: string | null
 }
 
 export interface SeedUser {
@@ -288,7 +289,7 @@ export const SEED_ROLES: readonly SeedRole[] = ${literal(facts.roles)}
 
 export const SEED_PLANS: readonly SeedPlan[] = ${literal(facts.plans)}
 
-export const SEED_ENTERPRISE_TERMS: SeedEnterpriseTerms = ${literal(facts.enterpriseTerms)}
+export const SEED_PLAN_OVERRIDES: SeedPlanOverrides = ${literal(facts.planOverrides)}
 
 export const SEED_USERS: readonly SeedUser[] = ${literal(facts.users)}
 

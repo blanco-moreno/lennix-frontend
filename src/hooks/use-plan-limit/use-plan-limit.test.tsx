@@ -1,8 +1,7 @@
 /**
- * The Enterprise row is being migrated to `NULL` on every ceiling — team size
- * and drafts join `max_projects`, which was already null. These pin that an
- * all-null plan gates nothing and meters nothing, and that the `0` the backend
- * still sends for `max_drafts` (its `limit or 0`) is read the same way.
+ * A plan is unlimited on a resource when its `max_*` is `NULL`, and any plan
+ * whose overrides say so can be. These pin that an all-null plan gates nothing
+ * and meters nothing, and that a `0` ceiling is read the same way.
  */
 
 import { renderHook, waitFor } from '@testing-library/react'

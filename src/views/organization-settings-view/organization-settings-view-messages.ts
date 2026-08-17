@@ -85,38 +85,34 @@ export const organizationSettingsViewMessages = defineMessages({
   customPlanBadge: {
     id: 'organization.customPlanBadge',
     defaultMessage: 'Custom',
-    description: 'Badge shown for enterprise custom terms',
-  },
-  pendingEnterprise: {
-    id: 'organization.pendingEnterprise',
-    defaultMessage:
-      'Your Enterprise account is pending configuration — contact support to define your limits.',
-    description: 'Notice shown when the enterprise plan is not yet configured',
+    description: 'Badge shown when the limits come from per-org overrides',
   },
   planLabel: {
     id: 'organization.planLabel',
     defaultMessage: 'Plan',
     description: 'Label for the current plan name',
   },
-  maxTeamSize: {
-    id: 'organization.maxTeamSize',
-    defaultMessage: 'Maximum team size',
-    description: 'Label for the maximum team size limit',
-  },
-  maxProjects: {
-    id: 'organization.maxProjects',
-    defaultMessage: 'Maximum projects',
-    description: 'Label for the maximum projects limit',
-  },
   storage: {
     id: 'organization.storage',
     defaultMessage: 'Storage',
     description: 'Label for the storage limit',
   },
-  aiRequests: {
-    id: 'organization.aiRequests',
-    defaultMessage: 'AI requests',
-    description: 'Label for the AI requests limit',
+  planUsageTitle: {
+    id: 'organization.planUsageTitle',
+    defaultMessage: 'Plan usage',
+    description: 'Heading above the four plan-usage meters in settings',
+  },
+  upgradeToPro: {
+    id: 'organization.upgradeToPro',
+    defaultMessage:
+      'You are running out of room on Basic. Pro raises every limit.',
+    description: 'Upgrade notice shown to a Basic organization near its caps',
+  },
+  upgradeToEnterprise: {
+    id: 'organization.upgradeToEnterprise',
+    defaultMessage:
+      'You are running out of room on Pro. Enterprise raises every limit.',
+    description: 'Upgrade notice shown to a Pro organization near its caps',
   },
 
   // Ownership transfer

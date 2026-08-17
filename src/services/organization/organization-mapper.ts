@@ -36,11 +36,10 @@ export function mapOrganizationResponseDTOToOrganization(
     resolvedLimits: {
       maxTeamSize: dto.resolved_limits.max_team_size,
       maxProjects: dto.resolved_limits.max_projects,
+      maxDraftProjects: dto.resolved_limits.max_draft_projects,
       storageMb: dto.resolved_limits.storage_mb,
       aiRequests: dto.resolved_limits.ai_requests,
       source: dto.resolved_limits.source,
-      pendingEnterpriseConfiguration:
-        dto.resolved_limits.pending_enterprise_configuration,
     },
   }
 }

@@ -23,10 +23,10 @@ export interface PlanSummaryResponseDTO {
 export interface ResolvedLimitsResponseDTO {
   max_team_size: number | null
   max_projects: number | null
-  storage_mb: number
-  ai_requests: number
-  source: 'plan' | 'enterprise_terms'
-  pending_enterprise_configuration: boolean
+  max_draft_projects: number | null
+  storage_mb: number | null
+  ai_requests: number | null
+  source: 'plan' | 'overrides'
 }
 
 /** Organization endpoints — response */

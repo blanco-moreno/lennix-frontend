@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/mocks/server'
 import { makeStore } from '@/stores'
 import { setUser } from '@/stores/slices/auth-slice'
-import { seedProjectListDTO } from '@/tests/fixtures'
+import { seedOrganizationUsageDTO, seedProjectListDTO } from '@/tests/fixtures'
 import {
   LOCATION_TEST_ID,
   renderWithProviders,
@@ -55,7 +55,10 @@ describe('DraftsView', () => {
     expect(
       await screen.findByTestId('plan-usage-meter-drafts'),
     ).toBeInTheDocument()
-    expect(screen.getByText('3 of 25')).toBeInTheDocument()
+    const usage = seedOrganizationUsageDTO()
+    expect(
+      screen.getByText(`${usage.current_drafts} of ${usage.max_drafts}`),
+    ).toBeInTheDocument()
   })
 
   it('opens a draft on its resumable review canvas, never project-detail', async () => {
