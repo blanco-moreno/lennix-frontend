@@ -93,6 +93,13 @@ export const removeOrgMemberHandler = http.delete(
   },
 )
 
+export const resetOrgMemberPasswordHandler = http.post(
+  '*/v1/organizations/:organizationId/members/:userId/password',
+  () => {
+    return new HttpResponse(null, { status: 204 })
+  },
+)
+
 export const orgUsageHandler = http.get(
   '*/v1/organizations/:organizationId/usage',
   () => {
@@ -133,6 +140,7 @@ export const organizationHandlers = [
   addOrgMemberHandler,
   updateOrgMemberRoleHandler,
   removeOrgMemberHandler,
+  resetOrgMemberPasswordHandler,
   orgUsageHandler,
   updatePlanHandler,
 ]

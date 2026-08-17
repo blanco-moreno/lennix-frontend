@@ -1,3 +1,4 @@
+import type { UserUpdatePasswordRequestDTO } from '@/types/dto/auth-dto'
 import type {
   OrganizationCreateRequestDTO,
   AddMemberRequestDTO,
@@ -73,6 +74,21 @@ export const removeOrgMember = ({
 }) => ({
   url: `/v1/organizations/${id}/members/${userId}`,
   method: 'DELETE',
+})
+
+/** Owner over anyone; admin over everyone but the owner and other admins. */
+export const resetOrgMemberPassword = ({
+  id,
+  userId,
+  body,
+}: {
+  id: string
+  userId: string
+  body: UserUpdatePasswordRequestDTO
+}) => ({
+  url: `/v1/organizations/${id}/members/${userId}/password`,
+  method: 'POST',
+  body,
 })
 
 export const getOrgUsage = (id: string) => `/v1/organizations/${id}/usage`

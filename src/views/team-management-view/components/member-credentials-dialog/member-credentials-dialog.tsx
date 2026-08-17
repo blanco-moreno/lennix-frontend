@@ -11,6 +11,8 @@ import { teamManagementViewMessages } from '../../team-management-view-messages'
 export interface MemberCredentials {
   email: string
   password: string
+  /** A regenerated password for an existing member, not a new account. */
+  regenerated?: boolean
 }
 
 interface MemberCredentialsDialogProps {
@@ -19,8 +21,8 @@ interface MemberCredentialsDialogProps {
   onClose: () => void
 }
 
-/** Shows the temporary credentials after a successful create, so the admin
- *  can copy/share them with the new user. */
+/** Shows the temporary credentials after a create or a password regeneration,
+ *  so the admin can copy/share them with the member. */
 export function MemberCredentialsDialog({
   credentials,
   onClose,
@@ -55,9 +57,15 @@ export function MemberCredentialsDialog({
         if (!open) onClose()
       }}
       size="sm"
-      title={intl.formatMessage(teamManagementViewMessages.memberCreatedTitle)}
+      title={intl.formatMessage(
+        credentials?.regenerated
+          ? teamManagementViewMessages.passwordRegeneratedTitle
+          : teamManagementViewMessages.memberCreatedTitle,
+      )}
       description={intl.formatMessage(
-        teamManagementViewMessages.memberCreatedDescription,
+        credentials?.regenerated
+          ? teamManagementViewMessages.passwordRegeneratedDescription
+          : teamManagementViewMessages.memberCreatedDescription,
       )}
       footer={
         <>

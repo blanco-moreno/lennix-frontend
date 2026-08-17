@@ -101,6 +101,47 @@ export const teamManagementViewMessages = defineMessages({
     defaultMessage: 'Remove Member',
     description: 'Title of the confirmation dialog to remove a member',
   },
+  resetPasswordTitle: {
+    id: 'teamManagement.resetPasswordTitle',
+    defaultMessage: 'Regenerate password',
+    description:
+      'Title of the confirmation dialog to regenerate a member password',
+  },
+  resetPasswordDescription: {
+    id: 'teamManagement.resetPasswordDescription',
+    defaultMessage:
+      'A new temporary password will be generated for {firstName} {lastName} and their current sessions will be signed out. Continue?',
+    description:
+      'Description of the confirmation dialog to regenerate a member password',
+  },
+  resetPasswordConfirm: {
+    id: 'teamManagement.resetPasswordConfirm',
+    defaultMessage: 'Regenerate',
+    description: 'Confirm button of the regenerate-password dialog',
+  },
+  passwordRegeneratedTitle: {
+    id: 'teamManagement.passwordRegeneratedTitle',
+    defaultMessage: 'Password regenerated',
+    description:
+      'Title of the credentials dialog shown after regenerating a member password',
+  },
+  passwordRegeneratedDescription: {
+    id: 'teamManagement.passwordRegeneratedDescription',
+    defaultMessage:
+      'Share the new credentials with the member. The password will not be shown again.',
+    description:
+      'Description of the credentials dialog shown after regenerating a member password',
+  },
+  passwordResetToast: {
+    id: 'teamManagement.passwordResetToast',
+    defaultMessage: 'Password regenerated',
+    description: 'Success toast shown after regenerating a member password',
+  },
+  resetPasswordError: {
+    id: 'teamManagement.resetPasswordError',
+    defaultMessage: 'Error regenerating the password',
+    description: 'Error toast shown when regenerating a member password fails',
+  },
   removeMemberDescription: {
     id: 'teamManagement.removeMemberDescription',
     defaultMessage:

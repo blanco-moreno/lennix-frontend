@@ -48,14 +48,18 @@ export function TeamManagementView() {
   const [createdCredentials, setCreatedCredentials] =
     useState<MemberCredentials | null>(null)
 
-  const { handleAddMember, handleRemoveMember, isSubmitting } =
-    useTeamMutations({
-      organizationId,
-      onMemberCreated: (credentials) => {
-        setCreatedCredentials(credentials)
-        setShowAddModal(false)
-      },
-    })
+  const {
+    handleAddMember,
+    handleRemoveMember,
+    handleResetPassword,
+    isSubmitting,
+  } = useTeamMutations({
+    organizationId,
+    onMemberCreated: (credentials) => {
+      setCreatedCredentials(credentials)
+      setShowAddModal(false)
+    },
+  })
 
   const filteredMembers = useMemo(
     () => filterMembers(members, searchTerm),
@@ -68,6 +72,7 @@ export function TeamManagementView() {
     currentUserId: user?.userId,
     canManageTeam,
     onRemoveMember: handleRemoveMember,
+    onResetPassword: handleResetPassword,
   })
 
   // Both states keep the view's own padding: an early return that drops the

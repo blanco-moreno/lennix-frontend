@@ -194,4 +194,51 @@ describe('useTeamMutations', () => {
     })
     expect(errorToast).toHaveBeenCalled()
   })
+
+  it('regenerates a password over POST and hands back the credentials', async () => {
+    const posts: { userId: string; body: Record<string, unknown> }[] = []
+    server.use(
+      http.post(
+        '*/v1/organizations/:organizationId/members/:userId/password',
+        async ({ params, request }) => {
+          posts.push({
+            userId: params.userId as string,
+            body: (await request.json()) as Record<string, unknown>,
+          })
+          if (posts.length > 1) {
+            return HttpResponse.json(
+              { detail: { code: 'only_owner_manages_admins' } },
+              { status: 403 },
+            )
+          }
+          return new HttpResponse(null, { status: 204 })
+        },
+      ),
+    )
+    const successToast = vi.spyOn(toast, 'success')
+    const errorToast = vi.spyOn(toast, 'error')
+    const { result, onMemberCreated } = renderMutations()
+    const email = seedUser(SEED_IDS.USER_MIGUEL_ID).email
+
+    await act(async () => {
+      await result.current.handleResetPassword(SEED_IDS.USER_MIGUEL_ID, email)
+    })
+    expect(posts[0]?.userId).toBe(SEED_IDS.USER_MIGUEL_ID)
+    const sent = posts[0]?.body.password
+    expect(typeof sent).toBe('string')
+    // The credentials dialog receives the very password that was sent.
+    expect(onMemberCreated).toHaveBeenCalledWith({
+      email,
+      password: sent,
+      regenerated: true,
+    })
+    expect(successToast).toHaveBeenCalled()
+
+    // A refusal lands as a toast, with no credentials surfaced.
+    await act(async () => {
+      await result.current.handleResetPassword(SEED_IDS.USER_MIGUEL_ID, email)
+    })
+    expect(errorToast).toHaveBeenCalled()
+    expect(onMemberCreated).toHaveBeenCalledTimes(1)
+  })
 })

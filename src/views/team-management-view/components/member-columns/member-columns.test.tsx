@@ -42,42 +42,56 @@ function seedMember(userId: string): OrganizationMember {
 interface HarnessProps {
   members: OrganizationMember[]
   canManageTeam: boolean
+  currentUserId: string
   onRemoveMember: (userId: string) => Promise<void>
+  onResetPassword: (userId: string, email: string) => Promise<void>
 }
 
 /** The rendered surface of the hook is the members DataTable. */
-function Harness({ members, canManageTeam, onRemoveMember }: HarnessProps) {
+function Harness({
+  members,
+  canManageTeam,
+  currentUserId,
+  onRemoveMember,
+  onResetPassword,
+}: HarnessProps) {
   const columns = useMemberColumns({
     organizationId,
     ownerId,
-    // Carlos is both the signed-in user and the org owner — the seeded truth.
-    currentUserId: SEED_IDS.USER_CARLOS_ID,
+    currentUserId,
     canManageTeam,
     onRemoveMember,
+    onResetPassword,
   })
   return <DataTable columns={columns} data={members} emptyMessage="empty" />
 }
 
 function renderColumns({
   canManageTeam = true,
+  // Carlos is both the signed-in user and the org owner — the seeded truth.
+  actorId = SEED_IDS.USER_CARLOS_ID as string,
   onRemoveMember = vi.fn().mockResolvedValue(undefined),
+  onResetPassword = vi.fn().mockResolvedValue(undefined),
 } = {}) {
   const members = [
     seedMember(SEED_IDS.USER_CARLOS_ID),
+    seedMember(SEED_IDS.USER_ANA_ID),
     seedMember(SEED_IDS.USER_MIGUEL_ID),
   ]
   const store = makeStore()
-  // Owner in the store: MemberRoleControl reads `user.role.manage` itself.
+  const actor = seedUser(actorId)
+  // Actor in the store: MemberRoleControl and the password action read the
+  // signed-in role themselves.
   store.dispatch(
     setUser({
-      userId: SEED_IDS.USER_CARLOS_ID,
-      email: seedUser(SEED_IDS.USER_CARLOS_ID).email,
-      firstName: 'Carlos',
-      lastName: 'Rodriguez',
+      userId: actorId,
+      email: actor.email,
+      firstName: actor.firstName,
+      lastName: actor.lastName,
       phone: null,
       isActive: true,
       planId: null,
-      roleId: 1,
+      roleId: actor.roleId,
       organizationId,
     }),
   )
@@ -85,11 +99,19 @@ function renderColumns({
     <Harness
       members={members}
       canManageTeam={canManageTeam}
+      currentUserId={actorId}
       onRemoveMember={onRemoveMember}
+      onResetPassword={onResetPassword}
     />,
     { store, route: '/settings/team' },
   )
-  return { onRemoveMember }
+  return { onRemoveMember, onResetPassword }
+}
+
+const RESET_NAME = /regenerate password/i
+
+function resetButtonIn(row: HTMLElement) {
+  return within(row).queryByRole('button', { name: RESET_NAME })
 }
 
 function rowOf(userId: string): HTMLElement {
@@ -126,7 +148,9 @@ describe('useMemberColumns', () => {
     expect(
       within(carlosRow).queryByRole('button', { name: /change role/i }),
     ).not.toBeInTheDocument()
-    const [selfRemove] = within(carlosRow).getAllByRole('button')
+    const [selfRemove] = within(carlosRow)
+      .getAllByRole('button')
+      .filter((b) => !RESET_NAME.test(b.getAttribute('aria-label') ?? ''))
     expect(selfRemove).toBeDisabled()
 
     // A regular member's row has both actions live.
@@ -142,7 +166,11 @@ describe('useMemberColumns', () => {
     const miguelRow = rowOf(SEED_IDS.USER_MIGUEL_ID)
     const removeButton = within(miguelRow)
       .getAllByRole('button')
-      .find((b) => !/change role/i.test(b.textContent ?? ''))
+      .find(
+        (b) =>
+          !/change role/i.test(b.textContent ?? '') &&
+          !RESET_NAME.test(b.getAttribute('aria-label') ?? ''),
+      )
     if (!removeButton) throw new Error('remove button not found')
     await userEvent.click(removeButton)
 
@@ -162,11 +190,50 @@ describe('useMemberColumns', () => {
   it('offers no remove button at all without org.team.manage', () => {
     renderColumns({ canManageTeam: false })
 
-    // The role control (its own permission) survives; the remove action —
-    // gated by canManageTeam — is hidden, not disabled.
+    // The role control (its own permission) survives; the remove and
+    // regenerate-password actions — gated by canManageTeam — are hidden.
     const miguelRow = rowOf(SEED_IDS.USER_MIGUEL_ID)
     const buttons = within(miguelRow).getAllByRole('button')
     expect(buttons).toHaveLength(1)
     expect(buttons[0]).toHaveTextContent(/change role/i)
+  })
+
+  it('lets the owner regenerate every password but their own', () => {
+    renderColumns()
+
+    expect(resetButtonIn(rowOf(SEED_IDS.USER_CARLOS_ID))).toBeNull()
+    expect(resetButtonIn(rowOf(SEED_IDS.USER_ANA_ID))).toBeInTheDocument()
+    expect(resetButtonIn(rowOf(SEED_IDS.USER_MIGUEL_ID))).toBeInTheDocument()
+  })
+
+  it('hides the action from an admin on the owner, other admins and themself', () => {
+    // Ana is the seeded admin.
+    renderColumns({ actorId: SEED_IDS.USER_ANA_ID })
+
+    expect(resetButtonIn(rowOf(SEED_IDS.USER_CARLOS_ID))).toBeNull()
+    expect(resetButtonIn(rowOf(SEED_IDS.USER_ANA_ID))).toBeNull()
+    expect(resetButtonIn(rowOf(SEED_IDS.USER_MIGUEL_ID))).toBeInTheDocument()
+  })
+
+  it('regenerates only after the confirmation, passing the row user id and email', async () => {
+    const { onResetPassword } = renderColumns()
+
+    const miguelRow = rowOf(SEED_IDS.USER_MIGUEL_ID)
+    const button = resetButtonIn(miguelRow)
+    if (!button) throw new Error('reset button not found')
+    await userEvent.click(button)
+    expect(onResetPassword).not.toHaveBeenCalled()
+
+    const dialog = await screen.findByRole('dialog')
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: 'Regenerate' }),
+    )
+
+    await waitFor(() => {
+      expect(onResetPassword).toHaveBeenCalledWith(
+        SEED_IDS.USER_MIGUEL_ID,
+        seedUser(SEED_IDS.USER_MIGUEL_ID).email,
+      )
+    })
   })
 })

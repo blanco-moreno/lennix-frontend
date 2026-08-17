@@ -23,6 +23,7 @@ import {
   addOrgMember,
   updateOrgMemberSystemRole,
   removeOrgMember,
+  resetOrgMemberPassword,
   getOrgUsage,
 } from './organization-endpoint'
 import {
@@ -132,6 +133,13 @@ export const organizationApi = api.injectEndpoints({
         { type: 'Task' },
       ],
     }),
+    resetOrgMemberPassword: builder.mutation<
+      void,
+      { id: string; userId: string; password: string }
+    >({
+      query: ({ id, userId, password }) =>
+        resetOrgMemberPassword({ id, userId, body: { password } }),
+    }),
     getOrgUsage: builder.query<OrganizationUsage, string>({
       query: getOrgUsage,
       transformResponse: mapOrganizationUsageResponseDTOToOrganizationUsage,
@@ -150,6 +158,7 @@ export const {
   useAddOrgMemberMutation,
   useUpdateOrgMemberSystemRoleMutation,
   useRemoveOrgMemberMutation,
+  useResetOrgMemberPasswordMutation,
   // The drafts quota meter reads plan usage, so the cap is legible
   // before an import hits the 400.
   useGetOrgUsageQuery,

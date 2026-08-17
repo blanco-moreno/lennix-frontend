@@ -8,6 +8,7 @@ export {
   useAddOrgMemberMutation,
   useUpdateOrgMemberSystemRoleMutation,
   useRemoveOrgMemberMutation,
+  useResetOrgMemberPasswordMutation,
   useGetOrgUsageQuery,
 } from './organization-service'
 

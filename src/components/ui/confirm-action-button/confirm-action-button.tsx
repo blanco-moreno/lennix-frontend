@@ -1,8 +1,8 @@
 import { Box } from '@chakra-ui/react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, type LucideIcon } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
-import { Button } from '../button'
+import { Button, type ButtonProps } from '../button'
 import { Modal } from '../modal'
 
 interface ConfirmActionButtonProps {
@@ -12,6 +12,10 @@ interface ConfirmActionButtonProps {
   confirmLabel: ReactNode
   onConfirm: () => void
   disabled?: boolean
+  /** Defaults to the destructive trash button; pass both for any other row action. */
+  icon?: LucideIcon
+  variant?: ButtonProps['variant']
+  'aria-label'?: string
 }
 
 // Trigger button + confirmation Modal for a destructive row action. Extracted
@@ -24,17 +28,21 @@ export function ConfirmActionButton({
   confirmLabel,
   onConfirm,
   disabled = false,
+  icon = Trash2,
+  variant = 'destructive',
+  'aria-label': ariaLabel,
 }: ConfirmActionButtonProps) {
   const [open, setOpen] = useState(false)
   return (
     <>
       <Button
-        variant="destructive"
+        variant={variant}
         size="sm"
         disabled={disabled}
+        aria-label={ariaLabel}
         onClick={() => setOpen(true)}
       >
-        <Box as={Trash2} boxSize={3} />
+        <Box as={icon} boxSize={3} />
       </Button>
       <Modal
         variant="confirmation"
