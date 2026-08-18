@@ -57,9 +57,12 @@ export type RiskUpdateRequestDTO = Partial<
  * A *suggestion* to open a risk from a delayed critical task. Never
  * persisted: the human decides whether it becomes a risk.
  */
+/** Why the backend suggests a risk — closed (`RiskSuggestionCode`, RSK-3). */
+export type RiskSuggestionCodeDTO = 'critical_path_delay'
+
 export interface RiskSuggestionResponseDTO {
   task_id: string
   task_title: string
   delay_days: number
-  reason: string
+  code: RiskSuggestionCodeDTO
 }

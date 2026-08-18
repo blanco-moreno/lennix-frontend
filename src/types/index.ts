@@ -76,6 +76,7 @@ export {
   type RiskSeverity,
   type RiskStatus,
   type RiskSuggestion,
+  type RiskSuggestionCode,
   type RiskWriteInput,
 } from './risk'
 export {

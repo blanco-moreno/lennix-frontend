@@ -114,7 +114,7 @@ describe('mapRiskSuggestionDTO', () => {
       task_id: SEED_IDS.P1_TASK_STRUCTURE,
       task_title: seedTask(SEED_IDS.P1_TASK_STRUCTURE).title,
       delay_days: 5,
-      reason: 'Delayed critical task',
+      code: 'critical_path_delay' as const,
     }
 
     const suggestion = mapRiskSuggestionDTO(dto)
@@ -122,6 +122,6 @@ describe('mapRiskSuggestionDTO', () => {
     expect(suggestion.taskId).toBe(SEED_IDS.P1_TASK_STRUCTURE)
     expect(suggestion.taskTitle).toBe('Estructura')
     expect(suggestion.delayDays).toBe(5)
-    expect(suggestion.reason).toBe(dto.reason)
+    expect(suggestion.code).toBe('critical_path_delay')
   })
 })

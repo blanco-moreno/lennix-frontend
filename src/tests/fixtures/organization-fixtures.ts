@@ -154,5 +154,7 @@ export function seedOrganizationUsageDTO(): OrganizationUsageResponseDTO {
     max_drafts: plan.maxDraftProjects,
     current_ai_requests: 0,
     max_ai_requests: plan.aiRequests,
+    current_storage_mb: 0,
+    max_storage_mb: plan.storageMb,
   }
 }

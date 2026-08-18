@@ -93,6 +93,8 @@ export interface OrganizationUsageResponseDTO {
   max_drafts: number | null
   current_ai_requests: number
   max_ai_requests: number | null
+  current_storage_mb: number
+  max_storage_mb: number | null
 }
 
 /** PUT /v1/organizations/:id/plan — request */

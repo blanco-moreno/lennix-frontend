@@ -13,13 +13,13 @@ const suggestions: RiskSuggestion[] = [
     taskId: SEED_IDS.P1_TASK_STRUCTURE,
     taskTitle: 'Estructura y obra gruesa',
     delayDays: 5,
-    reason: 'critical_delay',
+    code: 'critical_path_delay',
   },
   {
     taskId: SEED_IDS.P1_TASK_INSTALLATIONS,
     taskTitle: 'Instalaciones',
     delayDays: 1,
-    reason: 'critical_delay',
+    code: 'critical_path_delay',
   },
 ]
 
@@ -34,6 +34,20 @@ describe('RiskSuggestions', () => {
     // The plural rule holds at one — "1 days late" would read as a bug.
     expect(screen.getByText('Instalaciones')).toBeInTheDocument()
     expect(screen.getByText('1 day late')).toBeInTheDocument()
+    // The cause is the backend's closed code, translated here (RSK-3).
+    expect(screen.getAllByText('On the critical path')).toHaveLength(2)
+  })
+
+  it('renders a code it does not know with a generic cause, not a crash', () => {
+    const unknown = {
+      ...suggestions[0],
+      code: 'burn_rate_divergence' as RiskSuggestion['code'],
+    }
+    renderWithProviders(
+      <RiskSuggestions suggestions={[unknown]} onRegister={vi.fn()} />,
+    )
+
+    expect(screen.getByText('Suggested by the schedule')).toBeInTheDocument()
   })
 
   it('registers nothing on its own — each suggestion waits for its button', async () => {

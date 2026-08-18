@@ -34,4 +34,10 @@ export const planLimitButtonMessages = defineMessages({
     description:
       'Tooltip on an AI action blocked by the monthly AI request ceiling',
   },
+  storage: {
+    id: 'planLimit.storageBlocked',
+    defaultMessage:
+      'You reached your plan’s storage limit ({used} of {max} MB). Upgrade your plan to import more files.',
+    description: 'Tooltip on an upload action blocked by the storage ceiling',
+  },
 })

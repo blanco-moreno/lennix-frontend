@@ -5,7 +5,10 @@ import { FormattedMessage } from 'react-intl'
 import { Button, Card, Heading, Text } from '@/components'
 import type { RiskSuggestion } from '@/types'
 
-import { riskSuggestionsMessages as m } from './risk-suggestions-messages'
+import {
+  riskSuggestionCauseMessages,
+  riskSuggestionsMessages as m,
+} from './risk-suggestions-messages'
 
 interface RiskSuggestionsProps {
   suggestions: RiskSuggestion[]
@@ -51,6 +54,12 @@ export function RiskSuggestions({
                 <FormattedMessage
                   {...m.suggestionDelay}
                   values={{ days: suggestion.delayDays }}
+                />
+              </Text>
+              <Text size="xs" color="muted">
+                <FormattedMessage
+                  {...(riskSuggestionCauseMessages[suggestion.code] ??
+                    m.suggestionCauseUnknown)}
                 />
               </Text>
             </Box>

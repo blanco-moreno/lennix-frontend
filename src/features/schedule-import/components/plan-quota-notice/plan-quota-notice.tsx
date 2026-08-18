@@ -40,6 +40,12 @@ const COPY_BY_CODE: Record<
     action: m.goToDrafts,
     target: PATHS.DRAFTS,
   },
+  plan_storage_limit_exceeded: {
+    title: m.storageLimitTitle,
+    body: m.storageLimitBody,
+    action: m.goToSettings,
+    target: PATHS.SETTINGS,
+  },
 }
 
 export interface PlanQuotaNoticeProps {

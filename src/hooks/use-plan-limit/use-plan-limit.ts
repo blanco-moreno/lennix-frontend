@@ -15,7 +15,12 @@ import { useGetMeQuery } from '@/services/auth'
 import { useGetOrgUsageQuery } from '@/services/organization'
 
 /** The resources `usage` counts. */
-export type PlanLimitResource = 'projects' | 'drafts' | 'members' | 'ai'
+export type PlanLimitResource =
+  | 'projects'
+  | 'drafts'
+  | 'members'
+  | 'ai'
+  | 'storage'
 
 export interface PlanLimitState {
   /** Usage has not resolved yet — decide nothing, block nothing. */
@@ -50,7 +55,9 @@ export function usePlanLimit(resource: PlanLimitResource): PlanLimitState {
         ? [usage.currentProjects, usage.maxProjects]
         : resource === 'drafts'
           ? [usage.currentDrafts, usage.maxDrafts]
-          : [usage.currentAiRequests, usage.maxAiRequests]
+          : resource === 'ai'
+            ? [usage.currentAiRequests, usage.maxAiRequests]
+            : [usage.currentStorageMb, usage.maxStorageMb]
 
   // The backend spells unlimited as `null` on every `max_*`, and any plan
   // whose overrides say so can be unlimited on any resource. `0` is treated

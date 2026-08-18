@@ -80,6 +80,23 @@ export const planUsageMeterMessages = defineMessages({
       '{count, plural, one {# AI request left this month} other {# AI requests left this month}}',
     description: 'Headroom left on the plan AI requests cap',
   },
+  storageLabel: {
+    id: 'planUsageMeter.storageLabel',
+    defaultMessage: 'Storage used (MB)',
+    description: 'Label of the storage meter',
+  },
+  storageRemaining: {
+    id: 'planUsageMeter.storageRemaining',
+    defaultMessage: '{count} MB left before the cap',
+    description: 'Headroom left on the plan storage cap',
+  },
+  storageFull: {
+    id: 'planUsageMeter.storageFull',
+    defaultMessage:
+      'Your plan allows {limit} MB of imported files. Upgrade your plan to import more.',
+    description:
+      'Shown when the plan storage cap is reached, before an upload can fail',
+  },
   noLimit: {
     id: 'planUsageMeter.noLimit',
     defaultMessage: 'No limit',
@@ -120,5 +137,10 @@ export const PLAN_METER_COPY: Record<
     label: 'aiLabel',
     remaining: 'aiRemaining',
     full: 'aiFull',
+  },
+  storage: {
+    label: 'storageLabel',
+    remaining: 'storageRemaining',
+    full: 'storageFull',
   },
 }

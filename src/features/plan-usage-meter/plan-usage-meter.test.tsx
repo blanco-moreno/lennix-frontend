@@ -89,6 +89,15 @@ describe('PlanUsageMeter', () => {
     expect(screen.queryByText(/left this month/)).toBeNull()
   })
 
+  it('reads storage in whole megabytes against the plan cap', async () => {
+    serveUsage({ current_storage_mb: 900, max_storage_mb: 1000 })
+    renderMeter('storage')
+
+    expect(await screen.findByText('Storage used (MB)')).toBeVisible()
+    expect(screen.getByText('900 of 1000')).toBeInTheDocument()
+    expect(screen.getByText('100 MB left before the cap')).toBeInTheDocument()
+  })
+
   it('draws nothing on an unlimited plan — a bar that can never fill is worry, not information', async () => {
     serveUsage({ current_projects: 40, max_projects: null })
     renderWithProviders(

@@ -41,6 +41,6 @@ export function mapRiskSuggestionDTO(
     taskId: dto.task_id,
     taskTitle: dto.task_title,
     delayDays: dto.delay_days,
-    reason: dto.reason,
+    code: dto.code,
   }
 }

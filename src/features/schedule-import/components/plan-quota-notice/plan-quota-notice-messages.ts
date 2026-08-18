@@ -26,6 +26,17 @@ export const planQuotaNoticeMessages = defineMessages({
       'Activate or delete one of your drafts, or upgrade your plan, and import again.',
     description: 'Recovery options for the draft cap',
   },
+  storageLimitTitle: {
+    id: 'planQuotaNotice.storageLimitTitle',
+    defaultMessage: 'You reached your plan limit: {limit} MB of imported files',
+    description: 'Headline when a new upload would exceed the storage cap',
+  },
+  storageLimitBody: {
+    id: 'planQuotaNotice.storageLimitBody',
+    defaultMessage:
+      'This file was not stored. Upgrade your plan to import more files.',
+    description: 'Recovery options for the storage cap',
+  },
   currentUsage: {
     id: 'planQuotaNotice.currentUsage',
     defaultMessage: 'You are using {current} of {limit}.',
@@ -35,6 +46,11 @@ export const planQuotaNoticeMessages = defineMessages({
     id: 'planQuotaNotice.goToDrafts',
     defaultMessage: 'Go to drafts',
     description: 'Action that takes the user to the drafts home to free a slot',
+  },
+  goToSettings: {
+    id: 'planQuotaNotice.goToSettings',
+    defaultMessage: 'See plan usage',
+    description: 'Action that takes the user to the plan usage section',
   },
   goToProjects: {
     id: 'planQuotaNotice.goToProjects',

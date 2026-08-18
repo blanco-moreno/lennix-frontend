@@ -2,6 +2,7 @@ import type {
   RiskLevelDTO,
   RiskResponseStrategyDTO,
   RiskStatusDTO,
+  RiskSuggestionCodeDTO,
 } from './dto/risk-dto'
 
 export type RiskLevel = RiskLevelDTO
@@ -54,11 +55,13 @@ export interface Risk {
   updatedAt: string
 }
 
+export type RiskSuggestionCode = RiskSuggestionCodeDTO
+
 export interface RiskSuggestion {
   taskId: string
   taskTitle: string
   delayDays: number
-  reason: string
+  code: RiskSuggestionCode
 }
 
 export interface RiskListFilters {

@@ -129,4 +129,6 @@ export interface OrganizationUsage {
   maxDrafts: number | null
   currentAiRequests: number
   maxAiRequests: number | null
+  currentStorageMb: number
+  maxStorageMb: number | null
 }

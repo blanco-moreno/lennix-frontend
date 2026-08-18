@@ -62,11 +62,6 @@ export const organizationSettingsViewMessages = defineMessages({
     defaultMessage: 'Unique identifier for URLs.',
     description: 'Helper text for the organization slug field',
   },
-  unlimited: {
-    id: 'organization.unlimited',
-    defaultMessage: 'Unlimited',
-    description: 'Value shown for a limit with no maximum',
-  },
   title: {
     id: 'organization.title',
     defaultMessage: 'Organization',
@@ -91,11 +86,6 @@ export const organizationSettingsViewMessages = defineMessages({
     id: 'organization.planLabel',
     defaultMessage: 'Plan',
     description: 'Label for the current plan name',
-  },
-  storage: {
-    id: 'organization.storage',
-    defaultMessage: 'Storage',
-    description: 'Label for the storage limit',
   },
   planUsageTitle: {
     id: 'organization.planUsageTitle',

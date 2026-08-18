@@ -49,6 +49,29 @@ describe('PlanQuotaNotice', () => {
     ).toBeInTheDocument()
   })
 
+  it('names the storage cap and points at the plan usage', () => {
+    renderWithProviders(
+      <PlanQuotaNotice
+        failure={{
+          code: 'plan_storage_limit_exceeded',
+          limit: 1000,
+          current: 998,
+          message: 'Plan limit exceeded: maximum 1000 MB of storage',
+        }}
+      />,
+      { store: makeStore(), route: '/projects/import' },
+    )
+
+    expect(
+      screen.getByText(
+        'You reached your plan limit: 1000 MB of imported files',
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'See plan usage' }),
+    ).toBeInTheDocument()
+  })
+
   it('offers a way out rather than a dead end', async () => {
     renderWithProviders(
       <PlanQuotaNotice

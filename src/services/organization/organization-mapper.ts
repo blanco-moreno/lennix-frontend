@@ -76,6 +76,8 @@ export function mapOrganizationUsageResponseDTOToOrganizationUsage(
     maxDrafts: dto.max_drafts,
     currentAiRequests: dto.current_ai_requests,
     maxAiRequests: dto.max_ai_requests,
+    currentStorageMb: dto.current_storage_mb,
+    maxStorageMb: dto.max_storage_mb,
   }
 }
 

@@ -55,8 +55,8 @@ describe('OrganizationSettingsView', () => {
     expect(await screen.findByText(SEED_ORGANIZATION.name)).toBeInTheDocument()
     // Plan 2 in the seed is Pro; its limits resolve from the plan.
     expect(screen.getByText('Pro')).toBeInTheDocument()
-    // Storage is the only entitlement still shown as a field.
-    expect(screen.getByText('Storage')).toBeInTheDocument()
+    // Every ceiling is a meter now — no static storage field.
+    expect(screen.queryByText('Storage')).not.toBeInTheDocument()
     // The owner sees the transfer-ownership card.
     expect(screen.getByText('Current owner')).toBeInTheDocument()
   })
@@ -65,7 +65,7 @@ describe('OrganizationSettingsView', () => {
     renderSettings()
 
     expect(await screen.findByText('Plan usage')).toBeInTheDocument()
-    for (const resource of ['projects', 'drafts', 'members', 'ai']) {
+    for (const resource of ['projects', 'drafts', 'members', 'ai', 'storage']) {
       expect(
         await screen.findByTestId(`plan-usage-meter-${resource}`),
       ).toBeVisible()

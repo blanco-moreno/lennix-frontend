@@ -34,12 +34,13 @@ import { TransferOwnershipCard } from './components/transfer-ownership-card'
 import { UpgradeNudge } from './components/upgrade-nudge'
 import { organizationSettingsViewMessages as m } from './organization-settings-view-messages'
 
-/** The four metered resources, in the order the section reads them. */
+/** The five metered resources, in the order the section reads them. */
 const PLAN_USAGE_RESOURCES: readonly PlanLimitResource[] = [
   'projects',
   'drafts',
   'members',
   'ai',
+  'storage',
 ]
 
 export function OrganizationSettingsView() {
@@ -169,11 +170,6 @@ export function OrganizationSettingsView() {
   const limits = organization.resolvedLimits
   const isOwner = user?.userId === organization.ownerId
 
-  const formatLimit = (value: number | null, suffix = ''): string => {
-    if (value === null) return intl.formatMessage(m.unlimited)
-    return suffix ? `${value} ${suffix}` : String(value)
-  }
-
   return (
     // Who the organization is and what it is entitled to are one fact, so
     // they are one card; the owner handover sits beside it.
@@ -205,12 +201,6 @@ export function OrganizationSettingsView() {
                 </Badge>
               )}
             </Flex>
-          </ReadOnlyField>
-
-          {/* Storage is the one entitlement nothing measures, so it stays a
-              field; every ceiling a meter carries is not repeated here. */}
-          <ReadOnlyField label={intl.formatMessage(m.storage)}>
-            {formatLimit(limits.storageMb, 'MB')}
           </ReadOnlyField>
         </SimpleGrid>
 
