@@ -41,6 +41,7 @@ Feature: Projects and activities
     Given I am signed in as "Manager"
     When I open the project "Torre Residencial Norte"
     Then I see its schedule, with its main activities on it
+    And the screen has no critical accessibility violations
 
   Scenario: A draft opens on its resumable review, never on project detail
     Given I am signed in as "Manager"

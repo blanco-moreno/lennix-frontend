@@ -39,7 +39,11 @@ export function ConfirmActionButton({
         variant={variant}
         size="sm"
         disabled={disabled}
-        aria-label={ariaLabel}
+        // Icon-only: the confirmation's title is the action's name unless
+        // the caller says otherwise.
+        aria-label={
+          ariaLabel ?? (typeof title === 'string' ? title : undefined)
+        }
         onClick={() => setOpen(true)}
       >
         <Box as={icon} boxSize={3} />

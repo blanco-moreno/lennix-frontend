@@ -58,7 +58,13 @@ export function ProjectTable<T extends ProjectSubject>({
       borderRadius="lg"
       bg="bg.panel"
     >
-      <ProjectListHeader context={context} selectable={selectable} />
+      {/* A header `row` needs a table to sit in: while this box is still
+          `presentation`, the header is decoration too. */}
+      <ProjectListHeader
+        context={context}
+        selectable={selectable}
+        presentational={isLoading}
+      />
       {isLoading ? (
         <ListRowSkeleton
           templateColumns={PROJECT_GRID_COLUMNS}

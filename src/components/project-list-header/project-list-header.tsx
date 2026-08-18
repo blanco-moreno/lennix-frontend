@@ -12,6 +12,8 @@ interface ProjectListHeaderProps {
    * it has been waiting to be activated.
    */
   context?: 'projects' | 'drafts'
+  /** The listing is still loading, so this is not a table row yet. */
+  presentational?: boolean
   /**
    * Must match the rows underneath: the selection track exists in both or in
    * neither, or the header stops sitting over the cells it names.
@@ -32,11 +34,14 @@ interface ProjectListHeaderProps {
 export function ProjectListHeader({
   context = 'projects',
   selectable = false,
+  presentational = false,
 }: ProjectListHeaderProps) {
   const isDrafts = context === 'drafts'
 
   return (
     <ListRow
+      // Under a loading table there is no `table` to be the row of yet.
+      role={presentational ? 'presentation' : 'row'}
       hideBelow="lg"
       templateColumns={projectGridColumns({ selectable })}
       bg="bg.subtle"

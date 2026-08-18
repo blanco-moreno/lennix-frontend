@@ -18,7 +18,7 @@ export interface AvatarProps extends Omit<ChakraAvatar.RootProps, 'children'> {
 function Avatar({ src, name, fallbackProps, ...props }: AvatarProps) {
   return (
     <ChakraAvatar.Root {...props}>
-      {src && <ChakraAvatar.Image src={src} />}
+      {src && <ChakraAvatar.Image src={src} alt={name} />}
       <ChakraAvatar.Fallback {...fallbackProps}>
         {initials(name)}
       </ChakraAvatar.Fallback>

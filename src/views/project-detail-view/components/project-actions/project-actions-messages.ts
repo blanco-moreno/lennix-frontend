@@ -73,6 +73,11 @@ export const projectActionsMessages = defineMessages({
     defaultMessage: 'Project unarchived',
     description: 'Toast after unarchiving a project',
   },
+  moreActions: {
+    id: 'projectDetail.moreActions',
+    defaultMessage: 'Project actions',
+    description: 'Accessible name of the project actions menu button',
+  },
   unarchiveError: {
     id: 'projectDetail.unarchiveError',
     defaultMessage: 'Could not unarchive the project',

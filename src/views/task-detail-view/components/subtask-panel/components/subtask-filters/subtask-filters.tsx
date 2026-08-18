@@ -69,6 +69,7 @@ export function SubtaskFilters({
           <Select
             value={status}
             onChange={onStatus}
+            aria-label={intl.formatMessage(m.subtaskFilterStatusLabel)}
             placeholder={intl.formatMessage(m.subtaskFilterStatusLabel)}
             options={[
               {

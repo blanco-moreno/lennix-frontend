@@ -17,6 +17,8 @@ export interface SimpleSelectProps {
   size?: 'sm' | 'default'
   width?: string | number
   id?: string
+  /** Name for a select whose visible label is not bound to it by `id`. */
+  'aria-label'?: string
 }
 
 function Select({
@@ -29,6 +31,7 @@ function Select({
   size,
   width,
   id,
+  'aria-label': ariaLabel,
 }: SimpleSelectProps) {
   return (
     <ReactSelect<SimpleSelectOption, false>
@@ -37,6 +40,7 @@ function Select({
       styles={createSelectStyles<SimpleSelectOption>({ size, invalid, width })}
       isSearchable={false}
       inputId={id}
+      aria-label={ariaLabel}
       aria-invalid={invalid || undefined}
       isDisabled={disabled}
       options={options}

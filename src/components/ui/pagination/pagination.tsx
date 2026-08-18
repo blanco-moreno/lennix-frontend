@@ -60,6 +60,7 @@ export function Pagination({
             <Select
               value={String(pageSize)}
               onChange={(value) => onPageSizeChange(Number(value))}
+              aria-label={intl.formatMessage(paginationMessages.perPage)}
               options={pageSizeOptions.map((size) => ({
                 value: String(size),
                 label: String(size),

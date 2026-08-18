@@ -105,7 +105,11 @@ export function ProjectActions({ project }: ProjectActionsProps) {
     <>
       <DropdownMenu
         trigger={
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label={intl.formatMessage(m.moreActions)}
+          >
             <Box as={MoreVertical} boxSize={4} />
           </Button>
         }

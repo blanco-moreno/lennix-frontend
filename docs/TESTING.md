@@ -228,6 +228,14 @@ something has to — and only these three places do:
 Renaming a nav entry is one line in the vocabulary, and no scenario changes.
 That is the point of the seam.
 
+**Accessibility is checked in the browser, once per surface.** Each feature file
+carries one `Then the screen has no critical accessibility violations` on its
+main screen (`e2e/steps/accessibility.steps.ts`, axe-core, WCAG 2 A/AA).
+Critical impacts fail the run; serious ones — contrast, mostly — are attached
+to the report as an `a11y-serious` annotation, because a contrast decision
+belongs to the tone system, not to whichever scenario tripped it. `jsx-a11y`
+in lint sees only static JSX; this pass sees the live DOM.
+
 **Suite conventions.** One feature file per surface, and a new scenario joins the
 one it belongs to. Steps are shared: any step defined anywhere is usable from any
 feature. A scenario for a rule the UI does not implement yet is tagged

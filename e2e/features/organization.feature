@@ -16,6 +16,7 @@ Feature: Organization
     Given I am signed in as "Owner"
     When I open the organization roster
     Then the owner's row offers no way to change their role
+    And the screen has no critical accessibility violations
 
   @pending-ui
   Scenario Outline: Deleting your own account is offered only to the whole-organization roles

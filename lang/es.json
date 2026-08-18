@@ -724,6 +724,7 @@
   "projectDetail.managerPrefix": "Responsable:",
   "projectDetail.memberAddError": "No se pudo agregar el miembro",
   "projectDetail.memberAddSuccess": "Miembro agregado al proyecto",
+  "projectDetail.moreActions": "Acciones del proyecto",
   "projectDetail.noAvailableMembers": "No hay miembros disponibles. Todos los miembros de la organización ya forman parte de este proyecto.",
   "projectDetail.noDueDate": "Sin fecha",
   "projectDetail.noExpensesFound": "No hay gastos con los filtros seleccionados.",

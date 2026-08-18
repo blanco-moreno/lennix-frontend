@@ -15,6 +15,14 @@ Feature: Access by role
       | Manager | the portfolio dashboard |
       | User    | the project list        |
 
+  Scenario: The sign-in screen and the home it leads to are accessible
+    Given my account is the "Owner"
+    When I open the app
+    Then the screen has no critical accessibility violations
+    When I sign in
+    Then I land on "the portfolio dashboard"
+    And the screen has no critical accessibility violations
+
   Scenario Outline: The navigation offers each role only the destinations it owns
     Given I am signed in as "<role>"
     When I open the app

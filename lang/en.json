@@ -724,6 +724,7 @@
   "projectDetail.managerPrefix": "Manager:",
   "projectDetail.memberAddError": "Could not add the member",
   "projectDetail.memberAddSuccess": "Member added to the project",
+  "projectDetail.moreActions": "Project actions",
   "projectDetail.noAvailableMembers": "No available members. Every organization member is already on this project.",
   "projectDetail.noDueDate": "No date",
   "projectDetail.noExpensesFound": "No expenses match the selected filters.",

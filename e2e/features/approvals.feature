@@ -43,3 +43,4 @@ Feature: Approvals
     Given I am signed in as "Manager"
     When I force the start of a blocked activity
     Then I am told the activity started and is marked at risk
+    And the screen has no critical accessibility violations
