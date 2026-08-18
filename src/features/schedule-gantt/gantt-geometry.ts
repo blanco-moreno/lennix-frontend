@@ -148,6 +148,32 @@ export const SCROLL_AREA_MAX_H = {
   md: scrollAreaMaxHeight('70vh'),
 }
 
+/**
+ * Below this many rows every row is mounted: the DOM is small enough that
+ * windowing would only add scroll bookkeeping. Above it, only the rows in the
+ * scrollport (plus overscan) exist — a 5,000-activity schedule re-renders as
+ * few nodes on a click as a 50-activity one.
+ */
+export const WINDOW_MIN_ROWS = 200
+/** Rows mounted beyond each edge of the scrollport, so a flick never blanks. */
+export const ROW_OVERSCAN = 10
+
+/** The half-open row range `[start, end)` to mount for the current scroll. */
+export function rowWindow(
+  rowCount: number,
+  rowHeight: number,
+  scrollTop: number,
+  viewportHeight: number,
+): { start: number; end: number } {
+  if (rowCount <= WINDOW_MIN_ROWS) return { start: 0, end: rowCount }
+  const first = Math.floor(scrollTop / rowHeight)
+  const last = Math.ceil((scrollTop + viewportHeight) / rowHeight)
+  return {
+    start: Math.max(0, first - ROW_OVERSCAN),
+    end: Math.min(rowCount, last + ROW_OVERSCAN),
+  }
+}
+
 /** The geometry of one row's bar, in chart pixels. */
 export interface BarGeometry {
   x: number

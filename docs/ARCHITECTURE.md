@@ -187,6 +187,12 @@ relationship type and lag, broken-dependency re-linking, and parent
 auto-complete. It is **one** surface: activities, dependencies and critical path
 were three views of the same schedule.
 
+The chart mounts only the rows in its scrollport once a schedule passes
+`WINDOW_MIN_ROWS` (`features/schedule-gantt/gantt-geometry.ts`): every row's
+`y` comes from its index in the full row list, so a windowed row sits where the
+full chart put it, and the scroll height stays the whole schedule's. Below the
+threshold every row is mounted.
+
 ## 9. Build modes and deployment
 
 | Command          | Mode        | Purpose                                             |

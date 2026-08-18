@@ -28,6 +28,7 @@ import {
   labelColumns,
   LABEL_WIDTH,
   LABEL_WIDTH_COLLAPSED,
+  rowWindow,
   SCROLL_AREA_MAX_H,
   SCROLLBAR_GUTTER,
   SUBAXIS_HEIGHT,
@@ -132,6 +133,8 @@ export function ScheduleGantt({
   // Hover is state, not a CSS `:hover`: the label and the bar are two views of
   // one row and live in different subtrees, so no selector can span them.
   const [hoveredRowId, setHoveredRowId] = useState<string | null>(null)
+  // Where the scrollport is, so a large schedule mounts only the rows in it.
+  const [scrollTop, setScrollTop] = useState(0)
   const timeline = buildTimeline(rows)
 
   /** The model already chose the format; the component only localises it. */
@@ -182,6 +185,20 @@ export function ScheduleGantt({
   const axisHeight = AXIS_HEIGHT + (twoTierAxis ? SUBAXIS_HEIGHT : 0)
   const chartHeight = rows.length * rowHeight
   const rowIndex = new Map(rows.map((row, index) => [row.id, index]))
+  // The rows that exist in the DOM. Below `WINDOW_MIN_ROWS` that is all of
+  // them; above, the scrollport plus overscan — every `y` still comes from
+  // `rowIndex`, so a windowed row sits exactly where the full chart put it.
+  // Before the box has measured itself the window height falls back to the
+  // browser's, which only ever mounts a few rows too many.
+  const rowRange = rowWindow(
+    rows.length,
+    rowHeight,
+    scrollTop,
+    scrollAreaRect?.height || globalThis.innerHeight,
+  )
+  const mountedRows = rows.slice(rowRange.start, rowRange.end)
+  const spacerAbove = rowRange.start * rowHeight
+  const spacerBelow = (rows.length - rowRange.end) * rowHeight
   const weekends = weekendSpans(timeline, resolvedDayWidth)
   const today = todayOffset(timeline)
   const todayX = today === null ? null : today * resolvedDayWidth
@@ -220,6 +237,7 @@ export function ScheduleGantt({
         // flush with the scrollport edge and the scrollbar sat on top of it.
         maxH={SCROLL_AREA_MAX_H}
         ref={scrollAreaRef}
+        onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
         data-testid="gantt-scroll-area"
       >
         <Box
@@ -377,7 +395,8 @@ export function ScheduleGantt({
             borderRightWidth="1px"
             borderColor="border"
           >
-            {rows.map((row) => (
+            {spacerAbove > 0 && <Box h={`${spacerAbove}px`} />}
+            {mountedRows.map((row) => (
               <RowLabel
                 key={row.id}
                 row={row}
@@ -398,6 +417,7 @@ export function ScheduleGantt({
                 onActivate={() => onSelectRow?.(row.id)}
               />
             ))}
+            {spacerBelow > 0 && <Box h={`${spacerBelow}px`} />}
           </Box>
 
           {/* Chart */}
@@ -479,7 +499,7 @@ export function ScheduleGantt({
               label column, a selection leaves no sign of itself near the bars
               being read on a wide schedule.
             */}
-              {rows.map((row, index) => {
+              {mountedRows.map((row) => {
                 const { band } = rowBackground({
                   selected: row.id === selectedRowId,
                   hovered: row.id === hoveredRowId,
@@ -494,7 +514,7 @@ export function ScheduleGantt({
                         : 'gantt-row-hovered'
                     }
                     x={0}
-                    y={index * rowHeight}
+                    y={(rowIndex.get(row.id) ?? 0) * rowHeight}
                     width={chartWidth}
                     height={rowHeight}
                     fill={band}
@@ -536,7 +556,7 @@ export function ScheduleGantt({
                 barHeight={barHeight}
               />
 
-              {rows.map((row) => {
+              {mountedRows.map((row) => {
                 const bar = barGeometry(row)
                 if (!bar) return null
                 const critical = row.isCriticalPath

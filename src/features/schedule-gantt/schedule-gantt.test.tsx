@@ -11,6 +11,8 @@ import {
   CHART_TAIL,
   LABEL_WIDTH,
   labelColumns,
+  ROW_HEIGHT,
+  ROW_OVERSCAN,
   SCROLL_AREA_MAX_H,
   SCROLLBAR_GUTTER,
   scrollAreaMaxHeight,
@@ -675,6 +677,54 @@ describe('ScheduleGantt', () => {
       await user.hover(screen.getByTestId('dependency-legend-SF'))
       expect(await screen.findByTestId('tooltip')).toHaveTextContent(
         'Start → Finish',
+      )
+    })
+  })
+
+  describe('large schedules', () => {
+    const many = (n: number) =>
+      Array.from({ length: n }, (_, i) =>
+        row({
+          id: `r${i}`,
+          title: `Row ${i}`,
+          startDate: '2026-03-01',
+          dueDate: '2026-03-10',
+        }),
+      )
+
+    it('mounts only the scrollport of a 1,000-row schedule, and follows the scroll', () => {
+      const rows = many(1000)
+      renderWithProviders(<ScheduleGantt rows={rows} onSelectRow={vi.fn()} />)
+
+      // A viewport of rows plus overscan, never the whole schedule.
+      const mounted = screen.getAllByTestId('gantt-row-label').length
+      expect(mounted).toBeLessThan(200)
+      expect(mounted).toBeGreaterThan(ROW_OVERSCAN)
+      expect(screen.getByText('Row 0')).toBeInTheDocument()
+      expect(screen.queryByText('Row 900')).not.toBeInTheDocument()
+      // The scroll height is still the whole schedule's — the thumb is honest.
+      expect(screen.getByTestId('gantt-chart')).toHaveAttribute(
+        'height',
+        String(1000 * ROW_HEIGHT),
+      )
+
+      const area = screen.getByTestId('gantt-scroll-area')
+      area.scrollTop = 900 * ROW_HEIGHT
+      fireEvent.scroll(area)
+
+      expect(screen.getByText('Row 900')).toBeInTheDocument()
+      expect(screen.queryByText('Row 0')).not.toBeInTheDocument()
+    })
+
+    it('keeps selection on the row it names once windowed', () => {
+      const rows = many(1000)
+      renderWithProviders(
+        <ScheduleGantt rows={rows} selectedRowId="r5" onSelectRow={vi.fn()} />,
+      )
+      // The band sits on row 5's line, not on its position inside the window.
+      expect(screen.getByTestId('gantt-row-selected')).toHaveAttribute(
+        'y',
+        String(5 * ROW_HEIGHT),
       )
     })
   })

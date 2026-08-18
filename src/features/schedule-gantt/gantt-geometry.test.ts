@@ -1,4 +1,7 @@
 import {
+  ROW_OVERSCAN,
+  rowWindow,
+  WINDOW_MIN_ROWS,
   AXIS_HEIGHT,
   edgeAnchors,
   LABEL_WIDTH,
@@ -40,6 +43,29 @@ describe('labelColumns', () => {
   it('gives a wider screen a wider column for the name', () => {
     expect(LABEL_WIDTH.xl).toBeGreaterThan(LABEL_WIDTH.md)
     expect(LABEL_WIDTH.md).toBeGreaterThan(LABEL_WIDTH.base)
+  })
+})
+
+describe('rowWindow', () => {
+  it('mounts every row of a schedule under the windowing threshold', () => {
+    expect(rowWindow(WINDOW_MIN_ROWS, 28, 5000, 500)).toEqual({
+      start: 0,
+      end: WINDOW_MIN_ROWS,
+    })
+  })
+
+  it('slices a large schedule to the viewport plus overscan on both sides', () => {
+    // scrollTop 2800 at 28px/row → first visible row 100; a 560px viewport
+    // shows 20 rows; overscan pads both ends.
+    expect(rowWindow(5000, 28, 2800, 560)).toEqual({
+      start: 100 - ROW_OVERSCAN,
+      end: 120 + ROW_OVERSCAN,
+    })
+  })
+
+  it('clamps to the schedule at both ends', () => {
+    expect(rowWindow(5000, 28, 0, 560).start).toBe(0)
+    expect(rowWindow(5000, 28, 1_000_000, 560).end).toBe(5000)
   })
 })
 
