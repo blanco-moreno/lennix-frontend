@@ -157,6 +157,22 @@ export const unarchiveProject = (id: string) => ({
   method: 'POST',
 })
 
+/**
+ * The live schedule as an XLSX attachment.
+ *
+ * `responseHandler` branches on `ok`: a workbook is read as a blob, a refusal
+ * stays JSON so the base query's error extraction reads its `detail.message`
+ * as for every other endpoint. `cache: 'no-cache'` — a download is never a
+ * cached read.
+ */
+export const exportProjectSchedule = (id: string) => ({
+  url: `/v1/projects/${id}/export`,
+  method: 'POST',
+  cache: 'no-cache' as const,
+  responseHandler: async (response: Response) =>
+    response.ok ? response.blob() : response.json(),
+})
+
 export const getProjectTeam = (id: string) => `/v1/projects/${id}/team`
 
 /**

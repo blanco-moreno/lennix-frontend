@@ -123,3 +123,4 @@ export {
   unsatisfiedPredecessors,
 } from './dependency/blocking-predecessors'
 export { generateTempPassword } from './password/generate-temp-password'
+export { downloadBlob } from './download-blob'

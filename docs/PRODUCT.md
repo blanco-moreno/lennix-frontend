@@ -91,6 +91,10 @@ two places** unless it is an explicit overview → drill-down.
 - **Delay and critical path are always traceable.** Show _why_ — which driving
   dependency — because a number the user cannot check is a number they will not
   trust.
+- **The schedule leaves the way it came in.** "Export XLSX" on the schedule
+  surface and on the draft review header downloads the schedule in an
+  MS Project / P6 friendly layout, named by the backend; a refusal is a
+  translated toast, never a code. No AI request is spent on it.
 
 ## 5. Governance surfaces
 

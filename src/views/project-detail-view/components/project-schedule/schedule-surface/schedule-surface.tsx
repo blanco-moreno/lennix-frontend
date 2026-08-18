@@ -34,6 +34,7 @@ import {
   type ScheduleRow,
   type ZoomLevel,
 } from '@/features'
+import { ScheduleExportButton } from '@/features'
 import { TaskDependencies } from '@/features/dependency-edits/components/task-dependencies/task-dependencies'
 import { ScheduleGantt } from '@/features/schedule-gantt/schedule-gantt'
 import { SCHEDULE_TASK_PARAM, resolveScheduleSelection } from '@/router'
@@ -244,7 +245,10 @@ export function ScheduleSurface({
           ))}
         </Flex>
 
-        <GanttZoom value={zoom} onChange={setZoom} />
+        <Flex align="center" gap="tight" wrap="wrap">
+          <GanttZoom value={zoom} onChange={setZoom} />
+          <ScheduleExportButton projectId={projectId} />
+        </Flex>
       </Flex>
 
       {hiddenEdgeCount > 0 && (

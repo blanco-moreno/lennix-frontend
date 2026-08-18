@@ -1,3 +1,5 @@
+import type { FetchBaseQueryMeta } from '@reduxjs/toolkit/query'
+
 import type {
   AssignableMember,
   Page,
@@ -9,6 +11,7 @@ import type {
   ProjectPriority,
   ProjectSortBy,
   ProjectStatus,
+  ScheduleExportFile,
 } from '@/types'
 import type { PageDTO } from '@/types/dto/pagination-dto'
 import type {
@@ -21,6 +24,7 @@ import type {
 
 import { api } from '../api-injector'
 import { providesPageTags } from '../cache-tags'
+import { filenameFromContentDisposition } from '../content-disposition'
 
 import {
   listProjectsPaginated,
@@ -32,6 +36,7 @@ import {
   getProjectBudget,
   archiveProject,
   unarchiveProject,
+  exportProjectSchedule,
   getProjectTeam,
   getAssignableMembers,
   getProjectActivity,
@@ -213,6 +218,24 @@ export const projectApi = api.injectEndpoints({
       ],
     }),
 
+    /**
+     * `{ blob, filename }`: the filename comes from `Content-Disposition`,
+     * where the backend names the file after the project — the browser
+     * saves what the server named, and the frontend invents no name.
+     */
+    exportProjectSchedule: builder.mutation<ScheduleExportFile, string>({
+      query: exportProjectSchedule,
+      transformResponse: (
+        blob: Blob,
+        meta: FetchBaseQueryMeta | undefined,
+      ) => ({
+        blob,
+        filename: filenameFromContentDisposition(
+          meta?.response?.headers.get('content-disposition'),
+        ),
+      }),
+    }),
+
     getProjectTeam: builder.query<ProjectMember[], string>({
       query: getProjectTeam,
       transformResponse: mapProjectMemberArrayToProjectMembers,
@@ -324,6 +347,7 @@ export const {
   useGetProjectBudgetQuery,
   useArchiveProjectMutation,
   useUnarchiveProjectMutation,
+  useExportProjectScheduleMutation,
   useGetProjectTeamQuery,
   useGetAssignableMembersQuery,
   useGetProjectActivityQuery,

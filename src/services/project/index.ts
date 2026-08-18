@@ -12,6 +12,7 @@ export {
   useListProjectsPaginatedQuery,
   useRemoveTeamMemberMutation,
   useUnarchiveProjectMutation,
+  useExportProjectScheduleMutation,
   useUpdateProjectBudgetMutation,
   useUpdateProjectMutation,
   useUpdateProjectPriorityMutation,

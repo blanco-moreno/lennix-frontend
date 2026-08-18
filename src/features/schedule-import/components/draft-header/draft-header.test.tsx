@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 
 import { mapScheduleReviewStateDTO } from '@/services/schedule-import'
+import { makeStore } from '@/stores'
 import { seedImportReviewStateDTO } from '@/tests/fixtures'
 import { renderWithProviders } from '@/tests/render-with-providers'
 
@@ -23,6 +24,7 @@ function Host({ pending = 0 }: { pending?: number }) {
   )
   return (
     <DraftHeader
+      projectId={project().id}
       draft={draft}
       onEdit={(patch) => setDraft((current) => ({ ...current, ...patch }))}
       pending={pending}
@@ -32,7 +34,7 @@ function Host({ pending = 0 }: { pending?: number }) {
 
 describe('DraftHeader', () => {
   it('opens on what the import produced, editable in place', () => {
-    renderWithProviders(<Host />)
+    renderWithProviders(<Host />, { store: makeStore() })
 
     expect(screen.getByLabelText('Project name')).toHaveValue(project().name)
     expect(screen.getByLabelText('Location')).toBeInTheDocument()
@@ -40,13 +42,13 @@ describe('DraftHeader', () => {
   })
 
   it('carries the identity and nothing else — the budget is its own step', () => {
-    renderWithProviders(<Host />)
+    renderWithProviders(<Host />, { store: makeStore() })
 
     expect(screen.queryByLabelText('Project budget')).not.toBeInTheDocument()
   })
 
   it('reports every keystroke to the draft the wizard saves', async () => {
-    renderWithProviders(<Host />)
+    renderWithProviders(<Host />, { store: makeStore() })
 
     const location = screen.getByLabelText('Location')
     await userEvent.type(location, 'X')
@@ -55,7 +57,7 @@ describe('DraftHeader', () => {
   })
 
   it('says what the one Save would write, once something is pending', () => {
-    renderWithProviders(<Host pending={1} />)
+    renderWithProviders(<Host pending={1} />, { store: makeStore() })
 
     expect(screen.getByTestId('draft-header-pending')).toHaveTextContent(
       '1 change is applied when you activate',
@@ -63,7 +65,7 @@ describe('DraftHeader', () => {
   })
 
   it('says nothing is pending before the first edit', () => {
-    renderWithProviders(<Host />)
+    renderWithProviders(<Host />, { store: makeStore() })
 
     expect(screen.getByTestId('draft-header-pending')).toHaveTextContent(
       /Lennix took these from your file/,

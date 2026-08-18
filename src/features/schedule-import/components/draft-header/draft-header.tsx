@@ -15,6 +15,7 @@ import { useIntl } from 'react-intl'
 import { Badge, Label, Text } from '@/components'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { ScheduleExportButton } from '@/features'
 
 import type { ProjectDetailsDraft } from '../../project-details-draft'
 
@@ -25,6 +26,8 @@ export interface DraftHeaderProps {
    * The draft's unsaved edits, owned by the wizard: identity and money are one
    * draft of one project, and there is one Save for both.
    */
+  /** The draft being reviewed — the export takes what it has today. */
+  projectId: string
   draft: ProjectDetailsDraft
   onEdit: (patch: Partial<ProjectDetailsDraft>) => void
   /** How many fields the one Save would write — the wizard counts them. */
@@ -32,6 +35,7 @@ export interface DraftHeaderProps {
 }
 
 export function DraftHeader({
+  projectId,
   draft,
   onEdit: edit,
   pending,
@@ -57,6 +61,9 @@ export function DraftHeader({
             ? intl.formatMessage(m.pendingChanges, { count: pending })
             : intl.formatMessage(m.explainer)}
         </Text>
+        {/* "Download what I have": the draft leaves as a workbook at any step,
+            edits included — the same file a live project exports. */}
+        <ScheduleExportButton projectId={projectId} ml="auto" />
       </Flex>
 
       {/* A field, chrome and all — the borderless heading treatment read as

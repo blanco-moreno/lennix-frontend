@@ -11,7 +11,7 @@
  */
 
 /** Content hash of every backend seed file this manifest was derived from. */
-export const SEED_SOURCE_DIGEST = '91a3484ceeab8fbf'
+export const SEED_SOURCE_DIGEST = '634a36d926b56fd9'
 
 /** Stable IDs, mirroring `app/seeds/lennix_pro/constants.py`. */
 export const SEED_IDS = {

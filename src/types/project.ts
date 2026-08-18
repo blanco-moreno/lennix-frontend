@@ -240,3 +240,9 @@ export type ProjectSortBy =
   | '-priority'
   | 'progress'
   | '-progress'
+
+/** What `POST /v1/projects/{id}/export` hands back: the workbook and the name the backend gave it. */
+export interface ScheduleExportFile {
+  blob: Blob
+  filename: string
+}

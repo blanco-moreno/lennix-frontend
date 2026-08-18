@@ -247,6 +247,7 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
   return (
     <Stack gap={{ base: 6, md: 8 }} data-testid="draft-review-canvas">
       <DraftHeader
+        projectId={projectId}
         draft={edits.draft}
         onEdit={edits.edit}
         pending={edits.pending}
