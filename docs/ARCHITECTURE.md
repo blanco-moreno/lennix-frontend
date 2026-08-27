@@ -193,7 +193,17 @@ The chart mounts only the rows in its scrollport once a schedule passes
 full chart put it, and the scroll height stays the whole schedule's. Below the
 threshold every row is mounted.
 
-## 9. Build modes and deployment
+## 9. Observability
+
+`src/rum.ts`: the five web vitals with the library's rating, plus `error` and
+`unhandledrejection` with the error's class, batched and sent with
+`navigator.sendBeacon` as `text/plain` — it survives unload and avoids a CORS
+preflight. The queue flushes when the page hides or reaches the backend's cap.
+`VITE_RUM_ENDPOINT` unset sends to the backend's `/v1/rum/vitals`; empty
+registers no listener at all; a URL sends there. The e2e build never starts it.
+Failures to report are swallowed, and a payload carries no token and no identity.
+
+## 10. Build modes and deployment
 
 | Command          | Mode        | Purpose                                             |
 | ---------------- | ----------- | --------------------------------------------------- |
@@ -201,9 +211,11 @@ threshold every row is mounted.
 | `pnpm build`     | production  | The bundle Vercel serves, with sourcemaps           |
 | `pnpm build:e2e` | e2e         | The same bundle with the MSW browser worker started |
 
-`VITE_API_BASE_URL` points the app at a backend. The MSW worker starts only when
-`VITE_E2E_MOCKS` is set, which only the e2e env file sets and only the e2e build
-reads — Vite folds the branch away, so no build a user can reach contains MSW.
+`VITE_API_BASE_URL` points the app at a backend, and `VITE_RUM_ENDPOINT`
+redirects or disables the RUM beacon ("Observability"). The MSW worker starts
+only when `VITE_E2E_MOCKS` is set, which only the e2e env file sets and only the
+e2e build reads — Vite folds the branch away, so no build a user can reach
+contains MSW.
 
 Deployment is Vercel from `main`. Node is pinned by Volta and pnpm is the only
 supported package manager.
