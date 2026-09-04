@@ -4,10 +4,10 @@
  */
 
 interface ExpenseRow {
-  taskId: string
-  taskTitle: string
-  subtaskId: string
-  subtaskTitle: string
+  taskId?: string | null
+  taskTitle?: string | null
+  subtaskId?: string | null
+  subtaskTitle?: string | null
 }
 
 export interface FilterOption {
@@ -21,7 +21,9 @@ export function buildTaskOptions<T extends ExpenseRow>(
 ): FilterOption[] {
   const map = new Map<string, string>()
   for (const e of expenses) {
-    if (!map.has(e.taskId)) map.set(e.taskId, e.taskTitle)
+    if (e.taskId && e.taskTitle && !map.has(e.taskId)) {
+      map.set(e.taskId, e.taskTitle)
+    }
   }
   return Array.from(map, ([id, title]) => ({ id, title }))
 }
@@ -37,7 +39,9 @@ export function buildSubtaskOptions<T extends ExpenseRow>(
       : expenses.filter((e) => e.taskId === filterTaskId)
   const map = new Map<string, string>()
   for (const e of source) {
-    if (!map.has(e.subtaskId)) map.set(e.subtaskId, e.subtaskTitle)
+    if (e.subtaskId && e.subtaskTitle && !map.has(e.subtaskId)) {
+      map.set(e.subtaskId, e.subtaskTitle)
+    }
   }
   return Array.from(map, ([id, title]) => ({ id, title }))
 }
@@ -46,8 +50,15 @@ export function filterExpenses<T extends ExpenseRow>(
   expenses: T[],
   filterTaskId: string,
   filterSubtaskId: string,
+  filterLayer: string = 'all',
 ): T[] {
   let result = expenses
+  if (filterLayer === 'project') {
+    result = result.filter((e) => !e.subtaskId)
+  } else if (filterLayer === 'subtask') {
+    result = result.filter((e) => !!e.subtaskId)
+  }
+
   if (filterTaskId !== 'all') {
     result = result.filter((e) => e.taskId === filterTaskId)
   }

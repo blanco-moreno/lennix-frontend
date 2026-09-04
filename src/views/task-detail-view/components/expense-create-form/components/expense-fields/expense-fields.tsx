@@ -18,6 +18,8 @@ export interface ExpenseFieldValues {
   amount: string
   category: string
   expenseDate: string
+  documentType?: 'invoice' | 'receipt' | 'purchase_order' | '' | null
+  documentNumber?: string | null
 }
 
 interface ExpenseFieldsProps<T extends ExpenseFieldValues> {
@@ -31,7 +33,7 @@ interface ExpenseFieldsProps<T extends ExpenseFieldValues> {
 }
 
 /**
- * The four form fields (description / amount / category / date) shared by the
+ * The form fields (description / amount / category / date / document) shared by the
  * expense create and edit modals.
  */
 export function ExpenseFields<T extends ExpenseFieldValues>({
@@ -125,6 +127,55 @@ export function ExpenseFields<T extends ExpenseFieldValues>({
               invalid={!!errors.expenseDate}
             />
           )}
+        />
+      </FormField>
+
+      <FormField
+        htmlFor={`${idPrefix}-document-type`}
+        label={<FormattedMessage {...m.documentTypeLabel} />}
+        error={errors.documentType?.message}
+      >
+        <Controller
+          control={fieldsControl}
+          name="documentType"
+          render={({ field }) => (
+            <Select
+              id={`${idPrefix}-document-type`}
+              value={field.value ?? ''}
+              onChange={field.onChange}
+              placeholder={intl.formatMessage(m.documentTypePlaceholder)}
+              options={[
+                {
+                  value: '',
+                  label: intl.formatMessage(m.documentTypePlaceholder),
+                },
+                {
+                  value: 'invoice',
+                  label: intl.formatMessage(m.documentTypeInvoice),
+                },
+                {
+                  value: 'receipt',
+                  label: intl.formatMessage(m.documentTypeReceipt),
+                },
+                {
+                  value: 'purchase_order',
+                  label: intl.formatMessage(m.documentTypePurchaseOrder),
+                },
+              ]}
+            />
+          )}
+        />
+      </FormField>
+
+      <FormField
+        htmlFor={`${idPrefix}-document-number`}
+        label={<FormattedMessage {...m.documentNumberLabel} />}
+        error={errors.documentNumber?.message}
+      >
+        <Input
+          id={`${idPrefix}-document-number`}
+          placeholder={intl.formatMessage(m.documentNumberPlaceholder)}
+          {...fieldsRegister('documentNumber')}
         />
       </FormField>
     </>

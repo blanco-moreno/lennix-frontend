@@ -152,12 +152,15 @@ export interface SeedDependency {
 
 export interface SeedExpense {
   id: string
-  subtaskId: string
+  subtaskId: string | null
+  projectId?: string | null
   description: string
   amount: string
   category: string
   expenseDate: string
   createdBy: string
+  documentType?: string | null
+  documentNumber?: string | null
 }
 
 export interface SeedSubtaskNote {

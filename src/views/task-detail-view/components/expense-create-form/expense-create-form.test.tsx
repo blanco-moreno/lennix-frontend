@@ -60,10 +60,13 @@ describe('ExpenseCreateForm', () => {
       expect(bodies).toHaveLength(1)
     })
     expect(bodies[0]).toEqual({
+      project_id: null,
       subtask_id: SEED_IDS.P1_SUB_EXCAVATION,
       description: 'Cemento adicional',
       amount: '1500.00',
       category: 'materials',
+      document_type: null,
+      document_number: null,
       // The picker starts on the current month, so only the day is pinned.
       expense_date: expect.stringMatching(/^\d{4}-\d{2}-15$/) as unknown,
     })

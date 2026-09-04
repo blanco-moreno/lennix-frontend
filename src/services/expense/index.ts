@@ -2,9 +2,13 @@ export {
   useCreateExpenseMutation,
   useUpdateExpenseMutation,
   useDeleteExpenseMutation,
+  useListSubtaskExpensesQuery,
   useListProjectExpensesQuery,
   useGetTaskVarianceQuery,
   useGetCostReportQuery,
+  useUploadExpenseAttachmentMutation,
+  useDeleteExpenseAttachmentMutation,
+  useDownloadExpenseAttachmentMutation,
 } from './expense-service'
 
 export type {

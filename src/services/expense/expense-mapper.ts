@@ -17,11 +17,18 @@ export function mapExpenseResponseDTOToExpenseItem(
 ): ExpenseItem {
   return {
     id: dto.id,
-    subtaskId: dto.subtask_id,
+    projectId: dto.project_id ?? null,
+    subtaskId: dto.subtask_id ?? null,
     description: dto.description,
     amount: parseMoney(dto.amount),
     category: dto.category,
     expenseDate: dto.expense_date,
+    documentType: dto.document_type ?? null,
+    documentNumber: dto.document_number ?? null,
+    attachmentFilename: dto.attachment_filename ?? null,
+    attachmentSizeBytes: dto.attachment_size_bytes ?? null,
+    attachmentContentType: dto.attachment_content_type ?? null,
+    hasAttachment: dto.has_attachment ?? false,
     createdBy: dto.created_by,
     createdAt: dto.created_at,
   }
@@ -32,9 +39,9 @@ export function mapProjectExpenseResponseDTOToProjectExpense(
 ): ProjectExpense {
   return {
     ...mapExpenseResponseDTOToExpenseItem(dto),
-    taskId: dto.task_id,
-    taskTitle: dto.task_title,
-    subtaskTitle: dto.subtask_title,
+    taskId: dto.task_id ?? null,
+    taskTitle: dto.task_title ?? null,
+    subtaskTitle: dto.subtask_title ?? null,
   }
 }
 

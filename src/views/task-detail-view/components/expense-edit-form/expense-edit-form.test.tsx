@@ -80,6 +80,8 @@ describe('ExpenseEditForm', () => {
       amount: seeded.amount,
       category: seeded.category,
       expense_date: seeded.expense_date,
+      document_type: null,
+      document_number: null,
     })
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })

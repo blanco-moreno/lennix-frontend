@@ -298,6 +298,11 @@ export function extractSeedFacts(msBkRoot) {
   // ── Expenses ──────────────────────────────────────────────────────────
   const expensesSrc = read(`${SEED_DIR}/06_expenses.py`)
   const expenseSignature = parseSignature(expensesSrc, '_expense', { calls })
+  const projectExpenseSignature = parseSignature(
+    expensesSrc,
+    '_project_expense',
+    { calls },
+  )
   const expensesModule = evaluateModuleAssignments(expensesSrc, {
     symbols,
     calls: {
@@ -307,11 +312,27 @@ export function extractSeedFacts(msBkRoot) {
         return {
           id: bound.expense_id,
           subtaskId: bound.subtask_id,
+          projectId: null,
           description: bound.description,
           amount: bound.amount,
           category: bound.category,
           expenseDate: bound.expense_date,
           createdBy: bound.created_by,
+        }
+      },
+      _project_expense: (args, kwargs) => {
+        const bound = bindArguments(projectExpenseSignature, args, kwargs)
+        return {
+          id: bound.expense_id,
+          subtaskId: null,
+          projectId: bound.project_id,
+          description: bound.description,
+          amount: bound.amount,
+          category: bound.category,
+          expenseDate: bound.expense_date,
+          createdBy: bound.created_by,
+          documentType: bound.document_type ?? null,
+          documentNumber: bound.document_number ?? null,
         }
       },
     },

@@ -11,21 +11,32 @@ import type {
 import { seedProject, FIXTURE_CREATED_AT, seedTask } from './seed-lookup'
 
 function expensesOf(projectId: string): SeedExpense[] {
-  return SEED_EXPENSES.filter(
-    (expense) => seedTask(expense.subtaskId).projectId === projectId,
-  )
+  return SEED_EXPENSES.filter((expense) => {
+    if (expense.subtaskId) {
+      return seedTask(expense.subtaskId).projectId === projectId
+    }
+    return expense.projectId === projectId
+  })
 }
 
 function toExpenseDTO(expense: SeedExpense): ExpenseResponseDTO {
   return {
     id: expense.id,
-    subtask_id: expense.subtaskId,
+    project_id: expense.projectId ?? null,
+    subtask_id: expense.subtaskId ?? null,
     description: expense.description,
     amount: Number(expense.amount).toFixed(2),
     // The generated seed mirror types this as `string`; the values come from
     // the enum-validated backend seed, so the narrowing is safe.
     category: expense.category as ExpenseResponseDTO['category'],
     expense_date: expense.expenseDate,
+    document_type: (expense.documentType ??
+      null) as ExpenseResponseDTO['document_type'],
+    document_number: expense.documentNumber ?? null,
+    attachment_filename: null,
+    attachment_size_bytes: null,
+    attachment_content_type: null,
+    has_attachment: false,
     created_by: expense.createdBy,
     created_at: FIXTURE_CREATED_AT,
   }
@@ -33,14 +44,22 @@ function toExpenseDTO(expense: SeedExpense): ExpenseResponseDTO {
 
 /** Adds the parent-task context the project-scoped listing joins in. */
 function toProjectExpenseDTO(expense: SeedExpense): ProjectExpenseResponseDTO {
-  const subtask = seedTask(expense.subtaskId)
-  if (subtask.parentId === null)
-    throw new Error(`expense ${expense.id} is not attached to a subtask`)
+  if (expense.subtaskId) {
+    const subtask = seedTask(expense.subtaskId)
+    if (subtask.parentId === null)
+      throw new Error(`expense ${expense.id} is not attached to a subtask`)
+    return {
+      ...toExpenseDTO(expense),
+      task_id: subtask.parentId,
+      task_title: seedTask(subtask.parentId).title,
+      subtask_title: subtask.title,
+    }
+  }
   return {
     ...toExpenseDTO(expense),
-    task_id: subtask.parentId,
-    task_title: seedTask(subtask.parentId).title,
-    subtask_title: subtask.title,
+    task_id: null,
+    task_title: null,
+    subtask_title: null,
   }
 }
 
@@ -118,7 +137,9 @@ export function seedCostReportDTO(projectId: string): CostReportResponseDTO {
 
 function seedParentTaskIds(projectId: string): string[] {
   return SEED_EXPENSES.filter(
-    (expense) => seedTask(expense.subtaskId).projectId === projectId,
+    (expense): expense is SeedExpense & { subtaskId: string } =>
+      expense.subtaskId !== null &&
+      seedTask(expense.subtaskId).projectId === projectId,
   )
     .map((expense) => seedTask(expense.subtaskId).parentId)
     .filter((parentId): parentId is string => parentId !== null)

@@ -14,6 +14,7 @@ function failures(schema: z.ZodType, input: unknown) {
 }
 
 const validCreate = {
+  imputationType: 'subtask' as const,
   subtaskId: '4f2b8a1c-9d3e-4b6f-8a1c-2e5d7f9b0c3a',
   description: 'Cement bags for slab pour',
   amount: '450.75',
@@ -24,6 +25,17 @@ const validCreate = {
 describe('expenseCreateSchema', () => {
   it('accepts a filled expense unchanged', () => {
     expect(expenseCreateSchema.parse(validCreate)).toEqual(validCreate)
+  })
+
+  it('accepts project direct expense without subtaskId', () => {
+    const projectExpense = {
+      imputationType: 'project' as const,
+      description: 'Permit fees',
+      amount: '1200.00',
+      category: 'other',
+      expenseDate: '2026-07-15',
+    }
+    expect(expenseCreateSchema.parse(projectExpense)).toEqual(projectExpense)
   })
 
   it.each([

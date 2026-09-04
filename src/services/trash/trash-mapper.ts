@@ -37,7 +37,8 @@ export function mapTrashedExpenseDTOToDomain(
     id: dto.id,
     description: dto.description,
     amount: dto.amount,
-    subtaskId: dto.subtask_id,
+    subtaskId: dto.subtask_id ?? null,
+    projectId: dto.project_id ?? null,
     deletedAt: dto.deleted_at,
     deletedBy: dto.deleted_by,
   }

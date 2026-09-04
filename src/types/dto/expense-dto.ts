@@ -12,13 +12,18 @@ export type ExpenseCategoryDTO =
   | 'subcontractor'
   | 'other'
 
+export type ExpenseDocumentTypeDTO = 'invoice' | 'receipt' | 'purchase_order'
+
 /** POST /v1/expenses — request */
 export interface ExpenseCreateRequestDTO {
-  subtask_id: string
+  project_id?: string | null
+  subtask_id?: string | null
   description: string
   amount: string
   category: string
   expense_date: string
+  document_type?: ExpenseDocumentTypeDTO | null
+  document_number?: string | null
 }
 
 /** PUT /v1/expenses/:id — request */
@@ -27,25 +32,34 @@ export interface ExpenseUpdateRequestDTO {
   amount?: string | null
   category?: string | null
   expense_date?: string | null
+  document_type?: ExpenseDocumentTypeDTO | null
+  document_number?: string | null
 }
 
 /** Expense endpoints — response */
 export interface ExpenseResponseDTO {
   id: string
-  subtask_id: string
+  project_id?: string | null
+  subtask_id?: string | null
   description: string
   amount: string
   category: ExpenseCategoryDTO
   expense_date: string
+  document_type?: ExpenseDocumentTypeDTO | null
+  document_number?: string | null
+  attachment_filename?: string | null
+  attachment_size_bytes?: number | null
+  attachment_content_type?: string | null
+  has_attachment: boolean
   created_by: string
   created_at: string
 }
 
 /** GET /v1/expenses/projects/:project_id — response */
 export interface ProjectExpenseResponseDTO extends ExpenseResponseDTO {
-  task_id: string
-  task_title: string
-  subtask_title: string
+  task_id?: string | null
+  task_title?: string | null
+  subtask_title?: string | null
 }
 
 /** GET /v1/expenses/tasks/:task_id/variance — response */

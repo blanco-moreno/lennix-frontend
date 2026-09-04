@@ -22,7 +22,8 @@ export interface TrashedExpenseResponseDTO {
   id: string
   description: string
   amount: string
-  subtask_id: string
+  subtask_id: string | null
+  project_id?: string | null
   deleted_at: string | null
   deleted_by: string | null
 }

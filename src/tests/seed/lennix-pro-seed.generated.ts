@@ -11,7 +11,7 @@
  */
 
 /** Content hash of every backend seed file this manifest was derived from. */
-export const SEED_SOURCE_DIGEST = '634a36d926b56fd9'
+export const SEED_SOURCE_DIGEST = '4936ea9843f61465'
 
 /** Stable IDs, mirroring `app/seeds/lennix_pro/constants.py`. */
 export const SEED_IDS = {
@@ -145,6 +145,7 @@ export const SEED_IDS = {
   EXPENSE_P1_12: 'd0000000-0001-0005-0002-000000000000',
   EXPENSE_P1_13: 'd0000000-0001-0006-0001-000000000000',
   EXPENSE_P1_14: 'd0000000-0001-0006-0002-000000000000',
+  EXPENSE_P1_15: 'd0000000-0001-0000-0001-000000000000',
   EXPENSE_P2_01: 'd0000000-0002-0001-0001-000000000000',
   EXPENSE_P2_02: 'd0000000-0002-0001-0002-000000000000',
   EXPENSE_P2_03: 'd0000000-0002-0002-0001-000000000000',
@@ -338,12 +339,15 @@ export interface SeedDependency {
 
 export interface SeedExpense {
   id: string
-  subtaskId: string
+  subtaskId: string | null
+  projectId?: string | null
   description: string
   amount: string
   category: string
   expenseDate: string
   createdBy: string
+  documentType?: string | null
+  documentNumber?: string | null
 }
 
 export interface SeedSubtaskNote {
@@ -2839,6 +2843,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0001-0001-000000000000',
     subtaskId: 'c0000000-0001-0001-0001-000000000000',
+    projectId: null,
     description: 'Mano de obra excavacion',
     amount: '28000',
     category: 'labor',
@@ -2848,6 +2853,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0001-0002-000000000000',
     subtaskId: 'c0000000-0001-0001-0001-000000000000',
+    projectId: null,
     description: 'Alquiler excavadora',
     amount: '12000',
     category: 'equipment',
@@ -2857,6 +2863,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0001-0003-000000000000',
     subtaskId: 'c0000000-0001-0001-0001-000000000000',
+    projectId: null,
     description: 'Materiales de excavacion',
     amount: '8000',
     category: 'materials',
@@ -2866,6 +2873,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0002-0001-000000000000',
     subtaskId: 'c0000000-0001-0001-0002-000000000000',
+    projectId: null,
     description: 'Mano de obra cimentacion',
     amount: '45000',
     category: 'labor',
@@ -2875,6 +2883,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0002-0002-000000000000',
     subtaskId: 'c0000000-0001-0001-0002-000000000000',
+    projectId: null,
     description: 'Concreto y acero de refuerzo',
     amount: '62000',
     category: 'materials',
@@ -2884,6 +2893,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0002-0003-000000000000',
     subtaskId: 'c0000000-0001-0001-0002-000000000000',
+    projectId: null,
     description: 'Subcontratista pilotes',
     amount: '20000',
     category: 'subcontractor',
@@ -2893,6 +2903,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0003-0001-000000000000',
     subtaskId: 'c0000000-0001-0002-0001-000000000000',
+    projectId: null,
     description: 'Acero estructural pisos 1-5',
     amount: '32000',
     category: 'materials',
@@ -2902,6 +2913,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0003-0002-000000000000',
     subtaskId: 'c0000000-0001-0002-0001-000000000000',
+    projectId: null,
     description: 'Mano de obra estructura',
     amount: '22000',
     category: 'labor',
@@ -2911,6 +2923,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0004-0001-000000000000',
     subtaskId: 'c0000000-0001-0001-0002-000000000000',
+    projectId: null,
     description: 'Encofrado y moldes',
     amount: '35000',
     category: 'materials',
@@ -2920,6 +2933,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0004-0002-000000000000',
     subtaskId: 'c0000000-0001-0001-0002-000000000000',
+    projectId: null,
     description: 'Subcontratista pruebas de carga',
     amount: '15000',
     category: 'subcontractor',
@@ -2929,6 +2943,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0005-0001-000000000000',
     subtaskId: 'c0000000-0001-0001-0001-000000000000',
+    projectId: null,
     description: 'Transporte de tierra',
     amount: '18000',
     category: 'equipment',
@@ -2938,6 +2953,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0005-0002-000000000000',
     subtaskId: 'c0000000-0001-0002-0001-000000000000',
+    projectId: null,
     description: 'Concreto premezclado pisos',
     amount: '42000',
     category: 'materials',
@@ -2947,6 +2963,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0006-0001-000000000000',
     subtaskId: 'c0000000-0001-0001-0003-000000000000',
+    projectId: null,
     description: 'Membrana impermeabilizante',
     amount: '15000',
     category: 'materials',
@@ -2956,6 +2973,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0001-0006-0002-000000000000',
     subtaskId: 'c0000000-0001-0001-0002-000000000000',
+    projectId: null,
     description: 'Bomba de concreto',
     amount: '8000',
     category: 'equipment',
@@ -2963,8 +2981,21 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
     createdBy: 'f0000000-0000-0003-0000-000000000000',
   },
   {
+    id: 'd0000000-0001-0000-0001-000000000000',
+    subtaskId: null,
+    projectId: 'b0000000-0000-0001-0000-000000000000',
+    description: 'Permisos municipales y seguros de obra',
+    amount: '25000',
+    category: 'other',
+    expenseDate: '2025-07-02',
+    createdBy: 'f0000000-0000-0005-0000-000000000000',
+    documentType: 'invoice',
+    documentNumber: 'F-2025-0089',
+  },
+  {
     id: 'd0000000-0002-0001-0001-000000000000',
     subtaskId: 'c0000000-0002-0001-0001-000000000000',
+    projectId: null,
     description: 'Demolicion mecanica',
     amount: '42000',
     category: 'equipment',
@@ -2974,6 +3005,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0002-0001-0002-000000000000',
     subtaskId: 'c0000000-0002-0001-0001-000000000000',
+    projectId: null,
     description: 'Mano de obra demolicion',
     amount: '23000',
     category: 'labor',
@@ -2983,6 +3015,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0002-0002-0001-000000000000',
     subtaskId: 'c0000000-0002-0001-0002-000000000000',
+    projectId: null,
     description: 'Transporte de escombros',
     amount: '30000',
     category: 'equipment',
@@ -2992,6 +3025,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0002-0002-0002-000000000000',
     subtaskId: 'c0000000-0002-0002-0001-000000000000',
+    projectId: null,
     description: 'Excavacion y movimiento de tierra',
     amount: '85000',
     category: 'labor',
@@ -3001,6 +3035,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0002-0003-0001-000000000000',
     subtaskId: 'c0000000-0002-0002-0002-000000000000',
+    projectId: null,
     description: 'Concreto para zapatas',
     amount: '62000',
     category: 'materials',
@@ -3010,6 +3045,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0002-0003-0002-000000000000',
     subtaskId: 'c0000000-0002-0002-0002-000000000000',
+    projectId: null,
     description: 'Acero de refuerzo zapatas',
     amount: '33000',
     category: 'materials',
@@ -3019,6 +3055,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0002-0004-0001-000000000000',
     subtaskId: 'c0000000-0002-0003-0001-000000000000',
+    projectId: null,
     description: 'Acero estructural columnas',
     amount: '70000',
     category: 'materials',
@@ -3028,6 +3065,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0002-0004-0002-000000000000',
     subtaskId: 'c0000000-0002-0003-0002-000000000000',
+    projectId: null,
     description: 'Concreto losas nivel 1',
     amount: '28000',
     category: 'materials',
@@ -3037,6 +3075,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0003-0001-0001-000000000000',
     subtaskId: 'c0000000-0003-0001-0001-000000000000',
+    projectId: null,
     description: 'Levantamiento topografico',
     amount: '45000',
     category: 'subcontractor',
@@ -3046,6 +3085,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0003-0001-0002-000000000000',
     subtaskId: 'c0000000-0003-0001-0002-000000000000',
+    projectId: null,
     description: 'Materiales vialidad',
     amount: '155000',
     category: 'materials',
@@ -3055,6 +3095,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0003-0002-0001-000000000000',
     subtaskId: 'c0000000-0003-0001-0002-000000000000',
+    projectId: null,
     description: 'Mano de obra terraceria',
     amount: '120000',
     category: 'labor',
@@ -3064,6 +3105,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0003-0002-0002-000000000000',
     subtaskId: 'c0000000-0003-0002-0001-000000000000',
+    projectId: null,
     description: 'Excavacion masiva maquinaria',
     amount: '72000',
     category: 'equipment',
@@ -3073,6 +3115,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0003-0003-0001-000000000000',
     subtaskId: 'c0000000-0003-0002-0002-000000000000',
+    projectId: null,
     description: 'Concreto fundaciones',
     amount: '28000',
     category: 'materials',
@@ -3082,6 +3125,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0003-0003-0002-000000000000',
     subtaskId: 'c0000000-0003-0002-0002-000000000000',
+    projectId: null,
     description: 'Mano de obra fundaciones',
     amount: '12500',
     category: 'labor',
@@ -3091,6 +3135,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0001-0001-000000000000',
     subtaskId: 'c0000000-0004-0001-0001-000000000000',
+    projectId: null,
     description: 'Excavacion y nivelacion terreno',
     amount: '42000',
     category: 'labor',
@@ -3100,6 +3145,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0001-0002-000000000000',
     subtaskId: 'c0000000-0004-0001-0002-000000000000',
+    projectId: null,
     description: 'Pilotes de concreto',
     amount: '76000',
     category: 'materials',
@@ -3109,6 +3155,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0002-0001-000000000000',
     subtaskId: 'c0000000-0004-0002-0001-000000000000',
+    projectId: null,
     description: 'Acero estructural',
     amount: '110000',
     category: 'materials',
@@ -3118,6 +3165,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0002-0002-000000000000',
     subtaskId: 'c0000000-0004-0002-0002-000000000000',
+    projectId: null,
     description: 'Losas colaborantes',
     amount: '65000',
     category: 'materials',
@@ -3127,6 +3175,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0003-0001-000000000000',
     subtaskId: 'c0000000-0004-0003-0001-000000000000',
+    projectId: null,
     description: 'Cristal templado muro cortina',
     amount: '95000',
     category: 'materials',
@@ -3136,6 +3185,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0003-0002-000000000000',
     subtaskId: 'c0000000-0004-0003-0002-000000000000',
+    projectId: null,
     description: 'Material aislante termico',
     amount: '33000',
     category: 'materials',
@@ -3145,6 +3195,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0004-0001-000000000000',
     subtaskId: 'c0000000-0004-0004-0001-000000000000',
+    projectId: null,
     description: 'Pisos porcelanato oficinas',
     amount: '55000',
     category: 'materials',
@@ -3154,6 +3205,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0004-0002-000000000000',
     subtaskId: 'c0000000-0004-0004-0002-000000000000',
+    projectId: null,
     description: 'Cielos rasos modulares',
     amount: '33000',
     category: 'materials',
@@ -3163,6 +3215,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0005-0001-000000000000',
     subtaskId: 'c0000000-0004-0005-0001-000000000000',
+    projectId: null,
     description: 'Cableado estructurado Cat6A',
     amount: '48000',
     category: 'materials',
@@ -3172,6 +3225,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0004-0005-0002-000000000000',
     subtaskId: 'c0000000-0004-0005-0002-000000000000',
+    projectId: null,
     description: 'Sistema de automatizacion BMS',
     amount: '28000',
     category: 'equipment',
@@ -3181,6 +3235,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0001-0001-000000000000',
     subtaskId: 'c0000000-0005-0001-0001-000000000000',
+    projectId: null,
     description: 'Demolicion controlada interiores',
     amount: '180000',
     category: 'labor',
@@ -3190,6 +3245,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0001-0002-000000000000',
     subtaskId: 'c0000000-0005-0001-0002-000000000000',
+    projectId: null,
     description: 'Retiro y disposicion materiales peligrosos',
     amount: '95000',
     category: 'subcontractor',
@@ -3199,6 +3255,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0002-0001-000000000000',
     subtaskId: 'c0000000-0005-0002-0001-000000000000',
+    projectId: null,
     description: 'Refuerzo estructural con fibra',
     amount: '350000',
     category: 'materials',
@@ -3208,6 +3265,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0002-0002-000000000000',
     subtaskId: 'c0000000-0005-0002-0002-000000000000',
+    projectId: null,
     description: 'Construccion nuevas alas',
     amount: '260000',
     category: 'subcontractor',
@@ -3217,6 +3275,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0003-0001-000000000000',
     subtaskId: 'c0000000-0005-0003-0001-000000000000',
+    projectId: null,
     description: 'Instalacion electrica hospitalaria',
     amount: '480000',
     category: 'subcontractor',
@@ -3226,6 +3285,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0003-0002-000000000000',
     subtaskId: 'c0000000-0005-0003-0002-000000000000',
+    projectId: null,
     description: 'Red de gases medicinales',
     amount: '360000',
     category: 'subcontractor',
@@ -3235,6 +3295,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0004-0001-000000000000',
     subtaskId: 'c0000000-0005-0004-0001-000000000000',
+    projectId: null,
     description: 'Pisos vinilicos hospitalarios',
     amount: '280000',
     category: 'materials',
@@ -3244,6 +3305,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0004-0002-000000000000',
     subtaskId: 'c0000000-0005-0004-0002-000000000000',
+    projectId: null,
     description: 'Pintura antibacterial premium',
     amount: '230000',
     category: 'materials',
@@ -3253,6 +3315,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0005-0001-000000000000',
     subtaskId: 'c0000000-0005-0005-0001-000000000000',
+    projectId: null,
     description: 'Equipos medicos especializados',
     amount: '620000',
     category: 'equipment',
@@ -3262,6 +3325,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0005-0005-0002-000000000000',
     subtaskId: 'c0000000-0005-0005-0002-000000000000',
+    projectId: null,
     description: 'Mobiliario hospitalario completo',
     amount: '295000',
     category: 'equipment',
@@ -3271,6 +3335,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0001-0001-000000000000',
     subtaskId: 'c0000000-0006-0001-0001-000000000000',
+    projectId: null,
     description: 'Excavacion subterranea mecanizada',
     amount: '105000',
     category: 'equipment',
@@ -3280,6 +3345,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0001-0002-000000000000',
     subtaskId: 'c0000000-0006-0001-0002-000000000000',
+    projectId: null,
     description: 'Muros de contencion concreto',
     amount: '43000',
     category: 'materials',
@@ -3289,6 +3355,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0002-0001-000000000000',
     subtaskId: 'c0000000-0006-0002-0001-000000000000',
+    projectId: null,
     description: 'Losas de concreto estacionamiento',
     amount: '98000',
     category: 'materials',
@@ -3298,6 +3365,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0002-0002-000000000000',
     subtaskId: 'c0000000-0006-0002-0002-000000000000',
+    projectId: null,
     description: 'Construccion rampas de acceso',
     amount: '57000',
     category: 'labor',
@@ -3307,6 +3375,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0003-0001-000000000000',
     subtaskId: 'c0000000-0006-0003-0001-000000000000',
+    projectId: null,
     description: 'Luminarias LED de alta eficiencia',
     amount: '52000',
     category: 'materials',
@@ -3316,6 +3385,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0003-0002-000000000000',
     subtaskId: 'c0000000-0006-0003-0002-000000000000',
+    projectId: null,
     description: 'Ventiladores y ductos',
     amount: '38000',
     category: 'equipment',
@@ -3325,6 +3395,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0004-0001-000000000000',
     subtaskId: 'c0000000-0006-0004-0001-000000000000',
+    projectId: null,
     description: 'Pintura epoxica pisos',
     amount: '35000',
     category: 'materials',
@@ -3334,6 +3405,7 @@ export const SEED_EXPENSES: readonly SeedExpense[] = [
   {
     id: 'd0000000-0006-0004-0002-000000000000',
     subtaskId: 'c0000000-0006-0004-0002-000000000000',
+    projectId: null,
     description: 'Senalizacion vertical y horizontal',
     amount: '37000',
     category: 'other',

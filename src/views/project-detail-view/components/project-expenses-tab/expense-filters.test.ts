@@ -51,4 +51,20 @@ describe('filterExpenses', () => {
   it('applies both filters together', () => {
     expect(filterExpenses(expenses, 't1', 's2')).toEqual([row('t1', 's2')])
   })
+
+  it('filters by layer (project direct vs subtask)', () => {
+    const projectExpense = {
+      taskId: null,
+      taskTitle: null,
+      subtaskId: null,
+      subtaskTitle: null,
+    }
+    const mixed = [row('t1', 's1'), projectExpense]
+    expect(filterExpenses(mixed, 'all', 'all', 'project')).toEqual([
+      projectExpense,
+    ])
+    expect(filterExpenses(mixed, 'all', 'all', 'subtask')).toEqual([
+      row('t1', 's1'),
+    ])
+  })
 })

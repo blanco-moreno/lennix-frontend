@@ -1,3 +1,4 @@
+import { HStack } from '@chakra-ui/react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
@@ -12,6 +13,8 @@ import {
   EXPENSE_CATEGORY_VARIANT,
 } from '@/utils'
 
+import { ExpenseAttachmentButton } from './components/expense-attachment-button'
+
 /**
  * The expense-table columns shared by the project and task expense tabs.
  * Callers append surface-specific columns (e.g. a row-actions column).
@@ -25,15 +28,30 @@ export function useExpenseColumns(): ColumnDef<ProjectExpense>[] {
       {
         accessorKey: 'taskTitle',
         header: intl.formatMessage(m.columnTask),
-        cell: ({ getValue }) => (
-          <Text size="sm" weight="medium">
-            {getValue<string>()}
-          </Text>
-        ),
+        cell: ({ getValue }) => {
+          const val = getValue<string | null>()
+          return (
+            <Text
+              size="sm"
+              weight="medium"
+              color={val ? 'fg.default' : 'fg.muted'}
+            >
+              {val || intl.formatMessage(m.layerProjectDirect)}
+            </Text>
+          )
+        },
       },
       {
         accessorKey: 'subtaskTitle',
         header: intl.formatMessage(m.columnSubtask),
+        cell: ({ getValue }) => {
+          const val = getValue<string | null>()
+          return (
+            <Text size="sm" color={val ? 'fg.default' : 'fg.muted'}>
+              {val || '—'}
+            </Text>
+          )
+        },
       },
       {
         accessorKey: 'description',
@@ -56,6 +74,41 @@ export function useExpenseColumns(): ColumnDef<ProjectExpense>[] {
             <Badge variant={EXPENSE_CATEGORY_VARIANT[category] ?? 'default'}>
               {descriptor ? intl.formatMessage(descriptor) : category}
             </Badge>
+          )
+        },
+      },
+      {
+        id: 'document',
+        header: intl.formatMessage(m.columnDocument),
+        enableSorting: false,
+        cell: ({ row }) => {
+          const expense = row.original
+          if (
+            !expense.documentType &&
+            !expense.documentNumber &&
+            !expense.hasAttachment
+          ) {
+            return <Text color="fg.muted">—</Text>
+          }
+          const docTypeLabel =
+            expense.documentType === 'invoice'
+              ? intl.formatMessage(m.documentTypeInvoice)
+              : expense.documentType === 'receipt'
+                ? intl.formatMessage(m.documentTypeReceipt)
+                : expense.documentType === 'purchase_order'
+                  ? intl.formatMessage(m.documentTypePurchaseOrder)
+                  : ''
+          const label = [docTypeLabel, expense.documentNumber]
+            .filter(Boolean)
+            .join(' ')
+
+          return (
+            <HStack gap={2}>
+              {label ? <Badge variant="outline">{label}</Badge> : null}
+              {expense.hasAttachment && (
+                <ExpenseAttachmentButton expense={expense} />
+              )}
+            </HStack>
           )
         },
       },

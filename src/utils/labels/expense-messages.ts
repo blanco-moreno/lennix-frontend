@@ -312,4 +312,145 @@ export const expenseManagementMessages = defineMessages({
     defaultMessage: 'N/A',
     description: 'Cost report cell shown when the entity has no budget set',
   },
+
+  // Imputation & Layers
+  imputationTypeLabel: {
+    id: 'expenseManagement.imputationTypeLabel',
+    defaultMessage: 'Charge to',
+    description: 'Label for expense imputation target (subtask vs project)',
+  },
+  imputationSubtask: {
+    id: 'expenseManagement.imputationSubtask',
+    defaultMessage: 'Subtask',
+    description: 'Option to charge expense to a subtask',
+  },
+  imputationProject: {
+    id: 'expenseManagement.imputationProject',
+    defaultMessage: 'Project direct',
+    description: 'Option to charge expense directly to the project',
+  },
+  layerProjectDirect: {
+    id: 'expenseManagement.layerProjectDirect',
+    defaultMessage: 'Project direct',
+    description:
+      'Table badge/cell text when an expense is charged directly to the project',
+  },
+  filterLayerLabel: {
+    id: 'expenseManagement.filterLayerLabel',
+    defaultMessage: 'Layer',
+    description: 'Filter dropdown label for expense layer',
+  },
+  filterAllLayers: {
+    id: 'expenseManagement.filterAllLayers',
+    defaultMessage: 'All levels',
+    description: 'Filter option for all expense levels',
+  },
+  filterProjectLayer: {
+    id: 'expenseManagement.filterProjectLayer',
+    defaultMessage: 'Project direct',
+    description: 'Filter option for project-level expenses only',
+  },
+  filterSubtaskLayer: {
+    id: 'expenseManagement.filterSubtaskLayer',
+    defaultMessage: 'Subtasks',
+    description: 'Filter option for subtask expenses only',
+  },
+  addProjectExpense: {
+    id: 'expenseManagement.addProjectExpense',
+    defaultMessage: 'Add expense',
+    description: 'Button label to add an expense from the project expenses tab',
+  },
+  columnDocument: {
+    id: 'expenseManagement.columnDocument',
+    defaultMessage: 'Document',
+    description: 'Table column header for tax document type and number',
+  },
+
+  // Tax Document
+  documentTypeLabel: {
+    id: 'expenseManagement.documentTypeLabel',
+    defaultMessage: 'Document type',
+    description: 'Label for document type field',
+  },
+  documentTypePlaceholder: {
+    id: 'expenseManagement.documentTypePlaceholder',
+    defaultMessage: 'Select document type (optional)',
+    description: 'Placeholder for document type select',
+  },
+  documentTypeInvoice: {
+    id: 'expenseManagement.documentTypeInvoice',
+    defaultMessage: 'Invoice',
+    description: 'Document type option: invoice',
+  },
+  documentTypeReceipt: {
+    id: 'expenseManagement.documentTypeReceipt',
+    defaultMessage: 'Receipt',
+    description: 'Document type option: receipt',
+  },
+  documentTypePurchaseOrder: {
+    id: 'expenseManagement.documentTypePurchaseOrder',
+    defaultMessage: 'Purchase order',
+    description: 'Document type option: purchase order',
+  },
+  documentNumberLabel: {
+    id: 'expenseManagement.documentNumberLabel',
+    defaultMessage: 'Document number',
+    description: 'Label for document number field',
+  },
+  documentNumberPlaceholder: {
+    id: 'expenseManagement.documentNumberPlaceholder',
+    defaultMessage: 'e.g. INV-2026-001',
+    description: 'Placeholder for document number field',
+  },
+
+  // Attachments
+  attachmentLabel: {
+    id: 'expenseManagement.attachmentLabel',
+    defaultMessage: 'Attachment',
+    description: 'Label for expense file attachment',
+  },
+  attachmentDropzonePrompt: {
+    id: 'expenseManagement.attachmentDropzonePrompt',
+    defaultMessage: 'Click or drop document (PDF, PNG, JPG up to 20MB)',
+    description: 'Prompt text inside file attachment dropzone',
+  },
+  attachmentDownload: {
+    id: 'expenseManagement.attachmentDownload',
+    defaultMessage: 'Download attachment',
+    description: 'Action to download the attached file',
+  },
+  attachmentDelete: {
+    id: 'expenseManagement.attachmentDelete',
+    defaultMessage: 'Remove attachment',
+    description: 'Action to remove the attached file',
+  },
+  attachmentUploadSuccess: {
+    id: 'expenseManagement.attachmentUploadSuccess',
+    defaultMessage: 'Attachment uploaded successfully',
+    description: 'Toast when attachment is uploaded',
+  },
+  attachmentUploadError: {
+    id: 'expenseManagement.attachmentUploadError',
+    defaultMessage: 'Could not upload attachment',
+    description: 'Toast when attachment upload fails',
+  },
+  attachmentDeleteSuccess: {
+    id: 'expenseManagement.attachmentDeleteSuccess',
+    defaultMessage: 'Attachment removed successfully',
+    description: 'Toast when attachment is removed',
+  },
+  attachmentDeleteError: {
+    id: 'expenseManagement.attachmentDeleteError',
+    defaultMessage: 'Could not remove attachment',
+    description: 'Toast when attachment removal fails',
+  },
 })
+
+export const DOCUMENT_TYPE_OPTIONS = [
+  { value: 'invoice', label: expenseManagementMessages.documentTypeInvoice },
+  { value: 'receipt', label: expenseManagementMessages.documentTypeReceipt },
+  {
+    value: 'purchase_order',
+    label: expenseManagementMessages.documentTypePurchaseOrder,
+  },
+] as const

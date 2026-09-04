@@ -1,14 +1,17 @@
-import { Flex, Stack } from '@chakra-ui/react'
+import { Flex, HStack, Stack } from '@chakra-ui/react'
+import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { FormattedMessage, useIntl } from 'react-intl'
 
-import { ErrorState, Heading, Label, Select } from '@/components'
+import { Button, ErrorState, Heading, Label, Select } from '@/components'
 import { Combobox } from '@/components/ui/combobox/combobox'
 import { DataTable } from '@/components/ui/data-table'
+import { usePermission } from '@/hooks'
 import { useExpenseColumns } from '@/hooks/use-expense-columns/use-expense-columns'
 import { useListProjectExpensesQuery } from '@/services/expense'
 import { expenseManagementMessages as em } from '@/utils'
 
+import { ProjectExpenseCreateModal } from './components/project-expense-create-modal'
 import {
   buildSubtaskOptions,
   buildTaskOptions,
@@ -22,6 +25,9 @@ interface ProjectExpensesTabProps {
 
 export function ProjectExpensesTab({ projectId }: ProjectExpensesTabProps) {
   const intl = useIntl()
+  const canWriteExpenses = usePermission('task.expenses.write')
+  const [createOpen, setCreateOpen] = useState(false)
+  const [filterLayer, setFilterLayer] = useState('all')
   const [filterTaskId, setFilterTaskId] = useState('all')
   const [filterSubtaskId, setFilterSubtaskId] = useState('all')
   const [filterCategory, setFilterCategory] = useState('all')
@@ -43,8 +49,8 @@ export function ProjectExpensesTab({ projectId }: ProjectExpensesTabProps) {
   )
 
   const filteredExpenses = useMemo(
-    () => filterExpenses(expenses, filterTaskId, filterSubtaskId),
-    [expenses, filterTaskId, filterSubtaskId],
+    () => filterExpenses(expenses, filterTaskId, filterSubtaskId, filterLayer),
+    [expenses, filterTaskId, filterSubtaskId, filterLayer],
   )
 
   const handleTaskFilterChange = (value: string) => {
@@ -63,13 +69,51 @@ export function ProjectExpensesTab({ projectId }: ProjectExpensesTabProps) {
         align={{ base: 'stretch', sm: 'center' }}
         justify={{ base: 'flex-start', sm: 'space-between' }}
       >
-        <Heading size="h3" weight="semibold" color="primary">
-          <FormattedMessage
-            {...m.expensesDetailHeading}
-            values={{ count: filteredExpenses.length }}
-          />
-        </Heading>
+        <HStack gap={4}>
+          <Heading size="h3" weight="semibold" color="primary">
+            <FormattedMessage
+              {...m.expensesDetailHeading}
+              values={{ count: filteredExpenses.length }}
+            />
+          </Heading>
+          {canWriteExpenses && (
+            <Button
+              size="sm"
+              onClick={() => setCreateOpen(true)}
+              aria-label={intl.formatMessage(em.addProjectExpense)}
+            >
+              <HStack gap={1}>
+                <Plus size={16} />
+                <FormattedMessage {...em.addProjectExpense} />
+              </HStack>
+            </Button>
+          )}
+        </HStack>
         <Flex wrap="wrap" align="end" gap="tight">
+          <Stack gap={1}>
+            <Label fontSize="xs" color="fg.muted">
+              <FormattedMessage {...em.filterLayerLabel} />
+            </Label>
+            <Select
+              value={filterLayer}
+              onChange={setFilterLayer}
+              placeholder={intl.formatMessage(em.filterAllLayers)}
+              options={[
+                {
+                  value: 'all',
+                  label: intl.formatMessage(em.filterAllLayers),
+                },
+                {
+                  value: 'project',
+                  label: intl.formatMessage(em.filterProjectLayer),
+                },
+                {
+                  value: 'subtask',
+                  label: intl.formatMessage(em.filterSubtaskLayer),
+                },
+              ]}
+            />
+          </Stack>
           <Stack gap={1}>
             <Label fontSize="xs" color="fg.muted">
               <FormattedMessage {...m.filterTaskLabel} />
@@ -150,6 +194,12 @@ export function ProjectExpensesTab({ projectId }: ProjectExpensesTabProps) {
           emptyMessage={intl.formatMessage(m.noExpensesFound)}
         />
       )}
+
+      <ProjectExpenseCreateModal
+        projectId={projectId}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+      />
     </Stack>
   )
 }

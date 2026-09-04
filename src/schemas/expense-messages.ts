@@ -31,4 +31,10 @@ export const expenseValidationMessages = defineMessages({
     defaultMessage: 'The date is required',
     description: 'Expense validation: date field is empty',
   },
+  subtaskRequired: {
+    id: 'expenseValidation.subtaskRequired',
+    defaultMessage: 'The subtask is required',
+    description:
+      'Expense validation: subtask is required when imputing to subtask',
+  },
 })

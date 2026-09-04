@@ -1,20 +1,29 @@
 /** Expense domain types — matches the backend contract for /v1/expenses. */
 
+export type ExpenseDocumentType = 'invoice' | 'receipt' | 'purchase_order'
+
 export interface ExpenseItem {
   id: string
-  subtaskId: string
+  projectId?: string | null
+  subtaskId?: string | null
   description: string
   amount: number
   category: ExpenseCategory
   expenseDate: string
+  documentType?: ExpenseDocumentType | null
+  documentNumber?: string | null
+  attachmentFilename?: string | null
+  attachmentSizeBytes?: number | null
+  attachmentContentType?: string | null
+  hasAttachment?: boolean
   createdBy: string
   createdAt: string
 }
 
 export interface ProjectExpense extends ExpenseItem {
-  taskId: string
-  taskTitle: string
-  subtaskTitle: string
+  taskId?: string | null
+  taskTitle?: string | null
+  subtaskTitle?: string | null
 }
 
 export type ExpenseCategory =

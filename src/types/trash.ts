@@ -23,7 +23,8 @@ export interface TrashedExpense {
   description: string
   /** Numeric(12,2) — Decimal kept as string for precision. */
   amount: string
-  subtaskId: string
+  subtaskId: string | null
+  projectId?: string | null
   deletedAt: string | null
   deletedBy: string | null
 }

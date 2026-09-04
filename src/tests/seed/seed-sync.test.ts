@@ -82,7 +82,15 @@ describe('lennix_pro seed manifest', () => {
     }
 
     for (const expense of SEED_EXPENSES) {
-      expect(taskIds.has(expense.subtaskId)).toBe(true)
+      if (expense.subtaskId) {
+        expect(taskIds.has(expense.subtaskId)).toBe(true)
+      } else {
+        expect(
+          expense.projectId !== null &&
+            expense.projectId !== undefined &&
+            projectIds.has(expense.projectId),
+        ).toBe(true)
+      }
       expect(userIds.has(expense.createdBy)).toBe(true)
     }
 

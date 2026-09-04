@@ -47,8 +47,8 @@ export const SCHEDULE_INVALIDATION_TAGS: readonly AppTagType[] = [
 ]
 
 export interface ExpenseScope {
-  subtaskId: string
-  taskId: string
+  subtaskId?: string | null
+  taskId?: string | null
   projectId: string
 }
 
@@ -60,21 +60,28 @@ export function buildExpenseInvalidationTags({
   taskId,
   projectId,
 }: ExpenseScope): { type: AppTagType; id: string }[] {
-  return [
-    { type: 'Expense', id: `subtask-${subtaskId}` },
+  const tags: { type: AppTagType; id: string }[] = [
     { type: 'Expense', id: `project-${projectId}` },
     { type: 'CostReport', id: projectId },
-    { type: 'BudgetVariance', id: taskId },
-    { type: 'Task', id: taskId },
     { type: 'Task', id: `project-${projectId}` },
-    { type: 'Subtask', id: subtaskId },
     { type: 'ProjectBudget', id: projectId },
     { type: 'Project', id: projectId },
     { type: 'Dashboard', id: projectId },
     // Every consumer of this builder (expense create/update/delete, subtask
     // delete) writes a Historial row on the backend.
     { type: 'ProjectActivity', id: projectId },
+    // Metered storage quota is updated on attachment/expense mutations
+    { type: 'OrgUsage', id: 'current' },
   ]
+  if (subtaskId) {
+    tags.push({ type: 'Expense', id: `subtask-${subtaskId}` })
+    tags.push({ type: 'Subtask', id: subtaskId })
+  }
+  if (taskId) {
+    tags.push({ type: 'BudgetVariance', id: taskId })
+    tags.push({ type: 'Task', id: taskId })
+  }
+  return tags
 }
 
 // Tags invalidated when a dependency edge is created, edited or removed.

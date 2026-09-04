@@ -53,3 +53,25 @@ export const getTaskVariance = (taskId: string) =>
 
 export const getCostReport = (projectId: string) =>
   `/v1/expenses/projects/${projectId}/cost-report`
+
+export const uploadExpenseAttachment = ({
+  id,
+  formData,
+}: {
+  id: string
+  formData: FormData
+}) => ({
+  url: `/v1/expenses/${id}/attachment`,
+  method: 'POST',
+  body: formData,
+})
+
+export const downloadExpenseAttachment = (id: string) => ({
+  url: `/v1/expenses/${id}/attachment`,
+  responseHandler: async (response: Response) => response.blob(),
+})
+
+export const deleteExpenseAttachment = (id: string) => ({
+  url: `/v1/expenses/${id}/attachment`,
+  method: 'DELETE',
+})

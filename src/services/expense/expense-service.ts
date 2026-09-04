@@ -20,6 +20,8 @@ import {
   listProjectExpenses,
   getTaskVariance,
   getCostReport,
+  uploadExpenseAttachment,
+  deleteExpenseAttachment,
 } from './expense-endpoint'
 import {
   mapBudgetVarianceResponseDTOToBudgetVariance,
@@ -30,7 +32,7 @@ import {
 
 interface CreateExpenseArg {
   body: ExpenseCreateRequestDTO
-  taskId: string
+  taskId?: string | null
   projectId: string
 }
 
@@ -40,6 +42,15 @@ interface UpdateExpenseArg extends ExpenseScope {
 }
 
 interface DeleteExpenseArg extends ExpenseScope {
+  id: string
+}
+
+interface UploadExpenseAttachmentArg extends ExpenseScope {
+  id: string
+  file: File
+}
+
+interface DeleteExpenseAttachmentArg extends ExpenseScope {
   id: string
 }
 
@@ -122,6 +133,60 @@ export const expenseApi = api.injectEndpoints({
         { type: 'CostReport', id: projectId },
       ],
     }),
+
+    uploadExpenseAttachment: builder.mutation<
+      ExpenseItem,
+      UploadExpenseAttachmentArg
+    >({
+      query: ({ id, file }) => {
+        const formData = new FormData()
+        formData.append('file', file)
+        return uploadExpenseAttachment({ id, formData })
+      },
+      transformResponse: mapExpenseResponseDTOToExpenseItem,
+      invalidatesTags: (
+        _result,
+        _error,
+        { id, subtaskId, taskId, projectId },
+      ) => [
+        { type: 'Expense', id },
+        ...buildExpenseInvalidationTags({ subtaskId, taskId, projectId }),
+      ],
+    }),
+
+    deleteExpenseAttachment: builder.mutation<void, DeleteExpenseAttachmentArg>(
+      {
+        query: ({ id }) => deleteExpenseAttachment(id),
+        invalidatesTags: (
+          _result,
+          _error,
+          { id, subtaskId, taskId, projectId },
+        ) => [
+          { type: 'Expense', id },
+          ...buildExpenseInvalidationTags({ subtaskId, taskId, projectId }),
+        ],
+      },
+    ),
+
+    downloadExpenseAttachment: builder.mutation<
+      { blob: Blob; filename: string },
+      { id: string; fallbackFilename?: string }
+    >({
+      query: ({ id }) => ({
+        url: `/v1/expenses/${id}/attachment`,
+        responseHandler: async (response: Response) =>
+          response.ok ? response.blob() : response.json(),
+      }),
+      transformResponse: (blob: Blob, meta: any, { fallbackFilename }) => {
+        const header = meta?.response?.headers.get('content-disposition')
+        let filename = fallbackFilename || 'attachment'
+        if (header) {
+          const match = /filename\*?=['"]?(?:UTF-8'')?([^;'"]+)/i.exec(header)
+          if (match?.[1]) filename = decodeURIComponent(match[1])
+        }
+        return { blob, filename }
+      },
+    }),
   }),
 })
 
@@ -133,4 +198,7 @@ export const {
   useListProjectExpensesQuery,
   useGetTaskVarianceQuery,
   useGetCostReportQuery,
+  useUploadExpenseAttachmentMutation,
+  useDeleteExpenseAttachmentMutation,
+  useDownloadExpenseAttachmentMutation,
 } = expenseApi
