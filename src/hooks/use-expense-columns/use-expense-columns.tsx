@@ -3,7 +3,8 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { useIntl } from 'react-intl'
 
-import { Badge, Text } from '@/components'
+import { Badge } from '@/components/ui/badge'
+import { Text } from '@/components/ui/text'
 import { useFormatDate } from '@/i18n'
 import type { ProjectExpense } from '@/types'
 import {

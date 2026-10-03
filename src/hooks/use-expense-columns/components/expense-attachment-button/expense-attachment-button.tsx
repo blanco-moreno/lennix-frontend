@@ -4,7 +4,7 @@ import * as React from 'react'
 import toast from 'react-hot-toast'
 import { useIntl } from 'react-intl'
 
-import { Button } from '@/components'
+import { Button } from '@/components/ui/button'
 import { useDownloadExpenseAttachmentMutation } from '@/services/expense'
 import type { ProjectExpense } from '@/types'
 import { downloadBlob, expenseManagementMessages as m } from '@/utils'

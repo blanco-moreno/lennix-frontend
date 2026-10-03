@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 
-import { RoleBadge } from '@/components'
+import { RoleBadge } from '@/components/ui/role-badge'
 import { useGetAssignableMembersQuery } from '@/services/project'
 import type { RoleSlug } from '@/utils'
 

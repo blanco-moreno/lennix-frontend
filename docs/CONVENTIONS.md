@@ -48,9 +48,11 @@ only one view uses lives under that view.
 Enforced by lint: the restricted-path zones in `eslint.config.mjs` block
 features→views, components→features and services, hooks→features and views,
 cross-view imports, UI in the data layer, and upward imports from leaf modules.
-Tests and mocks are exempt. A shared hook _may_ reach for `@/components`: a hook
-that builds table columns renders them with the same primitives everything else
-does.
+Tests and mocks are exempt. A shared hook _may_ render with `components/ui`
+primitives — a hook that builds table columns uses the same ones everything
+else does — but imports each from its own folder (`@/components/ui/badge`),
+never the `@/components` barrel: components import `@/hooks`, and the two
+barrels importing each other is a cycle the bundler splits across chunks.
 
 ## 2. Barrels and doors
 
