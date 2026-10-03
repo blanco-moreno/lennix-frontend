@@ -70,11 +70,9 @@ export function ScheduleSurface({
 }: ScheduleSurfaceProps) {
   const intl = useIntl()
   const [filter, setFilter] = useState<ScheduleFilter>('all')
-  // `fit`, because the first paint of a schedule should be the whole schedule.
-  // `week` was 8px a day chosen against somebody's desktop window: on a phone
-  // it opened three months into a two-year build, and the reader's first act
-  // was always to zoom out to what they had asked to see.
-  const [zoom, setZoom] = useState<ZoomLevel>('fit')
+  // Week: a schedule is read by the week; the chart scrolls horizontally at
+  // every width and opens on today.
+  const [zoom, setZoom] = useState<ZoomLevel>('week')
   const [dependenciesOpen, setDependenciesOpen] = useState(false)
   const [collapsedIds, setCollapsedIds] = useState<ReadonlySet<string>>(
     new Set(),

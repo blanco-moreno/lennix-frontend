@@ -39,7 +39,13 @@ import {
 import type { DependencyNodeTask } from '@/types'
 import { linkCandidates } from '@/utils'
 
-import { buildScheduleRows, type ScheduleRow } from '../../../schedule-gantt'
+import {
+  buildScheduleRows,
+  GanttZoom,
+  type ScheduleRow,
+  ZOOM_DAY_WIDTH,
+  type ZoomLevel,
+} from '../../../schedule-gantt'
 import { ScheduleGantt } from '../../../schedule-gantt/schedule-gantt'
 import { useDependencyEdits } from '../../use-dependency-edits'
 import { DependencyEditor } from '../dependency-editor'
@@ -110,6 +116,8 @@ export function TaskDependencies({
   const { changeRelationship, changeLag, createLink, remove, isCreating } =
     useDependencyEdits(projectId)
   const [openComposer, setOpenComposer] = useState<Direction | null>(null)
+  // The calendar scrolls at the same steps as the schedule.
+  const [zoom, setZoom] = useState<ZoomLevel>('week')
 
   const { predecessors, successors, brokenCount } = useMemo(() => {
     const all = chains
@@ -338,13 +346,16 @@ export function TaskDependencies({
 
       {variant === 'page' && timelineRows.length > 1 && (
         <Stack gap="tight" data-testid="dependency-timeline">
-          <Text size="sm" weight="medium" color="primary">
-            {intl.formatMessage(m.timeline)}
-          </Text>
+          <Flex align="center" justify="space-between" gap="tight" wrap="wrap">
+            <Text size="sm" weight="medium" color="primary">
+              {intl.formatMessage(m.timeline)}
+            </Text>
+            <GanttZoom value={zoom} onChange={setZoom} />
+          </Flex>
           <ScheduleGantt
             rows={timelineRows}
             edges={[...predecessors, ...successors]}
-            dayWidth="fit"
+            dayWidth={ZOOM_DAY_WIDTH[zoom]}
             selectedRowId={taskId}
           />
         </Stack>

@@ -3,7 +3,7 @@ import { FormattedMessage } from 'react-intl'
 
 import { Text, Progress } from '@/components/ui'
 import { listCellsMessages } from '@/components/ui/list-cells/list-cells-messages'
-import { ROW_PROGRESS_BAR_W } from '@/constants'
+import { ROW_PROGRESS_BAR_MIN_W, ROW_PROGRESS_BAR_W } from '@/constants'
 import type { ProjectSubject } from '@/types'
 import {
   clampPercentage,
@@ -34,7 +34,7 @@ export function ProjectProgress({ project }: { project: ProjectSubject }) {
       <Progress
         aria-hidden
         w={ROW_PROGRESS_BAR_W}
-        flexShrink={0}
+        minW={ROW_PROGRESS_BAR_MIN_W}
         h={1.5}
         value={clampPercentage(project.progress)}
         indicatorProps={getProjectProgressColor(project.health.level)}

@@ -63,6 +63,15 @@ export const BAR_SELECTED_STROKE_WIDTH = 2
 export const WEEKEND_BAND = ganttVar('weekend')
 
 /**
+ * The chart's grid, as opacities of the text colour so it holds in both
+ * themes. Rows and weeks are hairlines that pace the eye; months carry the
+ * reading. Below about 6% a line disappears on most screens.
+ */
+export const GRID_ROW_OPACITY = 0.07
+export const GRID_WEEK_OPACITY = 0.07
+export const GRID_MONTH_OPACITY = 0.16
+
+/**
  * Today. Neutral and dashed — see the token's own note: a reference line that
  * borrowed red or amber would read as something the schedule is saying.
  */

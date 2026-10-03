@@ -34,11 +34,18 @@ describe('calculateTaskDuration', () => {
     expect(d.startDate.getMonth()).toBe(6)
   })
 
-  it('floors remaining at zero once the due date has passed', () => {
+  it('caps elapsed at the span once the due date has passed', () => {
+    // Elapsed never exceeds the span beside it; lateness is the due date's job.
     const d = calculateTaskDuration('2026-07-01', '2026-07-05')
     expect(d.totalDuration).toBe(4)
-    expect(d.elapsedDuration).toBe(9)
-    expect(d.remainingDuration).toBe(0) // never 4 - 9 = -5
+    expect(d.elapsedDuration).toBe(4)
+    expect(d.remainingDuration).toBe(0)
+  })
+
+  it('counts nothing elapsed before the start date', () => {
+    const d = calculateTaskDuration('2026-07-20', '2026-07-30')
+    expect(d.elapsedDuration).toBe(0)
+    expect(d.remainingDuration).toBe(10)
   })
 
   it('collapses to all zeroes when both dates are missing', () => {

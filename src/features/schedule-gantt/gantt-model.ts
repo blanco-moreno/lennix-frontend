@@ -280,6 +280,19 @@ export function monthAxisTicks(
 }
 
 /**
+ * Where the last label of an axis row ends, in pixels: its tick, the 4px inset
+ * every label is drawn at, the width its format needs, and the gap any label
+ * keeps (the semibold top row runs a few px past the bare budget). The chart
+ * is at least this wide, so a month that opens on the span's final day reads.
+ */
+export function axisLabelEnd(ticks: AxisTick[], dayWidth: number): number {
+  const last = ticks.at(-1)
+  return last
+    ? last.offsetDays * dayWidth + 4 + LABEL_PX[last.format] + TICK_GAP
+    : 0
+}
+
+/**
  * Below this, a weekend is four pixels of shading between two working weeks —
  * a texture, not an interval. The band is drawn only where it can be read as
  * the two days it stands for.

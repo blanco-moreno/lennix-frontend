@@ -16,6 +16,7 @@ import {
   SCROLL_AREA_MAX_H,
   SCROLLBAR_GUTTER,
   scrollAreaMaxHeight,
+  STACKED_NAME_LINE,
 } from './gantt-geometry'
 import type { ScheduleRow } from './gantt-model'
 import { ScheduleGantt, type ScheduleGanttProps } from './schedule-gantt'
@@ -631,6 +632,82 @@ describe('ScheduleGantt', () => {
         base: `${LABEL_WIDTH.base}px 200px`,
         xl: `${LABEL_WIDTH.xl}px 200px`,
       })
+    })
+  })
+
+  describe('the axis holds at every width', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals()
+    })
+
+    it('sizes its text in style, which the CSS reset cannot override', () => {
+      // Chakra's reset sets `* { font-size: inherit }`, and CSS outranks an SVG
+      // `font-size` attribute: as an attribute, every label drew at 16px.
+      renderWithProviders(<ScheduleGantt rows={twoRows} />)
+
+      const label = screen.getByTestId('gantt-axis').querySelector('text')
+      expect(label).toHaveStyle({ fontSize: '10px' })
+    })
+
+    it('keeps the last month label inside the chart when the span ends on the 1st', () => {
+      renderWithProviders(
+        <ScheduleGantt
+          rows={[row({ startDate: '2025-06-01', dueDate: '2026-08-01' })]}
+          dayWidth={8}
+        />,
+      )
+
+      const axis = screen.getByTestId('gantt-axis')
+      const last = [...axis.querySelectorAll('text')]
+        .filter((text) => text.getAttribute('y') === '15')
+        .at(-1)!
+      // 45px: the width the model budgets for a `MMM yyyy` label.
+      expect(Number(axis.getAttribute('width'))).toBeGreaterThanOrEqual(
+        Number(last.getAttribute('x')) + 45,
+      )
+    })
+
+    it('names every row above its bar on a phone, with nothing to unfold', () => {
+      vi.stubGlobal('matchMedia', (query: string) => ({
+        matches: query === '(max-width: 47.99em)',
+        media: query,
+        onchange: null,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        dispatchEvent: () => false,
+      }))
+      renderWithProviders(<ScheduleGantt rows={twoRows} />)
+
+      expect(screen.getByTestId('gantt-labels')).toHaveAttribute(
+        'data-stacked',
+        'true',
+      )
+      // Both names read; there is no fold control left to hide them behind.
+      expect(screen.getByText('Obras preliminares')).toBeVisible()
+      expect(screen.getByText('Estructura')).toBeVisible()
+      expect(
+        screen.queryByTestId('gantt-labels-toggle'),
+      ).not.toBeInTheDocument()
+      // The first bar sits below its name line, not centred over it.
+      const firstBar = screen.getAllByTestId('gantt-bar')[0]
+      expect(Number(firstBar.getAttribute('y'))).toBe(STACKED_NAME_LINE + 2)
+    })
+  })
+
+  describe('the grid is a plane', () => {
+    it('draws a line under every row, across the whole chart', () => {
+      renderWithProviders(<ScheduleGantt rows={twoRows} dayWidth={10} />)
+
+      const lines = screen.getAllByTestId('gantt-row-line')
+      expect(lines).toHaveLength(twoRows.length)
+      // Under the second row, full width: Y reads straight across to X.
+      expect(lines[1]).toHaveAttribute('y1', String(2 * ROW_HEIGHT - 0.5))
+      expect(lines[1]).toHaveAttribute(
+        'x2',
+        screen.getByTestId('gantt-chart').getAttribute('width'),
+      )
     })
   })
 

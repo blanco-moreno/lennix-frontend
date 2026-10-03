@@ -47,9 +47,10 @@ describe('SchedulePreview', () => {
     )
 
     const zoom = screen.getByTestId('schedule-zoom')
-    for (const label of ['Fit', 'Day', 'Week', 'Month']) {
-      expect(zoom).toHaveTextContent(label)
-    }
+    expect(zoom).toHaveTextContent('Week')
+    expect(zoom).toHaveTextContent('Month')
+    expect(zoom).not.toHaveTextContent('Fit')
+    expect(zoom).not.toHaveTextContent('Day')
   })
 
   it('opens the first phase and folds the rest, one tap away', () => {

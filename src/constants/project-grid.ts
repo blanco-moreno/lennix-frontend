@@ -50,7 +50,8 @@ const DATA_TRACKS = {
     'minmax(8rem, 1.4fr)',
     'minmax(5.5rem, 1fr)',
     'minmax(6rem, 1.1fr)',
-    'minmax(7rem, 1.2fr)',
+    // Money: "$1,850,000.00" and its wallet icon need 8.5rem at `lg`.
+    'minmax(8.5rem, 1.2fr)',
   ],
 } as const
 
@@ -90,3 +91,11 @@ export const PROJECT_ROW_MIN_H = '4.75rem'
  * 30% avance look longer than a 60% gasto purely because the column was wider.
  */
 export const ROW_PROGRESS_BAR_W = '6rem'
+
+/**
+ * 2.5rem — how far a row's bar may give way when its column is narrower than
+ * the bar plus its figure (`lg` at 1024px, the stacked card on a phone). The
+ * figure never shrinks; the bar does, so "100.0%" stays clear of the Estado
+ * badge next to it.
+ */
+export const ROW_PROGRESS_BAR_MIN_W = '2.5rem'

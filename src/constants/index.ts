@@ -10,6 +10,7 @@ export {
   PROJECT_GRID_COLUMNS,
   PROJECT_ROW_MIN_H,
   projectGridColumns,
+  ROW_PROGRESS_BAR_MIN_W,
   ROW_PROGRESS_BAR_W,
 } from './project-grid'
 export { TASK_GRID_COLUMNS, TASK_ROW_MIN_H, taskGridColumns } from './task-grid'

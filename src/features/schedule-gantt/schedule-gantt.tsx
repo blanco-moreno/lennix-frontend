@@ -9,9 +9,10 @@ import {
   chakra,
   useBreakpointValue,
   useElementRect,
+  useMediaQuery,
 } from '@chakra-ui/react'
-import { AlertTriangle, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { AlertTriangle } from 'lucide-react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import { EmptyState, Tooltip } from '@/components'
@@ -27,13 +28,14 @@ import {
   fitDayWidth,
   labelColumns,
   LABEL_WIDTH,
-  LABEL_WIDTH_COLLAPSED,
+  rowLayout,
   rowWindow,
   SCROLL_AREA_MAX_H,
   SCROLLBAR_GUTTER,
   SUBAXIS_HEIGHT,
 } from './gantt-geometry'
 import {
+  axisLabelEnd,
   type AxisTick,
   buildTimeline,
   monthAxisTicks,
@@ -57,6 +59,9 @@ import {
   BLOCKED_STROKE_DASH,
   CRITICAL_HATCH_ID,
   EDGE_ARROW_ID,
+  GRID_MONTH_OPACITY,
+  GRID_ROW_OPACITY,
+  GRID_WEEK_OPACITY,
   PROGRESS_MARK,
   rowBackground,
   TODAY_LINE,
@@ -86,12 +91,8 @@ export interface ScheduleGanttProps {
   rows: ScheduleRow[]
   /** Edges drawn between bars; broken ones get a stub instead of a line. */
   edges?: DependencyNode[]
-  /**
-   * Horizontal pixels per calendar day, or `fit` to make the whole timeline
-   * land inside the chart's own width. `fit` is what a screen of unknown size
-   * needs and a fixed ladder of zoom steps cannot give it.
-   */
-  dayWidth?: number | 'fit'
+  /** Horizontal pixels per calendar day. The chart scrolls when it is wider. */
+  dayWidth?: number
   selectedRowId?: string | null
   onSelectRow?: (rowId: string) => void
   /** Phases whose subactivities the surface is hiding. */
@@ -120,8 +121,13 @@ export function ScheduleGantt({
   const rowSummary = useRowSummary(scope)
   // The row scale follows the pointer, not the screen: what makes a 14px bar
   // unreachable is the finger. See `use-gantt-metrics`.
-  const { rowHeight, barHeight } = useGanttMetrics()
-  const [labelsCollapsed, setLabelsCollapsed] = useState(false)
+  const metrics = useGanttMetrics()
+  const { barHeight } = metrics
+  // Below `md` (the grid's own step, where `LABEL_WIDTH.base` is 0) each name
+  // rides on a line above its bar instead of in a column. A max-width query,
+  // so a screen that matches nothing (and the jsdom stub) keeps the column.
+  const [stacked] = useMediaQuery(['(max-width: 47.99em)'])
+  const { rowHeight, barTop } = rowLayout(metrics, stacked)
   // The width the label column *actually* renders at. Read from the same
   // breakpoint map the grid template uses: hard-coding the `md` value made the
   // fit zoom 120px too generous on `xl`, where the column is 380px — which is
@@ -136,6 +142,20 @@ export function ScheduleGantt({
   // Where the scrollport is, so a large schedule mounts only the rows in it.
   const [scrollTop, setScrollTop] = useState(0)
   const timeline = buildTimeline(rows)
+
+  // Open on today, once per zoom: a schedule read week by week is about the
+  // week you are in. Not on resize, which would move the chart under a reader.
+  const centredFor = useRef<number | null>(null)
+  useEffect(() => {
+    const area = scrollAreaRef.current
+    if (!area || !scrollAreaRect || centredFor.current === dayWidth) return
+    centredFor.current = dayWidth
+    const today = area.querySelector('[data-testid="gantt-today"]')
+    if (!today) return
+    const box = area.getBoundingClientRect()
+    area.scrollLeft +=
+      today.getBoundingClientRect().left - (box.left + box.width / 2)
+  }, [dayWidth, scrollAreaRect, scrollAreaRef])
 
   /** The model already chose the format; the component only localises it. */
   const tickLabel = (tick: AxisTick) =>
@@ -156,9 +176,7 @@ export function ScheduleGantt({
     )
   }
 
-  const labelWidth = labelsCollapsed
-    ? LABEL_WIDTH_COLLAPSED
-    : breakpointLabelWidth
+  const labelWidth = breakpointLabelWidth
   // What the timeline may spend: the box, less the label column, less the two
   // strips that are chrome — the border pair and the vertical scrollbar — and
   // less the tail the last bar's handle and outline draw into.
@@ -168,18 +186,24 @@ export function ScheduleGantt({
     SCROLLBAR_GUTTER -
     2 -
     CHART_TAIL
-  // Fixed zooms are floored at the fit width: a day may be wider than the
-  // step asks, never narrower than the viewport — a chart that ends mid-panel
+  // The zoom is floored at the fit width: a day may be wider than the step
+  // asks, never narrower than the viewport — a chart that ends mid-panel
   // leaves a blank strip that reads as broken, not as "no more work".
-  const resolvedDayWidth =
-    dayWidth === 'fit'
-      ? fitDayWidth(timeline.days, availableChartWidth)
-      : Math.max(dayWidth, fitDayWidth(timeline.days, availableChartWidth))
-  const chartWidth = timeline.days * resolvedDayWidth + CHART_TAIL
+  const resolvedDayWidth = Math.max(
+    dayWidth,
+    fitDayWidth(timeline.days, availableChartWidth),
+  )
   // Two rows, one source each — and the same lists draw the grid, so a line can
   // never drift from the label that names it.
   const monthTicks = monthAxisTicks(timeline, resolvedDayWidth)
   const weekTicks = weekAxisTicks(timeline, resolvedDayWidth)
+  // A span ending on the 1st puts its last month's label on the final pixel;
+  // the chart grows to hold it.
+  const chartWidth = Math.max(
+    timeline.days * resolvedDayWidth + CHART_TAIL,
+    axisLabelEnd(monthTicks, resolvedDayWidth),
+    axisLabelEnd(weekTicks, resolvedDayWidth),
+  )
   // A single week tick is the span's own start, not a rhythm: no second row.
   const twoTierAxis = weekTicks.length > 1
   const axisHeight = AXIS_HEIGHT + (twoTierAxis ? SUBAXIS_HEIGHT : 0)
@@ -211,7 +235,7 @@ export function ScheduleGantt({
       x: bar.offsetDays * resolvedDayWidth,
       width: Math.max(2, bar.durationDays * resolvedDayWidth),
       delayWidth: bar.delayDays * resolvedDayWidth,
-      y: index * rowHeight + (rowHeight - barHeight) / 2,
+      y: index * rowHeight + barTop,
     }
   }
 
@@ -242,7 +266,7 @@ export function ScheduleGantt({
       >
         <Box
           display="grid"
-          gridTemplateColumns={labelColumns(chartWidth, labelsCollapsed)}
+          gridTemplateColumns={labelColumns(chartWidth)}
           w="max-content"
           // The grid ends before the scrollport does, so the last row is never
           // under the scrollbar. Part of the layout, not a nudge: it is the
@@ -251,9 +275,7 @@ export function ScheduleGantt({
           data-testid="gantt-grid"
         >
           {/* Corner — pinned on both axes; it covers where axis meets labels.
-              It also carries the fold: the only chrome that is reachable
-              whatever the chart has been scrolled to belongs to the control
-              that gives the timeline its width back. */}
+              Below `md` its track is 0px wide and it draws nothing. */}
           <Box
             position="sticky"
             top={0}
@@ -262,43 +284,9 @@ export function ScheduleGantt({
             bg="bg.panel"
             h={`${axisHeight}px`}
             borderBottomWidth="1px"
-            borderRightWidth="1px"
+            borderRightWidth={{ base: 0, md: '1px' }}
             borderColor="border"
-            display="flex"
-            alignItems="center"
-            justifyContent={labelsCollapsed ? 'center' : 'flex-end'}
-            px={1}
-          >
-            <Tooltip
-              content={intl.formatMessage(
-                labelsCollapsed ? m.expandLabels : m.collapseLabels,
-              )}
-            >
-              <RowButton
-                type="button"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                w={5}
-                h={5}
-                rounded="sm"
-                color="fg.muted"
-                _hover={{ color: 'fg.default' }}
-                aria-expanded={!labelsCollapsed}
-                aria-label={intl.formatMessage(
-                  labelsCollapsed ? m.expandLabels : m.collapseLabels,
-                )}
-                data-testid="gantt-labels-toggle"
-                onClick={() => setLabelsCollapsed((folded) => !folded)}
-              >
-                {labelsCollapsed ? (
-                  <PanelLeftOpen size={14} aria-hidden />
-                ) : (
-                  <PanelLeftClose size={14} aria-hidden />
-                )}
-              </RowButton>
-            </Tooltip>
-          </Box>
+          />
 
           {/* Time axis — the reference a 150-row schedule loses the moment it
               scrolls, so it stays pinned. Two rows where the zoom affords
@@ -331,10 +319,13 @@ export function ScheduleGantt({
                     stroke="currentColor"
                     strokeOpacity={0.15}
                   />
+                  {/* Sizes go in `style`, never the attribute: the reset's
+                      `* { font-size: inherit }` outranks an SVG presentation
+                      attribute, which would draw every label at 16px. */}
                   <text
                     x={tick.offsetDays * resolvedDayWidth + 4}
                     y={15}
-                    fontSize={10}
+                    style={{ fontSize: 10 }}
                     fontWeight={twoTierAxis ? 600 : 400}
                     fill="currentColor"
                     opacity={0.75}
@@ -358,7 +349,7 @@ export function ScheduleGantt({
                       key={tick.day}
                       x={tick.offsetDays * resolvedDayWidth + 4}
                       y={AXIS_HEIGHT + 12}
-                      fontSize={9}
+                      style={{ fontSize: 9 }}
                       fill="currentColor"
                       opacity={0.55}
                     >
@@ -386,14 +377,29 @@ export function ScheduleGantt({
             </svg>
           </Box>
 
-          {/* Label column — the accessible, keyboard-operable view of the chart. */}
+          {/* Label column — the accessible, keyboard-operable view of the chart.
+              Stacked, its track is 0px and it overflows across the scrollport,
+              pinned left, so every name stays on screen above its bar while
+              the timeline scrolls under it. */}
           <Box
             position="sticky"
             left={0}
             zIndex={2}
-            bg="bg.panel"
-            borderRightWidth="1px"
+            {...(stacked
+              ? {
+                  w: `${(scrollAreaRect?.width ?? 0) - SCROLLBAR_GUTTER - 2}px`,
+                  pointerEvents: 'none',
+                }
+              : {
+                  bg: 'bg.panel',
+                  borderRightWidth: '1px',
+                  // The row lines carry on under the names, so a row reads
+                  // from its name to its bar along one line.
+                  bgImage: `repeating-linear-gradient(to bottom, transparent 0 ${rowHeight - 1}px, color-mix(in srgb, currentColor ${Math.round(GRID_ROW_OPACITY * 100)}%, transparent) ${rowHeight - 1}px ${rowHeight}px)`,
+                })}
             borderColor="border"
+            data-testid="gantt-labels"
+            data-stacked={stacked || undefined}
           >
             {spacerAbove > 0 && <Box h={`${spacerAbove}px`} />}
             {mountedRows.map((row) => (
@@ -405,7 +411,7 @@ export function ScheduleGantt({
                 hovered={hoveredRowId === row.id}
                 collapsed={collapsedIds?.has(row.id) ?? false}
                 rowHeight={rowHeight}
-                labelsCollapsed={labelsCollapsed}
+                stacked={stacked}
                 onToggleCollapse={
                   onToggleCollapse ? () => onToggleCollapse(row.id) : undefined
                 }
@@ -523,9 +529,25 @@ export function ScheduleGantt({
                 )
               })}
 
-              {/* The grid is the axis, continued down. Months carry the
-                  reading, weeks only pace it — so they are drawn fainter
-                  instead of turning the chart into graph paper. */}
+              {/* The grid is a plane: a bar is read by its row (Y) and by the
+                  calendar (X), so both get lines. Rows and weeks are hairlines
+                  that pace the eye; months are stronger because they carry the
+                  reading. Only mounted rows draw, like everything else here. */}
+              {mountedRows.map((row) => {
+                const y = ((rowIndex.get(row.id) ?? 0) + 1) * rowHeight - 0.5
+                return (
+                  <line
+                    key={`row-line-${row.id}`}
+                    data-testid="gantt-row-line"
+                    x1={0}
+                    x2={chartWidth}
+                    y1={y}
+                    y2={y}
+                    stroke="currentColor"
+                    strokeOpacity={GRID_ROW_OPACITY}
+                  />
+                )
+              })}
               {weekTicks.map((tick) => (
                 <line
                   key={`week-${tick.day}`}
@@ -534,7 +556,7 @@ export function ScheduleGantt({
                   y1={0}
                   y2={chartHeight}
                   stroke="currentColor"
-                  strokeOpacity={0.04}
+                  strokeOpacity={GRID_WEEK_OPACITY}
                 />
               ))}
               {monthTicks.map((tick) => (
@@ -545,7 +567,7 @@ export function ScheduleGantt({
                   y1={0}
                   y2={chartHeight}
                   stroke="currentColor"
-                  strokeOpacity={0.1}
+                  strokeOpacity={GRID_MONTH_OPACITY}
                 />
               ))}
 
@@ -634,7 +656,7 @@ export function ScheduleGantt({
                         x={bar.x + bar.width + bar.delayWidth + 4}
                         y={bar.y + barHeight / 2}
                         dominantBaseline="central"
-                        fontSize={9}
+                        style={{ fontSize: 9 }}
                         fill="currentColor"
                         opacity={0.65}
                         pointerEvents="none"

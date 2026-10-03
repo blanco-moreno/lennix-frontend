@@ -3,7 +3,7 @@ import { Wallet } from 'lucide-react'
 import { FormattedMessage } from 'react-intl'
 
 import { Progress, Text } from '@/components/ui'
-import { ROW_PROGRESS_BAR_W } from '@/constants'
+import { ROW_PROGRESS_BAR_MIN_W, ROW_PROGRESS_BAR_W } from '@/constants'
 import type { ProjectSubject } from '@/types'
 import {
   clampPercentage,
@@ -55,7 +55,7 @@ export function ProjectMoney({ project }: { project: ProjectSubject }) {
             <Progress
               aria-hidden
               w={ROW_PROGRESS_BAR_W}
-              flexShrink={0}
+              minW={ROW_PROGRESS_BAR_MIN_W}
               h={1.5}
               value={clampPercentage(spentPercent)}
               indicatorProps={getBudgetProgressBarColor(

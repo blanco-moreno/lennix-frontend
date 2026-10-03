@@ -4,6 +4,7 @@ import type { Task } from '@/types'
 
 import {
   addDays,
+  axisLabelEnd,
   buildScheduleRows,
   buildTimeline,
   daysBetween,
@@ -209,6 +210,22 @@ describe('monthAxisTicks', () => {
     expect(
       monthAxisTicks({ start: '2026-01-10', end: '2026-01-20', days: 11 }, 3),
     ).toEqual([{ day: '2026-01-10', offsetDays: 0, format: 'month' }])
+  })
+})
+
+describe('axisLabelEnd', () => {
+  // Torre Residencial Norte's shape: the span ends on the 1st of its last
+  // month, so the closing tick sits on the final day.
+  const endsOnFirst = { start: '2025-06-01', end: '2026-08-01', days: 427 }
+
+  it('reaches past a span whose last month opens on its final day', () => {
+    const ticks = monthAxisTicks(endsOnFirst, 8)
+    expect(ticks.at(-1)?.day).toBe('2026-08-01')
+    expect(axisLabelEnd(ticks, 8)).toBeGreaterThan(endsOnFirst.days * 8)
+  })
+
+  it('is zero for an axis with no ticks', () => {
+    expect(axisLabelEnd([], 8)).toBe(0)
   })
 })
 

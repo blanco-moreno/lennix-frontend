@@ -217,6 +217,18 @@ describe('TaskDependencies', () => {
     })
   })
 
+  it('scrolls the calendar at week and month steps, like the schedule', async () => {
+    renderDependencies(PHASE, 'Estructura')
+
+    const timeline = await screen.findByTestId('dependency-timeline')
+    const zoom = within(timeline).getByTestId('schedule-zoom')
+    expect(within(zoom).getByRole('button', { name: 'Week' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(within(zoom).getByRole('button', { name: 'Month' })).toBeVisible()
+  })
+
   it('drops the pivot card and the chart in the drawer, and nothing else', async () => {
     // One grammar wherever the graph is read. The drawer sits on top of the
     // full Gantt, which already draws these bars, and its own title already

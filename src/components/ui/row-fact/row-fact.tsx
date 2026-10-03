@@ -29,7 +29,7 @@ export function RowFact({ label, children }: RowFactProps) {
         color="muted"
         hideFrom="lg"
         flexShrink={0}
-        minW="7rem"
+        minW="5.5rem"
       >
         {label}
       </Text>

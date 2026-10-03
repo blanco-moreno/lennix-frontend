@@ -100,7 +100,7 @@ export function GanttEdges({
                 x={midX + 3}
                 y={(fromY + toY) / 2}
                 dominantBaseline="central"
-                fontSize={8}
+                style={{ fontSize: 8 }}
                 fill="currentColor"
                 opacity={0.6}
                 pointerEvents="none"

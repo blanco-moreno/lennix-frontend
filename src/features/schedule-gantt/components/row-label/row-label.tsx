@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl'
 
 import { Text } from '@/components'
 
-import { ROW_HEIGHT } from '../../gantt-geometry'
+import { ROW_HEIGHT, STACKED_NAME_LINE } from '../../gantt-geometry'
 import type { ScheduleRow } from '../../gantt-model'
 import { useRowSummary } from '../../hooks/use-row-summary'
 import { MARK_SIZE, ROW_MARKS } from '../../row-marks'
@@ -24,11 +24,12 @@ interface RowLabelProps {
   /** The row scale in force — taller on a coarse pointer. */
   rowHeight?: number
   /**
-   * The label column is folded to its chevron and marks. The name goes with
-   * it, but only visually: `aria-label` still carries it, so the row keeps
-   * saying which task it is to anyone reading by ear.
+   * Phone layout: no column, the label is the row's top line drawn over the
+   * chart. Only that line takes the press, so the bar under it stays the
+   * bar's own target, and it carries no fill: the chart already shades the
+   * selected and hovered row across its width.
    */
-  labelsCollapsed?: boolean
+  stacked?: boolean
   onToggleCollapse?: () => void
   onHoverChange: (isOver: boolean) => void
   onActivate: () => void
@@ -41,7 +42,7 @@ export function RowLabel({
   hovered,
   collapsed = false,
   rowHeight = ROW_HEIGHT,
-  labelsCollapsed = false,
+  stacked = false,
   onToggleCollapse,
   onHoverChange,
   onActivate,
@@ -62,13 +63,14 @@ export function RowLabel({
       w="full"
       flex={1}
       minW={0}
-      h={`${rowHeight}px`}
+      h={stacked ? `${STACKED_NAME_LINE}px` : `${rowHeight}px`}
       alignItems="center"
       gap={1.5}
       px={2}
-      pl={row.level === 'subtask' && !labelsCollapsed ? 6 : 2}
+      pl={row.level === 'subtask' ? 6 : 2}
       textAlign="left"
-      bg={background.bg}
+      bg={stacked ? undefined : background.bg}
+      pointerEvents="auto"
       onPointerEnter={() => onHoverChange(true)}
       onPointerLeave={() => onHoverChange(false)}
       data-testid="gantt-row-label"
@@ -81,18 +83,19 @@ export function RowLabel({
         Shared with three text badges it is left 38px of 260, and finding out
         which task you are looking at costs a hover or a drawer.
       */}
-      {!labelsCollapsed && (
-        <Text
-          size="xs"
-          color={row.level === 'task' ? 'primary' : 'muted'}
-          weight={row.level === 'task' ? 'medium' : undefined}
-          lineClamp={1}
-          flex={1}
-          minW={0}
-        >
-          {row.title}
-        </Text>
-      )}
+      <Text
+        size="xs"
+        color={row.level === 'task' ? 'primary' : 'muted'}
+        weight={row.level === 'task' ? 'medium' : undefined}
+        lineClamp={1}
+        flex={stacked ? undefined : 1}
+        minW={0}
+        // Over the chart the name crosses gridlines and dependency edges; a
+        // backing keeps it readable without hiding what runs behind it.
+        {...(stacked && { bg: 'bg.panel/80', px: 1, rounded: 'sm' })}
+      >
+        {row.title}
+      </Text>
       {/*
         The same three states, as marks instead of sentences: ~50px of icons
         rather than ~220px of pills. `aria-hidden` because the row's own
@@ -119,15 +122,30 @@ export function RowLabel({
     </RowButton>
   )
 
-  if (!collapsible) return label
+  // Stacked, the row box is the whole row but transparent to the pointer:
+  // only the name line under the finger belongs to the label.
+  const rowBox = stacked
+    ? ({ align: 'flex-start', pointerEvents: 'none' } as const)
+    : ({ align: 'center' } as const)
+
+  if (!collapsible) {
+    return stacked ? (
+      <Flex h={`${rowHeight}px`} {...rowBox}>
+        {label}
+      </Flex>
+    ) : (
+      label
+    )
+  }
 
   return (
-    <Flex align="center" h={`${rowHeight}px`}>
+    <Flex h={`${rowHeight}px`} {...rowBox}>
       <RowButton
         type="button"
         flexShrink={0}
         w={5}
-        h="full"
+        h={stacked ? `${STACKED_NAME_LINE}px` : 'full'}
+        pointerEvents="auto"
         display="flex"
         alignItems="center"
         justifyContent="center"

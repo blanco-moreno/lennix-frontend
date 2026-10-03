@@ -6,6 +6,8 @@ import {
   edgeAnchors,
   LABEL_WIDTH,
   labelColumns,
+  rowLayout,
+  STACKED_NAME_LINE,
   SCROLLBAR_GUTTER,
   scrollAreaMaxHeight,
 } from './gantt-geometry'
@@ -81,5 +83,19 @@ describe('edgeAnchors', () => {
 
   it('anything unrecognized draws as FS', () => {
     expect(edgeAnchors('nonsense')).toEqual({ from: 'end', to: 'start' })
+  })
+})
+
+describe('rowLayout', () => {
+  const mouse = { rowHeight: 30, barHeight: 14 }
+
+  it('centres the bar in its row beside a name column', () => {
+    expect(rowLayout(mouse, false)).toEqual({ rowHeight: 30, barTop: 8 })
+  })
+
+  it('puts the bar under a name line of its own when stacked', () => {
+    const { rowHeight, barTop } = rowLayout(mouse, true)
+    expect(barTop).toBeGreaterThanOrEqual(STACKED_NAME_LINE)
+    expect(barTop + mouse.barHeight).toBeLessThan(rowHeight)
   })
 })

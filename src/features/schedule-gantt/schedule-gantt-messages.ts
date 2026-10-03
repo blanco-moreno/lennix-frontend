@@ -69,17 +69,6 @@ export const scheduleGanttMessages = defineMessages({
     defaultMessage: 'Expand “{title}”',
     description: 'Shows a collapsed phase’s subactivities again',
   },
-  collapseLabels: {
-    id: 'scheduleGantt.collapseLabels',
-    defaultMessage: 'Fold the name column',
-    description:
-      'Folds the sticky label column to its marks, giving the width to the timeline',
-  },
-  expandLabels: {
-    id: 'scheduleGantt.expandLabels',
-    defaultMessage: 'Unfold the name column',
-    description: 'Brings the activity names back into the label column',
-  },
   rowProgress: {
     id: 'scheduleGantt.rowProgress',
     defaultMessage: '{progress}% done',
@@ -128,17 +117,6 @@ export const scheduleGanttMessages = defineMessages({
     id: 'scheduleGantt.progressLabel',
     defaultMessage: '{progress}%',
     description: 'Percent figure drawn at the end of a bar with progress',
-  },
-  zoomFit: {
-    id: 'scheduleGantt.zoomFit',
-    defaultMessage: 'Fit',
-    description:
-      'Zoom step: the chart picks the scale that lands the whole build inside its own width',
-  },
-  zoomDay: {
-    id: 'scheduleGantt.zoomDay',
-    defaultMessage: 'Day',
-    description: 'Zoom step: one week of work fills the screen',
   },
   zoomWeek: {
     id: 'scheduleGantt.zoomWeek',

@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
-import { ROW_PROGRESS_BAR_W } from '@/constants'
+import { ROW_PROGRESS_BAR_MIN_W, ROW_PROGRESS_BAR_W } from '@/constants'
 import { useFormatDate } from '@/i18n'
 import { formatPercent, getProgressColor, resolveProgressHealth } from '@/utils'
 
@@ -38,7 +38,7 @@ export function ProgressCell({ subject }: { subject: ProgressSubject }) {
     <Flex align="center" gap={2} minW={0} w="full">
       <Progress
         w={ROW_PROGRESS_BAR_W}
-        flexShrink={0}
+        minW={ROW_PROGRESS_BAR_MIN_W}
         h={1.5}
         value={subject.progress}
         indicatorProps={getProgressColor(resolveProgressHealth(subject))}

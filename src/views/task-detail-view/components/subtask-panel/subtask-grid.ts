@@ -13,7 +13,8 @@ export const SUBTASK_GRID_COLUMNS = {
   lg: [
     'minmax(0, 2.4fr)',
     'minmax(7rem, 1.1fr)',
-    'minmax(5.5rem, 0.9fr)',
+    // Estado: 7rem holds "En Progreso" on one line.
+    'minmax(7rem, 0.9fr)',
     'minmax(5.5rem, 0.9fr)',
     'minmax(7rem, 1.2fr)',
     'minmax(9rem, 1.4fr)',

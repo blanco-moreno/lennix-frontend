@@ -11,8 +11,14 @@ export function calculateTaskDuration(
   const totalDuration = Math.ceil(
     (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
   )
-  const elapsedDuration = Math.ceil(
-    (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+  // Inside the span: nothing before the start, never more than the span once
+  // it is overdue. Lateness is the due date's job, not this tile's.
+  const elapsedDuration = Math.min(
+    totalDuration,
+    Math.max(
+      0,
+      Math.ceil((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)),
+    ),
   )
   const remainingDuration = Math.max(0, totalDuration - elapsedDuration)
 

@@ -75,9 +75,9 @@ export function SchedulePreview({ tasks, dependencies }: SchedulePreviewProps) {
 
   const timeline = buildTimeline(rows)
   const phaseCount = rows.filter((row) => row.level === 'task').length
-  // `fit` first: the preview's opening question is "did the whole schedule
-  // land". The fixed steps are for reading a corner of it more closely.
-  const [zoom, setZoom] = useState<ZoomLevel>('fit')
+  // Week, like the live schedule: the preview scrolls through the span, and
+  // the summary line above it says whether the whole schedule landed.
+  const [zoom, setZoom] = useState<ZoomLevel>('week')
 
   return (
     <Stack gap="tight" data-testid="schedule-preview">

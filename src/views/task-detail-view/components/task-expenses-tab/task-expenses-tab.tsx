@@ -160,8 +160,16 @@ export function TaskExpensesTab({ task }: TaskExpensesTabProps) {
             values={{ count: filteredExpenses.length }}
           />
         </Heading>
-        <Flex align="flex-end" gap="tight">
-          <Stack gap={1} width={400}>
+        {/* The filter gives way before the button does, so "Registrar gasto"
+            stays inside the card on a tablet. */}
+        <Flex
+          align="flex-end"
+          gap="tight"
+          minW={0}
+          flex={{ sm: 1 }}
+          justify={{ sm: 'flex-end' }}
+        >
+          <Stack gap={1} flex={1} minW={0} maxW="400px">
             <Label fontSize="xs" color="fg.muted">
               <FormattedMessage {...m.expensesSubtaskFilterLabel} />
             </Label>

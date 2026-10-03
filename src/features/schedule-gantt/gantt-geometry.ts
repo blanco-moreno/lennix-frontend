@@ -60,19 +60,34 @@ export function ganttMetrics(coarsePointer: boolean): GanttMetrics {
  * It was a fixed 260px, which was half the truncation bug: the title shared
  * that width with three text badges and was measured down to 38px on a real
  * row. The name is the row's identifier — it gets the column, and the column
- * grows with the screen the schedule is read on.
+ * grows with the screen the schedule is read on. `base` is 0: on a phone the
+ * names ride above their bars instead (`STACKED_NAME_LINE`).
  */
-export const LABEL_WIDTH = { base: 160, md: 260, xl: 380 } as const
+export const LABEL_WIDTH = { base: 0, md: 260, xl: 380 } as const
 
 /**
- * The label column with the names folded away.
- *
- * At 160px the column eats 41% of a 390px phone, leaving 230px of timeline —
- * about four weeks at the default zoom. Collapsed it keeps the row's chevron
- * and its state mark and gives the rest back to the chart, which is the half
- * of the screen the reader came for. The names are one tap away again.
+ * Below `md` there is no name column, which would take half a phone's width.
+ * Each row carries its name on a line of its own above the bar, pinned to the
+ * scrollport's left edge while the chart scrolls under it.
  */
-export const LABEL_WIDTH_COLLAPSED = 64
+export const STACKED_NAME_LINE = 18
+
+/** Where a row's bar sits, and how tall the row is, in either layout. */
+export function rowLayout(
+  metrics: Pick<GanttMetrics, 'rowHeight' | 'barHeight'>,
+  stacked: boolean,
+): { rowHeight: number; barTop: number } {
+  if (!stacked) {
+    return {
+      rowHeight: metrics.rowHeight,
+      barTop: (metrics.rowHeight - metrics.barHeight) / 2,
+    }
+  }
+  return {
+    rowHeight: STACKED_NAME_LINE + metrics.barHeight + 8,
+    barTop: STACKED_NAME_LINE + 2,
+  }
+}
 
 /**
  * The strip at the bottom of the scroll area that belongs to the scrollbar.
@@ -98,11 +113,7 @@ export const CHART_TAIL = TOUCH_HANDLE_HIT_RADIUS
  * The chart's grid template: the label column, then the timeline. Responsive
  * on the label side only — the timeline is measured in days, not in screen.
  */
-export function labelColumns(
-  chartWidth: number,
-  collapsed = false,
-): Record<string, string> {
-  if (collapsed) return { base: `${LABEL_WIDTH_COLLAPSED}px ${chartWidth}px` }
+export function labelColumns(chartWidth: number): Record<string, string> {
   return Object.fromEntries(
     Object.entries(LABEL_WIDTH).map(([breakpoint, width]) => [
       breakpoint,
