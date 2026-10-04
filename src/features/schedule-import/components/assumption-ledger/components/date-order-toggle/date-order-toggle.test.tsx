@@ -138,7 +138,7 @@ describe('DateOrderToggle', () => {
 
     expect(
       screen.getByText(
-        'Every date in this column reads the same either way — there is nothing to flip.',
+        'Every date in this column reads the same in both orders.',
       ),
     ).toBeInTheDocument()
   })

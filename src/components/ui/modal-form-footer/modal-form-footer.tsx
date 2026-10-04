@@ -14,6 +14,11 @@ export interface ModalFormFooterProps {
   /** Extra submit-disabling condition on top of `isLoading` (e.g. `!isValid`). */
   submitDisabled?: boolean
   onCancel: () => void
+  /**
+   * The form the submit button belongs to, for a footer rendered outside it —
+   * a drawer whose body also holds controls that must not submit the fields.
+   */
+  formId?: string
 }
 
 /**
@@ -28,6 +33,7 @@ export function ModalFormFooter({
   isLoading,
   submitDisabled = false,
   onCancel,
+  formId,
 }: ModalFormFooterProps) {
   return (
     <>
@@ -39,7 +45,11 @@ export function ModalFormFooter({
       >
         <FormattedMessage {...cancelLabel} />
       </Button>
-      <Button type="submit" disabled={isLoading || submitDisabled}>
+      <Button
+        type="submit"
+        form={formId}
+        disabled={isLoading || submitDisabled}
+      >
         {isLoading ? (
           <FormattedMessage {...savingLabel} />
         ) : (

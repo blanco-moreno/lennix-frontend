@@ -18,7 +18,7 @@ const project = () =>
   mapScheduleReviewStateDTO(seedImportReviewStateDTO()).project
 
 /** The wizard owns the draft; this stands in for it. */
-function Host({ pending = 0 }: { pending?: number }) {
+function Host() {
   const [draft, setDraft] = useState<ProjectDetailsDraft>(() =>
     draftFromProject(project()),
   )
@@ -27,7 +27,6 @@ function Host({ pending = 0 }: { pending?: number }) {
       projectId={project().id}
       draft={draft}
       onEdit={(patch) => setDraft((current) => ({ ...current, ...patch }))}
-      pending={pending}
     />
   )
 }
@@ -56,19 +55,10 @@ describe('DraftHeader', () => {
     expect(location).toHaveValue(`${project().location ?? ''}X`)
   })
 
-  it('says what the one Save would write, once something is pending', () => {
-    renderWithProviders(<Host pending={1} />, { store: makeStore() })
-
-    expect(screen.getByTestId('draft-header-pending')).toHaveTextContent(
-      '1 change is applied when you activate',
-    )
-  })
-
-  it('says nothing is pending before the first edit', () => {
+  it('leaves the pending count to the nav, and carries no explainer', () => {
     renderWithProviders(<Host />, { store: makeStore() })
 
-    expect(screen.getByTestId('draft-header-pending')).toHaveTextContent(
-      /Lennix took these from your file/,
-    )
+    expect(screen.queryByTestId('draft-header-pending')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Lennix/)).not.toBeInTheDocument()
   })
 })

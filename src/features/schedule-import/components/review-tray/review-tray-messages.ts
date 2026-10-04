@@ -3,7 +3,7 @@ import { defineMessages } from 'react-intl'
 export const reviewTrayMessages = defineMessages({
   title: {
     id: 'reviewTray.title',
-    defaultMessage: 'Review this ({count})',
+    defaultMessage: '{count} to review',
     description:
       'Header of the tray holding the exceptions the parser could not resolve',
   },
@@ -13,38 +13,9 @@ export const reviewTrayMessages = defineMessages({
       '{count, plural, one {# item holds activation} other {# items hold activation}}',
     description: 'How many tray items must be resolved before go-live',
   },
-  optionalNote: {
-    id: 'reviewTray.optionalNote',
-    defaultMessage: 'The rest is optional — you can activate without it.',
-    description: 'Clarifies that non-structural exceptions never block go-live',
-  },
-  floorNote: {
-    id: 'reviewTray.floorNote',
-    defaultMessage:
-      'Anything else — a wrong name, a date only you can read — is fixed by editing the row directly on the schedule below.',
-    description:
-      'Names the canvas edit as the universal fallback for what has no widget',
-  },
-  structureTitle: {
-    id: 'reviewTray.structureTitle',
-    defaultMessage: '“{title}” has no subactivities under it',
-    description: 'Title of the structure exception card',
-  },
-  structureBody: {
-    id: 'reviewTray.structureBody',
-    defaultMessage:
-      'A main activity is tracked through its subactivities. Lennix can add one mirror subactivity that repeats the main activity, or you can add the real subactivities by editing the schedule.',
-    description:
-      'Explains the every-main-activity-has-subactivities invariant and both ways out of it',
-  },
-  structureAccept: {
-    id: 'reviewTray.structureAccept',
-    defaultMessage: 'Add the mirror subactivity',
-    description: 'One-click acceptance of the mirror subactivity',
-  },
   unclassifiedTitle: {
     id: 'reviewTray.unclassifiedTitle',
-    defaultMessage: 'Lennix could not place “{text}”',
+    defaultMessage: '“{text}” did not land under any main activity',
     description: 'Title of an unclassified-row exception card',
   },
   unclassifiedSource: {
@@ -79,30 +50,22 @@ export const reviewTrayMessages = defineMessages({
   },
   edgeTitle: {
     id: 'reviewTray.edgeTitle',
-    defaultMessage: 'Predecessor “{text}” matched no row',
+    defaultMessage: '“{text}”, written on “{successor}”, matches no activity',
     description: 'Title of an unresolved predecessor exception card',
-  },
-  edgeBody: {
-    id: 'reviewTray.edgeBody',
-    defaultMessage:
-      'It was written on “{successor}”. Pick the row it meant, or leave it — Lennix never invents a dependency.',
-    description:
-      'Explains the unresolved edge and that resolving it is optional',
   },
   edgeNoOptions: {
     id: 'reviewTray.edgeNoOptions',
-    defaultMessage:
-      'No row in this schedule can precede it, so there is nothing to link.',
+    defaultMessage: 'No activity can precede it.',
     description: 'Shown when no legal predecessor exists for the row',
   },
   edgeLabel: {
     id: 'reviewTray.edgeLabel',
-    defaultMessage: 'Predecessor row',
+    defaultMessage: 'Predecessor',
     description: 'Label of the predecessor picker',
   },
   edgePlaceholder: {
     id: 'reviewTray.edgePlaceholder',
-    defaultMessage: 'Choose a row',
+    defaultMessage: 'Choose an activity',
     description: 'Empty state of the predecessor picker',
   },
   edgeSuggested: {
@@ -112,7 +75,7 @@ export const reviewTrayMessages = defineMessages({
   },
   edgeOther: {
     id: 'reviewTray.edgeOther',
-    defaultMessage: 'Every other row',
+    defaultMessage: 'Every other activity',
     description: 'Group of the remaining rows in the predecessor picker',
   },
   edgeAction: {
@@ -124,5 +87,29 @@ export const reviewTrayMessages = defineMessages({
     id: 'reviewTray.working',
     defaultMessage: 'Saving…',
     description: 'Shown on a tray action while its request is in flight',
+  },
+  edgeOpen: {
+    id: 'reviewTray.edgeOpen',
+    defaultMessage: 'Choose predecessor',
+    description:
+      'Opens the drawer of the row the unmatched predecessor was written on',
+  },
+  skippedTitle: {
+    id: 'reviewTray.skippedTitle',
+    defaultMessage:
+      '{count, plural, one {# dependency in the file was not imported} other {# dependencies in the file were not imported}}',
+    description:
+      'Relationships the file states that did not become an edge, with the full count',
+  },
+  skippedItem: {
+    id: 'reviewTray.skippedItem',
+    defaultMessage: '“{text}” · sheet {sheet}, row {row} · {reason}',
+    description:
+      'One relationship that was not imported: the file’s own text, where it is, and why',
+  },
+  skippedCapped: {
+    id: 'reviewTray.skippedCapped',
+    defaultMessage: 'Showing the first {shown} of {total}.',
+    description: 'The skipped list is capped by the parser',
   },
 })

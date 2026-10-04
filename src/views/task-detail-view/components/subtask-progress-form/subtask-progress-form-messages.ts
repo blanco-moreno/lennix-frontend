@@ -44,17 +44,6 @@ export const subtaskProgressModalMessages = defineMessages({
     defaultMessage: 'Current status',
     description: 'Label above the current status badge in the progress modal',
   },
-  progressLabel: {
-    id: 'taskDetail.progressLabel',
-    defaultMessage: 'Progress',
-    description: 'Label of the progress slider in the progress modal',
-  },
-  progressMinWarning: {
-    id: 'taskDetail.progressMinWarning',
-    defaultMessage:
-      'Minimum allowed progress is {minProgress}% (last reported value). To lower it, switch the status to Cancelled.',
-    description: 'Warning shown when the user tries to lower the progress',
-  },
   progressUpdateSuccess: {
     id: 'taskDetail.progressUpdateSuccess',
     defaultMessage: 'Progress and status updated',

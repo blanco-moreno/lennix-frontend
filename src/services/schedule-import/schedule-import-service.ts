@@ -12,16 +12,23 @@ import type {
   ImportExecuteResponseDTO,
   ReviewTaskBudgetsResponseDTO,
 } from '@/types/dto/project-import-dto'
-import type { SubtaskCreateRequestDTO } from '@/types/dto/subtask-dto'
+import type {
+  SubtaskCreateRequestDTO,
+  SubtaskProgressUpdateRequestDTO,
+} from '@/types/dto/subtask-dto'
+import type { TaskCreateRequestDTO } from '@/types/dto/task-dto'
 
 import { api } from '../api-injector'
 
 import type { UpdateReviewRowArg } from './schedule-import-endpoint'
 import {
   activateSchedule,
+  createReviewPhase,
+  deleteReviewRow,
   getImportJob,
   getScheduleReviewState,
   placeReviewRow,
+  updateReviewProgress,
   updateReviewRow,
   updateReviewStep,
   updateReviewTaskBudgets,
@@ -130,6 +137,30 @@ export const scheduleImportApi = api.injectEndpoints({
       invalidatesTags: reviewInvalidation,
     }),
 
+    createReviewPhase: builder.mutation<
+      void,
+      { projectId: string; body: TaskCreateRequestDTO }
+    >({
+      query: createReviewPhase,
+      invalidatesTags: reviewInvalidation,
+    }),
+
+    updateReviewProgress: builder.mutation<
+      void,
+      { projectId: string; id: string; body: SubtaskProgressUpdateRequestDTO }
+    >({
+      query: updateReviewProgress,
+      invalidatesTags: reviewInvalidation,
+    }),
+
+    deleteReviewRow: builder.mutation<
+      void,
+      { projectId: string; level: 'task' | 'subtask'; id: string }
+    >({
+      query: deleteReviewRow,
+      invalidatesTags: reviewInvalidation,
+    }),
+
     /**
      * Both readers of the step go stale on this write: the drafts listing
      * prints the station a draft was left at, and the review state carries the
@@ -169,4 +200,7 @@ export const {
   useUpdateReviewStepMutation,
   useUpdateReviewTaskBudgetsMutation,
   usePlaceReviewRowMutation,
+  useCreateReviewPhaseMutation,
+  useDeleteReviewRowMutation,
+  useUpdateReviewProgressMutation,
 } = scheduleImportApi

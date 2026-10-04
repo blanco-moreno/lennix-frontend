@@ -13,7 +13,7 @@ export const wizardNavMessages = defineMessages({
   },
   nextBlocked: {
     id: 'wizardNav.nextBlocked',
-    defaultMessage: 'Finish this step first — the next one is not ready.',
+    defaultMessage: 'Resolve what blocks activation to continue.',
     description: 'Why Next is disabled: the draft cannot reach the next step',
   },
   activate: {
@@ -36,11 +36,6 @@ export const wizardNavMessages = defineMessages({
     id: 'wizardNav.saving',
     defaultMessage: 'Saving…',
     description: 'Label of the save action while the write is in flight',
-  },
-  saved: {
-    id: 'wizardNav.saved',
-    defaultMessage: 'Saved.',
-    description: 'Confirmation that the draft’s pending edits were written',
   },
   saveFailed: {
     id: 'wizardNav.saveFailed',

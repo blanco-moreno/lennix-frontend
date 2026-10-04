@@ -50,6 +50,7 @@ export function useRowSummary(scope: 'live' | 'draft' = 'live') {
       const facts = [
         row.ref ? intl.formatMessage(m.rowRef, { ref: row.ref }) : null,
         progress,
+        row.openQuestion ? intl.formatMessage(m.openQuestionMark) : null,
       ].filter(Boolean)
       return facts.length > 0 ? `${base}. ${facts.join(' · ')}` : base
     }

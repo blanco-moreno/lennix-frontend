@@ -5,12 +5,13 @@ import { http, HttpResponse } from 'msw'
 import { PATHS } from '@/constants'
 import { server } from '@/mocks/server'
 import { makeStore } from '@/stores'
-import { seedImportReviewStateDTO } from '@/tests/fixtures'
+import { seedImportReviewStateDTO, seedProjectDTO } from '@/tests/fixtures'
 import {
   LOCATION_TEST_ID,
   renderWithProviders,
   SEARCH_TEST_ID,
 } from '@/tests/render-with-providers'
+import { signedInStore } from '@/tests/signed-in-store'
 
 import { DraftReviewCanvas } from './draft-review-canvas'
 
@@ -41,15 +42,12 @@ describe('DraftReviewCanvas', () => {
   it('resumes the draft from the backend review state', async () => {
     renderCanvas('?step=schedule')
 
-    // The receipt and the schedule arrive together — the review IS the canvas.
     expect(
-      await screen.findByText('Read from ampliacion-bodega-logistica.xlsx'),
+      await screen.findByRole('heading', {
+        name: 'ampliacion-bodega-logistica.xlsx',
+      }),
     ).toBeInTheDocument()
     const canvas = screen.getByTestId('schedule-canvas')
-    expect(canvas).toBeInTheDocument()
-    // Scoped to the canvas: the phase names are also options in the tray's
-    // placement picker, which is a different surface saying a different thing
-    // about the same row.
     expect(within(canvas).getByText('OBRAS PRELIMINARES')).toBeInTheDocument()
   })
 
@@ -62,43 +60,49 @@ describe('DraftReviewCanvas', () => {
     expect(screen.queryByText(/simulated|mocked/i)).not.toBeInTheDocument()
   })
 
-  it('resolves the receipt’s claims in two places, split by nature', async () => {
+  it('reads the schedule step as one card: file, questions, listing', async () => {
     renderCanvas('?step=schedule')
-    await screen.findByTestId('draft-review-canvas')
+    const card = await screen.findByTestId('schedule-review')
 
-    // The tray holds what the parser could not resolve; the ledger holds what
-    // it decided. Neither repeats the other, and there is no third list.
-    expect(screen.getByTestId('review-tray')).toBeInTheDocument()
-    expect(screen.getByTestId('assumption-ledger')).toBeInTheDocument()
-    expect(screen.queryByTestId('caveat-list')).not.toBeInTheDocument()
+    expect(within(card).getByTestId('narration-receipt')).toBeInTheDocument()
+    expect(within(card).getByTestId('review-tray')).toBeInTheDocument()
+    expect(within(card).getByTestId('schedule-canvas')).toBeInTheDocument()
+    expect(screen.queryByTestId('assumption-ledger')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('draft-dependencies')).not.toBeInTheDocument()
   })
 
-  it('points at them when the receipt number is clicked', async () => {
+  it('says each step once: one heading, the stepper only names it', async () => {
     renderCanvas('?step=schedule')
-    const caveats = await screen.findByRole('button', {
-      name: /things to check/,
+    await screen.findByTestId('schedule-review')
+
+    expect(
+      screen.getByRole('heading', { name: 'Review activities and dates' }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId('import-step-schedule')).toHaveTextContent(
+      /^2Schedule$/,
+    )
+  })
+
+  it('opens the one drawer from the selected row’s panel', async () => {
+    renderWithProviders(<DraftReviewCanvas projectId={PROJECT_ID} />, {
+      store: signedInStore(),
+      route: `/drafts/${PROJECT_ID}/review?step=schedule`,
     })
-
-    expect(screen.getByTestId('review-tray')).toHaveAttribute(
-      'data-highlighted',
-      'false',
-    )
-    await userEvent.click(caveats)
-    expect(screen.getByTestId('review-tray')).toHaveAttribute(
-      'data-highlighted',
-      'true',
-    )
-    expect(screen.getByTestId('assumption-ledger')).toHaveAttribute(
-      'data-highlighted',
-      'true',
+    const [phase] = (await screen.findAllByTestId('gantt-row-label')).filter(
+      (label) => label.dataset.level === 'task',
     )
 
-    // Clicking again releases it — the receipt is a toggle, not a trap.
-    await userEvent.click(caveats)
-    expect(screen.getByTestId('review-tray')).toHaveAttribute(
-      'data-highlighted',
-      'false',
+    await userEvent.click(phase)
+    await userEvent.click(
+      within(await screen.findByTestId('schedule-selection')).getByRole(
+        'button',
+        { name: 'Edit' },
+      ),
     )
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Main activity' }),
+    ).toBeInTheDocument()
   })
 
   it('keeps the project’s identity above the wizard, at every step', async () => {
@@ -109,10 +113,11 @@ describe('DraftReviewCanvas', () => {
     await userEvent.clear(name)
     await userEvent.type(name, 'Bodega Oeste')
 
-    // One draft, one count: the nav says what the one Save would write.
+    // One draft, one count, said once: beside the Save that would write it.
     expect(screen.getByTestId('wizard-nav-pending')).toHaveTextContent(
       '1 unsaved change',
     )
+    expect(screen.queryByTestId('draft-header-pending')).not.toBeInTheDocument()
     // The header is identity, not money: the budget lives in its own step.
     expect(screen.queryByLabelText('Project budget')).not.toBeInTheDocument()
   })
@@ -347,5 +352,30 @@ describe('DraftReviewCanvas — where the step comes from', () => {
     const nav = within(screen.getByTestId('wizard-nav'))
     expect(nav.getByRole('button', { name: 'Activate schedule' })).toBeEnabled()
     expect(nav.queryByRole('button', { name: 'Next' })).toBeNull()
+  })
+
+  it('writes what the wizard is holding before it activates', async () => {
+    const calls: string[] = []
+    server.use(
+      http.put('*/v1/projects/:id', () => {
+        calls.push('save')
+        return HttpResponse.json(seedProjectDTO(PROJECT_ID))
+      }),
+      http.post('*/v1/schedule/review/:projectId/activate', () => {
+        calls.push('activate')
+        return HttpResponse.json({}, { status: 500 })
+      }),
+    )
+    renderCanvas('?step=confirm')
+    await screen.findByTestId('confirm-summary')
+
+    await userEvent.type(screen.getByLabelText('Location'), 'X')
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Activate schedule' }),
+    )
+
+    // Unsaved per-activity amounts never reach go-live on their own, so the
+    // one Save runs first and the summary shows what actually goes live.
+    await waitFor(() => expect(calls).toEqual(['save', 'activate']))
   })
 })

@@ -10,7 +10,7 @@ describe('TrayCard', () => {
       <TrayCard
         kind="unclassified_row"
         blocking={false}
-        title="Lennix could not place “TOTAL GENERAL”"
+        title="“TOTAL GENERAL” did not land under any main activity"
         body="Place it under a phase"
         meta="Sheet CARTA GANTT, row 17"
       >

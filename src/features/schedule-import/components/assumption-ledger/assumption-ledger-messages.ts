@@ -1,17 +1,6 @@
 import { defineMessages } from 'react-intl'
 
 export const assumptionLedgerMessages = defineMessages({
-  title: {
-    id: 'assumptionLedger.title',
-    defaultMessage: 'What Lennix decided for you',
-    description: 'Header of the assumption ledger',
-  },
-  subtitle: {
-    id: 'assumptionLedger.subtitle',
-    defaultMessage:
-      'One entry per decision, not per cell. Each says what the other reading was.',
-    description: 'Explains that the ledger is aggregated by cause',
-  },
   entry: {
     id: 'assumptionLedger.entry',
     defaultMessage:
@@ -21,7 +10,7 @@ export const assumptionLedgerMessages = defineMessages({
   },
   provenanceToggle: {
     id: 'assumptionLedger.provenanceToggle',
-    defaultMessage: 'Where did this come from?',
+    defaultMessage: 'See it in the file',
     description: 'Opens the source rows behind an assumption',
   },
   provenanceRow: {
@@ -36,13 +25,8 @@ export const assumptionLedgerMessages = defineMessages({
   },
   provenanceSamples: {
     id: 'assumptionLedger.provenanceSamples',
-    defaultMessage: 'Read from the file: {samples}',
+    defaultMessage: 'In the file: {samples}',
     description: 'The raw cell values the parser read, quoted verbatim',
-  },
-  quietTitle: {
-    id: 'assumptionLedger.quietTitle',
-    defaultMessage: 'Minor clean-ups',
-    description: 'Header of the cosmetic, low-consequence assumptions',
   },
   leftOut: {
     id: 'assumptionLedger.leftOut',
@@ -62,8 +46,7 @@ export const assumptionLedgerMessages = defineMessages({
   },
   flipNothing: {
     id: 'assumptionLedger.flipNothing',
-    defaultMessage:
-      'Every date in this column reads the same either way — there is nothing to flip.',
+    defaultMessage: 'Every date in this column reads the same in both orders.',
     description: 'Shown when the alternative reading changes no row',
   },
   flipDone: {

@@ -59,6 +59,7 @@ const draftRow = (
     dueDate: string | null
     /** Source-file provenance — what the review is verifying against. */
     ref: string | null
+    openQuestion: boolean
   },
 ): ScheduleRow => ({
   ...base,
@@ -75,7 +76,11 @@ const draftRow = (
   isOverBudget: false,
 })
 
-export function buildReviewScheduleRows(tasks: ReviewTask[]): ScheduleRow[] {
+/** `questionRowIds`: rows whose predecessor reference is still a question. */
+export function buildReviewScheduleRows(
+  tasks: ReviewTask[],
+  questionRowIds: ReadonlySet<string> = new Set(),
+): ScheduleRow[] {
   return byStart(
     tasks.map((task) => ({ ...task, ...phaseDates(task) })),
   ).flatMap((task) => [
@@ -88,6 +93,7 @@ export function buildReviewScheduleRows(tasks: ReviewTask[]): ScheduleRow[] {
       startDate: task.startDate,
       dueDate: task.dueDate,
       ref: task.ref,
+      openQuestion: questionRowIds.has(task.id),
     }),
     ...byStart(task.subtasks).map((subtask) =>
       draftRow({
@@ -104,6 +110,7 @@ export function buildReviewScheduleRows(tasks: ReviewTask[]): ScheduleRow[] {
         startDate: subtask.startDate,
         dueDate: subtask.dueDate,
         ref: subtask.ref,
+        openQuestion: questionRowIds.has(subtask.id),
       }),
     ),
   ])

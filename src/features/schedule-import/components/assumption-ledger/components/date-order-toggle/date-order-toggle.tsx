@@ -8,7 +8,7 @@ import { Button, Text } from '@/components'
 import { useUpdateReviewRowMutation } from '@/services/schedule-import'
 import type { ReviewTask } from '@/types'
 
-import { useReviewJournal } from '../../../review-tray'
+import { useReviewJournal } from '../../../review-tray/review-journal'
 import { assumptionLedgerMessages as m } from '../../assumption-ledger-messages'
 import {
   flipKey,

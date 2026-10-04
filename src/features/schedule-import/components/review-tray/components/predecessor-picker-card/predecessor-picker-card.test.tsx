@@ -46,15 +46,12 @@ function renderCard(review = state(), tasks = review.tasks) {
 }
 
 describe('PredecessorPickerCard', () => {
-  it('quotes the unmatched name and says resolving it is optional', () => {
+  it('quotes the unmatched name and the row it was written on, as optional', () => {
     const review = renderCard()
 
     expect(
-      screen.getByText('Predecessor “OBRAS PRELIMINRES” matched no row'),
-    ).toBeInTheDocument()
-    expect(
       screen.getByText(
-        `It was written on “${review.tasks[1].title}”. Pick the row it meant, or leave it — Lennix never invents a dependency.`,
+        `“OBRAS PRELIMINRES”, written on “${review.tasks[1].title}”, matches no activity`,
       ),
     ).toBeInTheDocument()
     expect(screen.getByTestId('tray-card')).toHaveAttribute(
@@ -79,7 +76,7 @@ describe('PredecessorPickerCard', () => {
     const review = renderCard()
 
     await userEvent.selectOptions(
-      screen.getByRole('combobox', { name: 'Predecessor row' }),
+      screen.getByRole('combobox', { name: 'Predecessor' }),
       review.tasks[0].id,
     )
     // A file's reference can mean more than finish-to-start: the answer
@@ -103,12 +100,12 @@ describe('PredecessorPickerCard', () => {
     renderCard()
 
     const groups = screen
-      .getByRole('combobox', { name: 'Predecessor row' })
+      .getByRole('combobox', { name: 'Predecessor' })
       .querySelectorAll('optgroup')
 
     expect([...groups].map((group) => group.label)).toEqual([
       'Closest to what the file says',
-      'Every other row',
+      'Every other activity',
     ])
     expect(groups[0].textContent).toContain('OBRAS PRELIMINARES')
   })
@@ -118,11 +115,7 @@ describe('PredecessorPickerCard', () => {
     // The successor is the only row left, so no legal predecessor exists.
     renderCard(review, [review.tasks[1]])
 
-    expect(
-      screen.getByText(
-        'No row in this schedule can precede it, so there is nothing to link.',
-      ),
-    ).toBeInTheDocument()
+    expect(screen.getByText('No activity can precede it.')).toBeInTheDocument()
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 })

@@ -23,7 +23,8 @@ const SHARED_WITH_ENGLISH = new Set([
   // English one.
   'listFilterBar.chipValue',
   'listFilterBar.optionNo',
-  'narrationReceipt.dateRange',
+  'rowDrawer.span',
+  'scheduleFacts.span',
   // "{start} → {end}" is pure notation — same in all three locales.
   'projectRow.dateRange',
   // "+{n}" is the overflow counter's notation, not a word.
@@ -34,7 +35,6 @@ const SHARED_WITH_ENGLISH = new Set([
   'organization.slugLabel',
   'pagination.pageOfTotal',
   'priority.normal',
-  'scheduleCanvas.dateRange',
   // "{progress}%" is a unit, and the aria string is pure ICU notation joined
   // by "·" — same in all three locales.
   'scheduleGantt.progressLabel',

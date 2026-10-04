@@ -88,9 +88,9 @@ export const scheduleGanttMessages = defineMessages({
   },
   rowRef: {
     id: 'scheduleGantt.rowRef',
-    defaultMessage: 'Source row {ref}',
+    defaultMessage: 'Source ID {ref}',
     description:
-      'Provenance of an imported row — the reference it had in the uploaded file',
+      'Provenance of an imported row — the activity’s own ID in the uploaded file, not its row number',
   },
   rowAssignee: {
     id: 'scheduleGantt.rowAssignee',
@@ -112,6 +112,12 @@ export const scheduleGanttMessages = defineMessages({
     id: 'scheduleGantt.overBudgetBadge',
     defaultMessage: 'Over budget',
     description: 'Mark on a phase whose spend exceeds its budget',
+  },
+  openQuestionMark: {
+    id: 'scheduleGantt.openQuestionMark',
+    defaultMessage: 'Open question',
+    description:
+      'Mark on a draft row whose predecessor reference the file named but no row matched',
   },
   progressLabel: {
     id: 'scheduleGantt.progressLabel',

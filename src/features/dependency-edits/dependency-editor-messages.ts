@@ -162,7 +162,7 @@ export const dependencyEditorMessages = defineMessages({
   },
   reasonOtherPhase: {
     id: 'dependencyEditor.reasonOtherPhase',
-    defaultMessage: 'Another phase',
+    defaultMessage: 'Another main activity',
     description:
       'Picker: two subactivities can only be linked under the same main activity',
   },

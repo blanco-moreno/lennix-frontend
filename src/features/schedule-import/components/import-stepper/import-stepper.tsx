@@ -1,7 +1,7 @@
 /**
  * The wizard's one stepper — the only one on the page. Horizontal and compact
  * on a phone, where four stacked stations would be 280px of navigation before
- * the first row of the draft; vertical with its hints from `lg`.
+ * the first row of the draft; vertical from `lg`.
  *
  * It shows the stage and navigates between the stages that are actually
  * reachable; it never *stores* where you are. The URL owns that, and
@@ -9,7 +9,7 @@
  * real state wins.
  */
 
-import { Box, Flex, Stack, chakra } from '@chakra-ui/react'
+import { Box, Flex, chakra } from '@chakra-ui/react'
 import { Check } from 'lucide-react'
 import { useIntl } from 'react-intl'
 
@@ -19,14 +19,13 @@ import { REVIEW_STEPS, type ReviewStep } from '@/types'
 import { importStepperMessages as m } from './import-stepper-messages'
 
 const STEPS = [
-  { step: 'upload', label: m.stepUpload, hint: m.hintUpload },
-  { step: 'schedule', label: m.stepSchedule, hint: m.hintSchedule },
-  { step: 'budget', label: m.stepBudget, hint: m.hintBudget },
-  { step: 'confirm', label: m.stepConfirm, hint: m.hintConfirm },
+  { step: 'upload', label: m.stepUpload },
+  { step: 'schedule', label: m.stepSchedule },
+  { step: 'budget', label: m.stepBudget },
+  { step: 'confirm', label: m.stepConfirm },
 ] as const satisfies readonly {
   step: ReviewStep
   label: unknown
-  hint: unknown
 }[]
 
 const StepButton = chakra('button', {
@@ -36,7 +35,7 @@ const StepButton = chakra('button', {
     gap: 3,
     minW: 0,
     textAlign: 'start',
-    lg: { alignItems: 'flex-start', w: 'full' },
+    lg: { w: 'full' },
     rounded: 'lg',
     px: 3,
     py: 2.5,
@@ -89,7 +88,7 @@ export function ImportStepper({
       aria-label={intl.formatMessage(m.label)}
       data-testid="import-stepper"
     >
-      {STEPS.map(({ step, label, hint }, index) => {
+      {STEPS.map(({ step, label }, index) => {
         const state =
           index < currentIndex
             ? 'done'
@@ -143,22 +142,16 @@ export function ImportStepper({
               </Flex>
 
               {/* Every station is named at every width — a number alone does
-                  not say what the step is, and the map is the whole point of
-                  a stepper. Only the one-line hint waits for the column
-                  layout, where there is a line to put it on. */}
-              <Stack gap={0} minW={0}>
-                <Text
-                  size="sm"
-                  weight={state === 'todo' ? 'medium' : 'semibold'}
-                  color={state === 'todo' ? 'muted' : 'primary'}
-                  whiteSpace="nowrap"
-                >
-                  {intl.formatMessage(label)}
-                </Text>
-                <Text size="xs" color="muted" hideBelow="lg">
-                  {intl.formatMessage(reachable ? hint : m.locked)}
-                </Text>
-              </Stack>
+                  not say what the step is. The step's own heading says what it
+                  asks, so the stepper carries no second line. */}
+              <Text
+                size="sm"
+                weight={state === 'todo' ? 'medium' : 'semibold'}
+                color={state === 'todo' ? 'muted' : 'primary'}
+                whiteSpace="nowrap"
+              >
+                {intl.formatMessage(label)}
+              </Text>
             </StepButton>
 
             {/* The rail between two stations — done up to where you are. It

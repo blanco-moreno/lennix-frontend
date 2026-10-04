@@ -29,13 +29,15 @@ function renderCause(review: ScheduleReviewState, cause: LedgerCause) {
 }
 
 describe('LoudCause', () => {
-  it('names its cause on the card, so the ledger stays inspectable by cause', () => {
+  it('is one review item carrying its one-flip reversal', () => {
     const review = state()
     renderCause(review, seededCause(review))
 
-    const card = screen.getByTestId('ledger-cause')
-    expect(card).toHaveAttribute('data-cause', 'date_format')
-    expect(card).toHaveAttribute('data-consequence', 'high')
+    expect(screen.getByTestId('tray-card')).toHaveAttribute(
+      'data-exception-kind',
+      'assumption',
+    )
+    expect(screen.getByTestId('date-order-toggle')).toBeInTheDocument()
   })
 
   it('offers no flip on a cause that is not a reversible date column', () => {

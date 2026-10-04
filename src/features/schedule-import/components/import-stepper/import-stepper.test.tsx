@@ -42,7 +42,7 @@ describe('ImportStepper', () => {
     )
   })
 
-  it('refuses a station the draft cannot be at, and says why', () => {
+  it('refuses a station the draft cannot be at — the nav says why', () => {
     renderWithProviders(
       <ImportStepper
         current="schedule"
@@ -52,7 +52,6 @@ describe('ImportStepper', () => {
     )
 
     expect(screen.getByTestId('import-step-confirm')).toBeDisabled()
-    expect(screen.getAllByText('Not available yet').length).toBeGreaterThan(0)
   })
 
   it('navigates to a reachable station', async () => {

@@ -131,13 +131,19 @@ active step's surface on the right — `upload → schedule → budget → confi
 step edits its money, but they are one draft of one project: a single hook owns
 both, and "save and continue later" is the one write for them. A step with a
 Save of its own meant the button whose name promises a save could walk away from
-what the step above it was holding. Corrections to the schedule itself — a row,
-a placement, an edge — are written the moment they are made.
+what the step above it was holding. Activate runs that Save first when anything
+is pending, because the per-activity split reaches the server only through it.
+Corrections to the schedule itself — a row, a placement, a subactivity's
+progress, an edge, adding or deleting a row — are written the moment they are
+made, through the review mutations, whose invalidation is scoped to the draft's
+review state. Progress goes through the subtask progress endpoint
+(`useUpdateReviewProgressMutation`) without the live form's floor: a draft's
+figure is the file's reading.
 
 **Edges are edited on the review state.** Activation sends no edges, so every
 edge change goes straight through the dependency endpoints
-(`useDependencyEdits`), from the `draft-dependencies/` panel and from the
-tray's predecessor questions alike. Those writes invalidate the draft's review
+(`useDependencyEdits`), from the row drawer's predecessor list and its
+predecessor questions alike. Those writes invalidate the draft's review
 state, scoped to its project. Rows and edges come from the review state
 (`buildReviewScheduleRows`, `state.dependencies`), never from the live task
 list, so no engine-owned status is drawn. A new link is judged by
@@ -153,26 +159,29 @@ whoever asked for it (`PRJ-9`). The derived fallback is where the work starts,
 not how far the draft may go.
 
 `allocated` from the task-budget response is never rendered: it counts live
-tasks, so it is zero for a draft's whole life (`BUD-4`). The budget step sums the
-split client-side.
+tasks, so it is zero for a draft's whole life (`BUD-4`). The split is summed
+client-side by `summarizeAllocation`, and the budget and confirm steps render it
+through the same `allocation-balance/`; the schedule and confirm steps state the
+draft's counts and span through the same `schedule-facts/`.
 
-| Folder                 | Role                                                                  |
-| ---------------------- | --------------------------------------------------------------------- |
-| `schedule-canvas/`     | The result-first canvas the user lands on                             |
-| `narration-receipt/`   | The checkable receipt of what the parse did                           |
-| `review-tray/`         | The one review mechanism, where rows get resolved                     |
-| `draft-dependencies/`  | The draft's graph with each edge's provenance, and what was skipped   |
-| `assumption-ledger/`   | Assumptions by cause, with the alternative and a one-flip reversal    |
-| `inline-row-edit/`     | Editing rows in place, with edit-pinning so the touched row stays put |
-| `draft-review-canvas/` | The wizard shell over the resumable review state                      |
-| `draft-header/`        | The project's identity above every step                               |
-| `wizard-nav/`          | Back, Next, Activate and Save in the stepper's sticky column          |
-| `confirm-summary/`     | Everything go-live will record, in one read                           |
-| `import-stepper/`      | The one stepper: vertical, four stations, navigates but never stores  |
-| `upload-summary/`      | What the upload actually read                                         |
-| `budget-step/`         | The budget split per main activity                                    |
-| `schedule-preview/`    | The read-only Gantt, fed from the review state so the edges show      |
-| `trust-copy/`          | Contract facts into sentences in the user's language                  |
+| Folder                 | Role                                                                 |
+| ---------------------- | -------------------------------------------------------------------- |
+| `schedule-canvas/`     | The schedule card's Gantt, with the selected row's panel and actions |
+| `narration-receipt/`   | The schedule card's header: the file, its facts, how it was read     |
+| `review-tray/`         | The "to review" band: every open question, one item each             |
+| `assumption-ledger/`   | Ledger model, loud causes with their one-flip reversal               |
+| `row-drawer/`          | Edit or create a row, and its predecessors                           |
+| `schedule-facts/`      | Counts, span and dependencies, shared by schedule and confirm        |
+| `allocation-balance/`  | Budget against its split, shared by budget and confirm               |
+| `draft-review-canvas/` | The wizard shell over the resumable review state                     |
+| `draft-header/`        | The project's identity above every step                              |
+| `wizard-nav/`          | Back, Next, Activate and Save in the stepper's sticky column         |
+| `confirm-summary/`     | Everything go-live will record, in one read                          |
+| `import-stepper/`      | The one stepper: vertical, four stations, navigates but never stores |
+| `upload-summary/`      | What the upload actually read                                        |
+| `budget-step/`         | The budget split per main activity                                   |
+| `schedule-preview/`    | Confirm's read-only Gantt, and the review state → Gantt projection   |
+| `trust-copy/`          | Contract facts into sentences in the user's language                 |
 
 **No word a user reads comes from the contract** (`IMP-6`). The AI service ships
 the _facts_ behind every trust output — a cause, a scope, a chosen token, a
@@ -199,6 +208,10 @@ critical path and propagated delay, dependency building in place with
 relationship type and lag, broken-dependency re-linking, and parent
 auto-complete. It is **one** surface: activities, dependencies and critical path
 were three views of the same schedule.
+
+The selection panel and the selection held in the URL (`?task=`) live in
+`features/schedule-gantt/`, because the draft review's schedule step renders the
+same chart and panel with `scope="draft"`, which drops status and owner.
 
 The chart mounts only the rows in its scrollport once a schedule passes
 `WINDOW_MIN_ROWS` (`features/schedule-gantt/gantt-geometry.ts`): every row's

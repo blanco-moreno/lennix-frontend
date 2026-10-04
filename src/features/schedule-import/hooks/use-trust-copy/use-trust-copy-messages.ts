@@ -33,7 +33,7 @@ export const trustCopyMessages = defineMessages({
   },
   dateFormatUnknown: {
     id: 'trustCopy.dateFormat.unknown',
-    defaultMessage: 'an order I could not determine',
+    defaultMessage: 'an undetermined order',
     description: 'Fallback when no date order was established',
   },
 
@@ -67,18 +67,18 @@ export const trustCopyMessages = defineMessages({
   // --- one clause per ledger cause ---------------------------------------
   causeDateFormat: {
     id: 'trustCopy.cause.dateFormat',
-    defaultMessage: 'I read the {column} dates as {format}.',
+    defaultMessage: 'Dates in the {column} column read as {format}.',
     description: 'The assumption behind a date column’s reading',
   },
   causeSheetChoice: {
     id: 'trustCopy.cause.sheetChoice',
-    defaultMessage: 'I used the “{sheet}” sheet.',
+    defaultMessage: 'The “{sheet}” sheet was used.',
     description: 'The assumption behind which worksheet was read',
   },
   causeDayGridYear: {
     id: 'trustCopy.cause.dayGridYear',
     defaultMessage:
-      'The day grid does not state a year, so I took it from the rest of the file.',
+      'The day grid does not state a year; it was taken from the rest of the file.',
     description: 'The assumption behind a day grid with no year',
   },
   causeHierarchySignal: {
@@ -90,19 +90,19 @@ export const trustCopyMessages = defineMessages({
   causeEdgeRef: {
     id: 'trustCopy.cause.edgeRef',
     defaultMessage:
-      'Some predecessor references match no row, so I left them unlinked.',
+      'Some predecessor references match no activity and were left unlinked.',
     description: 'The assumption behind unresolved dependency references',
   },
   causeLlmMapping: {
     id: 'trustCopy.cause.llmMapping',
     defaultMessage:
-      'I could not resolve this file’s layout, so my model rebuilt every row from what it read.',
+      'The file’s layout could not be read directly; every row was rebuilt with AI from what was read.',
     description:
       'The assumption behind a model-normalized import: the deterministic parse diverted and the model pass rebuilt the row set',
   },
   causeLocale: {
     id: 'trustCopy.cause.locale',
-    defaultMessage: 'I read the file as being written in “{locale}”.',
+    defaultMessage: 'File read as written in “{locale}”.',
     description: 'The assumption behind the language the file was read in',
   },
 
@@ -119,18 +119,17 @@ export const trustCopyMessages = defineMessages({
   },
   alternativeGroupRows: {
     id: 'trustCopy.alternative.groupRows',
-    defaultMessage: 'You can group the rows by hand in the review tray.',
+    defaultMessage: 'You can group them by hand from the schedule.',
     description: 'What to do about a file with no hierarchy',
   },
   alternativeConfirmEdges: {
     id: 'trustCopy.alternative.confirmEdges',
-    defaultMessage: 'You can confirm the candidate predecessors by hand.',
+    defaultMessage: 'You can choose the predecessor on each marked activity.',
     description: 'What to do about unresolved dependency references',
   },
   alternativeStateYear: {
     id: 'trustCopy.alternative.stateYear',
-    defaultMessage:
-      'You can state the year explicitly when reviewing the dates.',
+    defaultMessage: 'You can correct the year by editing each activity.',
     description: 'What to do about a day grid with no year',
   },
 
@@ -215,13 +214,13 @@ export const trustCopyMessages = defineMessages({
   // --- why a relationship in the file was not imported -------------------
   skippedTypeNotStated: {
     id: 'trustCopy.skippedEdge.typeNotStated',
-    defaultMessage: 'the link type is not stated',
+    defaultMessage: 'the dependency type is not stated',
     description:
       'Skipped relationship: a predecessor list with ids and no FS/SS/FF/SF',
   },
   skippedUnknownType: {
     id: 'trustCopy.skippedEdge.unknownType',
-    defaultMessage: 'a link type Lennix does not recognize',
+    defaultMessage: 'an unrecognized dependency type',
     description: 'Skipped relationship: a type code outside FS/SS/FF/SF',
   },
   skippedUnconvertibleLag: {
@@ -260,7 +259,7 @@ export const trustCopyMessages = defineMessages({
   },
   skippedMalformed: {
     id: 'trustCopy.skippedEdge.malformed',
-    defaultMessage: 'it cannot be read as a link',
+    defaultMessage: 'it cannot be read as a dependency',
     description: 'Skipped relationship: the text follows no known grammar',
   },
   skippedSelfLoop: {
@@ -270,7 +269,7 @@ export const trustCopyMessages = defineMessages({
   },
   skippedDuplicate: {
     id: 'trustCopy.skippedEdge.duplicate',
-    defaultMessage: 'it repeats a link already imported',
+    defaultMessage: 'it repeats a dependency already imported',
     description: 'Skipped relationship: the same pair appears twice',
   },
   skippedCycle: {

@@ -22,10 +22,10 @@
 import { Grid, Stack } from '@chakra-ui/react'
 import { FileWarning } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { useIntl } from 'react-intl'
+import { type MessageDescriptor, useIntl } from 'react-intl'
 import { useNavigate, useSearchParams } from 'react-router'
 
-import { EmptyState, Skeleton } from '@/components'
+import { EmptyState, Heading, ListPanel, Skeleton, Text } from '@/components'
 import { PATHS } from '@/constants'
 import { useIntlToast } from '@/i18n'
 import { buildProjectDetailPath } from '@/router'
@@ -37,28 +37,24 @@ import { REVIEW_STEPS, type ReviewProject, type ReviewStep } from '@/types'
 
 import { useActivateDraft } from '../../hooks/use-activate-draft'
 import { useDraftEdits } from '../../hooks/use-draft-edits'
+import { summarizeAllocation } from '../../project-details-draft'
 import {
   earliestReachableStep,
   furthestReachableStep,
   resolveReviewStep,
 } from '../../review-step'
-import { AssumptionLedger } from '../assumption-ledger'
 import { BudgetStep } from '../budget-step'
 import { ConfirmSummary } from '../confirm-summary'
-import { DraftDependencies } from '../draft-dependencies'
 import { DraftHeader } from '../draft-header'
 import { ImportStepper } from '../import-stepper'
-import {
-  buildNarration,
-  NarrationReceipt,
-  type NarrationFocus,
-} from '../narration-receipt'
+import { NarrationReceipt } from '../narration-receipt'
 import {
   buildReviewExceptions,
   countBlocking,
   ReviewTray,
   useReviewJournal,
 } from '../review-tray'
+import { RowDrawer, rowDrawerKey, type RowDrawerTarget } from '../row-drawer'
 import { ScheduleCanvas } from '../schedule-canvas'
 import { SchedulePreview } from '../schedule-preview'
 import { UploadSummary } from '../upload-summary'
@@ -83,6 +79,18 @@ const EMPTY_PROJECT: ReviewProject = {
   reviewStep: 'upload',
 }
 
+/**
+ * One heading per step: what the step asks, plus at most one line — never the
+ * stepper's label again.
+ */
+const STEP_HEADINGS: Partial<
+  Record<ReviewStep, { title: MessageDescriptor; line?: MessageDescriptor }>
+> = {
+  schedule: { title: m.scheduleTitle },
+  budget: { title: m.budgetTitle },
+  confirm: { title: m.confirmTitle, line: m.confirmLine },
+}
+
 export interface DraftReviewCanvasProps {
   projectId: string
 }
@@ -92,7 +100,7 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
   const navigate = useNavigate()
   const toast = useIntlToast()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [focus, setFocus] = useState<NarrationFocus | null>(null)
+  const [drawer, setDrawer] = useState<RowDrawerTarget | null>(null)
 
   const {
     data: state,
@@ -104,6 +112,18 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
   const exceptions = useMemo(
     () => (state ? buildReviewExceptions(state, journal) : []),
     [state, journal],
+  )
+  // Memoised: the chart rebuilds its rows whenever this set changes identity.
+  const markedRowIds = useMemo(
+    () =>
+      new Set(
+        exceptions.flatMap((exception) =>
+          exception.kind === 'unresolved_edge'
+            ? [exception.successorTaskId]
+            : [],
+        ),
+      ),
+    [exceptions],
   )
   const [persistStep] = useUpdateReviewStepMutation()
   // One draft of one project: the header edits its identity, the budget step
@@ -176,13 +196,22 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
     setSearchParams(params)
   }
 
+  // A failure is said once, by the nav's inline line beside Save.
   const saveAll = async () => {
     const outcome = await edits.save()
     if (outcome.kind === 'saved') toast.success(m.saveSuccess)
-    // `unknown-tasks` keeps its own inline line, which names the count; the
-    // toast is only there to say a save the user asked for did not happen.
-    else if (outcome.kind !== 'noop') toast.error(m.saveFailed)
     return outcome
+  }
+
+  // The per-activity split only reaches the server through Save, so go-live
+  // writes whatever the wizard is still holding first — otherwise the amounts
+  // the confirm step shows would not be the ones that go live.
+  const saveThenActivate = async () => {
+    if (edits.pending > 0) {
+      const outcome = await edits.save()
+      if (outcome.kind !== 'saved' && outcome.kind !== 'noop') return
+    }
+    await activate()
   }
 
   if (isLoading) {
@@ -235,6 +264,8 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
     )
   }
 
+  const heading = STEP_HEADINGS[step]
+
   const index = REVIEW_STEPS.indexOf(step)
   // Back walks one station at a time and stops at `earliest` — `upload` is a
   // receipt once rows landed, not a step to return to.
@@ -251,7 +282,6 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
         projectId={projectId}
         draft={edits.draft}
         onEdit={edits.edit}
-        pending={edits.pending}
       />
 
       <Grid
@@ -277,8 +307,10 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
             onBack={previous ? () => goTo(previous) : undefined}
             onNext={next && canAdvance ? () => goTo(next) : undefined}
             nextDisabled={next !== null && !canAdvance}
-            onActivate={step === 'confirm' ? activate : undefined}
-            isActivating={isActivating}
+            onActivate={step === 'confirm' ? saveThenActivate : undefined}
+            isActivating={
+              isActivating || (step === 'confirm' && edits.isSaving)
+            }
             onSave={saveAll}
             isSaving={edits.isSaving}
             pending={edits.pending}
@@ -287,7 +319,7 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
         </Stack>
 
         <Stack
-          gap={{ base: 6, md: 8 }}
+          gap={{ base: 4, md: 5 }}
           minW={0}
           order={{ base: 2, lg: 'initial' }}
         >
@@ -298,64 +330,44 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
             />
           )}
 
+          {heading && (
+            <Stack gap={1}>
+              <Heading size="h4" color="primary">
+                {intl.formatMessage(heading.title)}
+              </Heading>
+              {heading.line && (
+                <Text size="sm" color="muted">
+                  {intl.formatMessage(heading.line)}
+                </Text>
+              )}
+            </Stack>
+          )}
+
           {step === 'schedule' && (
-            <>
-              {/* The receipt and the surfaces that answer it read as one
-                  block; the schedule listing is a separate subject and gets
-                  the wizard's full gap to itself, instead of butting into the
-                  last card. */}
-              <Stack gap={4}>
-                <NarrationReceipt
-                  narration={buildNarration(state)}
-                  activeFocus={focus}
-                  onFocus={(nextFocus) =>
-                    setFocus((current) =>
-                      current === nextFocus ? null : nextFocus,
-                    )
-                  }
-                />
-
-                {/* The receipt states the claims; these two resolve them — the
-                  tray what the parser could not read, the ledger what it
-                  decided. Clicking the receipt's "things to check" points at
-                  them instead of opening a third list of the same facts. */}
-                <Grid
-                  gap={4}
-                  alignItems="start"
-                  templateColumns={{
-                    base: '1fr',
-                    '2xl': 'repeat(2, minmax(0, 1fr))',
-                  }}
-                >
-                  <ReviewTray
-                    projectId={projectId}
-                    state={state}
-                    exceptions={exceptions}
-                    onDiscardRow={discardRow}
-                    highlighted={focus === 'caveats'}
-                  />
-
-                  <AssumptionLedger
-                    projectId={projectId}
-                    state={state}
-                    highlighted={focus === 'caveats'}
-                  />
-                </Grid>
-
-                {/* The graph the file carried, and what it stated but did
-                    not carry — editable here, because activation sends no
-                    edges of its own. */}
-                <DraftDependencies projectId={projectId} state={state} />
-              </Stack>
-
-              <ScheduleCanvas
-                tasks={state.tasks}
-                highlight={
-                  focus === 'phases' || focus === 'activities' ? focus : null
-                }
+            <ListPanel
+              header={<NarrationReceipt state={state} />}
+              contentProps={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'section',
+              }}
+              data-testid="schedule-review"
+            >
+              <ReviewTray
                 projectId={projectId}
+                state={state}
+                exceptions={exceptions}
+                onDiscardRow={discardRow}
+                onOpenRow={(rowId) => setDrawer({ mode: 'edit', rowId })}
               />
-            </>
+              <ScheduleCanvas
+                projectId={projectId}
+                tasks={state.tasks}
+                dependencies={state.dependencies}
+                markedRowIds={markedRowIds}
+                onOpenRow={setDrawer}
+              />
+            </ListPanel>
           )}
 
           {step === 'budget' && (
@@ -370,9 +382,13 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
           {step === 'confirm' && (
             <>
               <ConfirmSummary
-                project={state.project}
                 tasks={state.tasks}
-                details={edits.details}
+                dependencyCount={state.dependencies.length}
+                allocation={summarizeAllocation(
+                  state.project,
+                  edits.draft,
+                  state.tasks,
+                )}
                 quotaFailure={quotaFailure}
                 failed={failed}
               />
@@ -385,6 +401,17 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
           )}
         </Stack>
       </Grid>
+
+      {drawer && (
+        <RowDrawer
+          key={rowDrawerKey(drawer)}
+          projectId={projectId}
+          state={state}
+          exceptions={exceptions}
+          target={drawer}
+          onClose={() => setDrawer(null)}
+        />
+      )}
     </Stack>
   )
 }

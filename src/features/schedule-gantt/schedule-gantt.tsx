@@ -145,9 +145,12 @@ export function ScheduleGantt({
 
   // Open on today, once per zoom: a schedule read week by week is about the
   // week you are in. Not on resize, which would move the chart under a reader.
+  // A draft opens on its own start instead: under review is the file's work,
+  // which today may be nowhere near.
   const centredFor = useRef<number | null>(null)
   useEffect(() => {
     const area = scrollAreaRef.current
+    if (scope === 'draft') return
     if (!area || !scrollAreaRect || centredFor.current === dayWidth) return
     centredFor.current = dayWidth
     const today = area.querySelector('[data-testid="gantt-today"]')
@@ -155,7 +158,7 @@ export function ScheduleGantt({
     const box = area.getBoundingClientRect()
     area.scrollLeft +=
       today.getBoundingClientRect().left - (box.left + box.width / 2)
-  }, [dayWidth, scrollAreaRect, scrollAreaRef])
+  }, [dayWidth, scope, scrollAreaRect, scrollAreaRef])
 
   /** The model already chose the format; the component only localises it. */
   const tickLabel = (tick: AxisTick) =>

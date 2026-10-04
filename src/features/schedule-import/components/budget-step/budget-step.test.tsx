@@ -57,9 +57,9 @@ describe('BudgetStep', () => {
 
     // The response says `allocated: 0` for every draft — rendering it would
     // answer "assigned 0" to someone who just assigned 30.000.
-    const balance = screen.getByTestId('budget-step-total')
+    const balance = screen.getByTestId('allocation-balance')
     expect(balance).toHaveTextContent('$30,000.00')
-    expect(screen.getByTestId('budget-step-remainder')).toHaveTextContent(
+    expect(screen.getByTestId('allocation-remainder')).toHaveTextContent(
       '$70,000.00',
     )
   })
@@ -73,8 +73,8 @@ describe('BudgetStep', () => {
     await userEvent.type(screen.getByLabelText(tasks[0].title), '4000')
 
     expect(screen.getByText('Over budget')).toBeInTheDocument()
-    expect(screen.getByTestId('budget-step-total')).toHaveTextContent(
-      /over the project budget/,
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Over by $3,000.00. You can still activate.',
     )
   })
 
@@ -89,7 +89,7 @@ describe('BudgetStep', () => {
   it('has nothing to budget when the draft carries no activities', () => {
     renderWithProviders(<Host tasks={[]} />)
 
-    expect(screen.getByText('No activities to budget yet')).toBeInTheDocument()
+    expect(screen.getByText('No main activities to budget')).toBeInTheDocument()
     expect(screen.queryByTestId('budget-step')).not.toBeInTheDocument()
   })
 })

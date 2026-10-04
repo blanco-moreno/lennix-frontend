@@ -1,10 +1,10 @@
 /**
- * A predecessor name that matched no row — answered by picking the row it meant,
- * with the link's type and lag.
+ * A predecessor name that matched no row — answered, in the row's drawer, by
+ * picking the activity it meant with the link's type and lag.
  *
  * The parser kept the raw text and its closest candidates rather than inventing
- * an edge (the human owns the graph), so the closed set is right here: the rows it proposed first,
- * every other legal row behind them. Optional by nature — an unlinked
+ * an edge (`IMP-3`), so the closed set is right here: the rows it proposed
+ * first, every other legal row behind them. Optional by nature — an unlinked
  * predecessor costs a dependency, never the go-live.
  */
 
@@ -13,7 +13,10 @@ import { useId, useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
 
 import { Button } from '@/components'
-import { RelationshipFields, useDependencyEdits } from '@/features'
+import {
+  RelationshipFields,
+  useDependencyEdits,
+} from '@/features/dependency-edits'
 import type { RelationshipType, ReviewDependency, ReviewTask } from '@/types'
 
 import {
@@ -85,14 +88,9 @@ export function PredecessorPickerCard({
       blocking={false}
       title={intl.formatMessage(m.edgeTitle, {
         text: exception.edge.sourceText ?? exception.edge.successorRef,
+        successor: successor?.title ?? exception.edge.successorRef,
       })}
-      body={
-        options.length === 0
-          ? intl.formatMessage(m.edgeNoOptions)
-          : intl.formatMessage(m.edgeBody, {
-              successor: successor?.title ?? exception.edge.successorRef,
-            })
-      }
+      body={options.length === 0 ? intl.formatMessage(m.edgeNoOptions) : null}
     >
       {options.length > 0 && (
         <Stack gap={3}>

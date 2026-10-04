@@ -132,6 +132,17 @@ describe('buildReviewScheduleRows', () => {
     expect(rows[1].startDate).toBeNull()
     expect(rows[1].dueDate).toBeNull()
   })
+
+  it('flags the rows carrying an open question, and only those', () => {
+    const rows = buildReviewScheduleRows(
+      [task({ id: 'a', subtasks: [subtask({ id: 's' })] }), task({ id: 'b' })],
+      new Set(['s']),
+    )
+
+    expect(
+      Object.fromEntries(rows.map((row) => [row.id, row.openQuestion])),
+    ).toEqual({ a: false, s: true, b: false })
+  })
 })
 
 describe('buildReviewGanttEdges', () => {

@@ -38,6 +38,8 @@ export interface ScheduleRow {
   isOverBudget: boolean
   /** Source-file row reference, carried through the import review. */
   ref: string | null
+  /** A draft row whose predecessor reference is still a question. */
+  openQuestion?: boolean
 }
 
 export interface Timeline {

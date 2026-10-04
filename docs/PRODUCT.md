@@ -65,31 +65,55 @@ two places** unless it is an explicit overview → drill-down.
   coherent, chronologically ordered schedule and adjusts it. Friction scales
   with how messy the file was: a clean file reaches Activate with near-zero
   required decisions.
-- **The narration is a receipt, not marketing.** It states what the parse did,
-  and every claim in it is checkable against the data on screen.
-- **The assumption ledger is by cause, never per cell** (`IMP-5`). An assumption
-  is loud only when a viable alternative reading exists, and it shows that
-  alternative plus a one-flip reversal.
+- **The review reads as one product.** Schedule, budget and confirm share one
+  structure: the draft's identity, one step heading (the stepper only names the
+  step), the step's content, the nav. A fact has one owner per step, and the
+  same kind of fact uses the same component across steps — the counts and span
+  on schedule and confirm, the budget balance on budget and confirm. The unsaved
+  count is said once, beside Save. Copy names the thing; there is no narrator.
+- **One schedule surface.** The schedule step is one card: the file's facts as
+  its header, the open questions as a "to review" band, and under them the
+  draft on the same Gantt and selection panel the live schedule uses, so every
+  activity, its progress and its dependencies read at a glance. Nothing the
+  engine owns is drawn or stated — no status, critical path, delay or block
+  (`IMP-10`). Every claim in the header is checkable against the chart.
+- **The assumption ledger is by cause, never per cell** (`IMP-5`). A loud cause
+  — one with a viable alternative reading — is an item in the band, with that
+  alternative plus a one-flip reversal. The quiet ones, the sheet choice and the
+  dropped rows sit folded under "how the file was read" in the card's header.
 - **Dropped rows are shown, not hidden.** The parse report names what was
   scanned, imported and dropped, with the reason and the source location.
-- **The draft's graph is the user's before go-live.** The schedule step lists
-  every dependency, each badged with where it came from — read from the file or
+- **The draft is the user's before go-live.** Selecting a row lifts it into the
+  panel, from which the user edits it, adds a subactivity under a main
+  activity, or deletes it after an in-app confirmation (a soft delete,
+  restorable from the papelera); the toolbar adds a main activity. Each action
+  is gated on its own permission. A main activity takes a name only — its dates
+  and progress derive from its subactivities (`TSK-4`); until go-live it keeps
+  the file's progress figure, and the panel says so.
+- **The file's progress is correctable.** A subactivity's drawer takes its
+  progress across the whole 0–100 range, lowering included: the figure is the
+  file's reading, not a report going backwards. Status follows on the server
+  (`TSK-9`) and is not shown on the draft.
+- **The draft's graph is the user's before go-live.** A row's drawer lists what
+  it waits on, each edge badged with where it came from — read from the file or
   added by hand — and lets the user add one with its type and lag in the same
   act, change a type or lag in place, or delete it (`DEP-2`, `DEP-5`). A link
   that would repeat an edge or close a loop is shown disabled, with the reason,
-  before it can be picked (`DEP-4`). An answered predecessor question in the
-  review tray carries a type and lag too. Every edge change is saved the
-  moment it is made: activation confirms the graph as it stands (`IMP-10`).
+  before it can be picked (`DEP-4`). A predecessor the file named that matched
+  no row is a band item and a mark on its row in the chart; the band item and
+  the selected row's panel open that row's drawer on the question, answered
+  with a type and lag too. Every edge change is saved
+  the moment it is made: activation confirms the graph as it stands (`IMP-10`).
 - **Relationships the file states but that never became an edge are shown, not
   hidden.** Each quotes the file's own text, its sheet and row, and the reason
   in the user's language; the count is the full one even when the list is
-  capped, and they count once among the receipt's things to check. A link whose
-  file lacks the ID column it names says to export the file again with it.
+  capped, and they are one item in the band. A link whose file lacks the ID
+  column it names says to export the file again with it.
 - **A file that did not resolve goes to assisted mapping**, never to a broken
   Gantt.
 - **The mirror subactivity is rendered honestly** (`TSK-3`) — a collapsed leaf on
   a live activity, never as invented work. Drafts show childless phases as
-  childless.
+  childless, and the selected one says what go-live adds.
 
 ## 4. The schedule surface
 

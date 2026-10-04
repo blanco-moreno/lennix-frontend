@@ -8,23 +8,23 @@
  *
  * The task-budget response's `allocated` is never rendered either. It counts
  * *live* tasks, so for a draft it is always `0` — showing it would answer
- * "assigned: 0" to a user who just allocated the whole budget. The balance
- * below is summed here instead.
+ * "assigned: 0" to a user who just allocated the whole budget; the balance is
+ * summed from the draft by `summarizeAllocation`.
  */
 
 import { Grid, Stack } from '@chakra-ui/react'
 import { Wallet } from 'lucide-react'
 import { useIntl } from 'react-intl'
 
-import { EmptyState, Heading, Label, Progress, Text } from '@/components'
+import { EmptyState, Label } from '@/components'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import type { ReviewProject, ReviewTask } from '@/types'
-import { formatMoney } from '@/utils'
 
 import {
   type ProjectDetailsDraft,
   summarizeAllocation,
 } from '../../project-details-draft'
+import { AllocationBalance } from '../allocation-balance'
 
 import { budgetStepMessages as m } from './budget-step-messages'
 
@@ -54,197 +54,65 @@ export function BudgetStep({
 }: BudgetStepProps) {
   const intl = useIntl()
 
-  const allocation = summarizeAllocation(project, draft, tasks)
-  // What the balance measures against: the amount being typed, not the saved
-  // one — raising the budget resolves an overrun in the same keystroke.
-  const typedBudget =
-    allocation.unassigned === null
-      ? null
-      : allocation.assigned + allocation.unassigned
-
   if (tasks.length === 0) {
-    return (
-      <EmptyState
-        icon={Wallet}
-        title={intl.formatMessage(m.emptyTitle)}
-        description={intl.formatMessage(m.emptyDescription)}
-      />
-    )
+    return <EmptyState icon={Wallet} title={intl.formatMessage(m.emptyTitle)} />
   }
+
+  const rows = [
+    {
+      id: 'budget-step-project',
+      label: intl.formatMessage(m.projectBudgetLabel),
+      value: draft.budget,
+      onChange: (value: string) => edit({ budget: value }),
+      isProject: true,
+    },
+    ...tasks.map((task) => ({
+      id: `task-budget-${task.id}`,
+      label: task.title,
+      value: draft.taskBudgets[task.id] ?? '',
+      onChange: (value: string) =>
+        edit({ taskBudgets: { ...draft.taskBudgets, [task.id]: value } }),
+      isProject: false,
+    })),
+  ]
 
   return (
     <Stack gap={6} data-testid="budget-step" maxW="56rem">
-      <Stack gap={1}>
-        <Heading size="h4" color="primary">
-          {intl.formatMessage(m.title)}
-        </Heading>
-        <Text size="sm" color="muted">
-          {intl.formatMessage(m.explainer)}
-        </Text>
-      </Stack>
-
-      <Grid
-        templateColumns={BUDGET_COLUMNS}
-        alignItems="center"
-        columnGap={4}
-        rowGap={1}
-        px={4}
-        py={3}
+      <Stack
+        gap={0}
         rounded="lg"
-        bg="bg.subtle"
         borderWidth="1px"
         borderColor="border"
+        bg="bg.panel"
       >
-        <Label htmlFor="budget-step-project" mb={0}>
-          {intl.formatMessage(m.projectBudgetLabel)}
-        </Label>
-        <CurrencyInput
-          id="budget-step-project"
-          value={draft.budget}
-          onValueChange={(details) => edit({ budget: details.value })}
-        />
-      </Grid>
-
-      <Stack gap={2}>
-        <Text
-          weight="semibold"
-          size="xs"
-          color="muted"
-          textTransform="uppercase"
-          letterSpacing="0.06em"
-        >
-          {intl.formatMessage(m.perTaskTitle)}
-        </Text>
-
-        <Stack gap={0} rounded="lg" borderWidth="1px" borderColor="border">
-          {tasks.map((task, index) => (
-            <Grid
-              key={task.id}
-              templateColumns={BUDGET_COLUMNS}
-              alignItems="center"
-              columnGap={4}
-              px={4}
-              py={2.5}
-              borderTopWidth={index === 0 ? undefined : '1px'}
-              borderColor="border.muted"
-              _hover={{ bg: 'bg.muted/50' }}
-            >
-              <Label htmlFor={`task-budget-${task.id}`} mb={0}>
-                {task.title}
-              </Label>
-              <CurrencyInput
-                id={`task-budget-${task.id}`}
-                value={draft.taskBudgets[task.id] ?? ''}
-                onValueChange={(details) =>
-                  edit({
-                    taskBudgets: {
-                      ...draft.taskBudgets,
-                      [task.id]: details.value,
-                    },
-                  })
-                }
-              />
-            </Grid>
-          ))}
-        </Stack>
+        {rows.map((row, index) => (
+          <Grid
+            key={row.id}
+            templateColumns={BUDGET_COLUMNS}
+            alignItems="center"
+            columnGap={4}
+            px={4}
+            py={row.isProject ? 3 : 2.5}
+            borderTopWidth={index === 0 ? undefined : '1px'}
+            borderColor={index === 1 ? 'border' : 'border.muted'}
+            bg={row.isProject ? 'bg.subtle' : undefined}
+            _hover={row.isProject ? undefined : { bg: 'bg.muted/50' }}
+          >
+            <Label htmlFor={row.id} mb={0}>
+              {row.label}
+            </Label>
+            <CurrencyInput
+              id={row.id}
+              value={row.value}
+              onValueChange={(details) => row.onChange(details.value)}
+            />
+          </Grid>
+        ))}
       </Stack>
 
-      {/* The balance, as the panel it is — a 12px muted line under the last
-          input is where a number nobody can find lives. */}
-      <Stack
-        gap="tight"
-        p="card"
-        rounded="lg"
-        borderWidth="1px"
-        borderColor={allocation.overrun ? 'overBudget' : 'border'}
-        bg={allocation.overrun ? 'overBudget/5' : 'bg.subtle'}
-        data-testid="budget-step-total"
-      >
-        <Grid
-          gap={4}
-          templateColumns={{ base: '1fr 1fr', md: 'repeat(3, minmax(0, 1fr))' }}
-        >
-          <Stack gap={0.5}>
-            <Text
-              size="xs"
-              color="muted"
-              textTransform="uppercase"
-              letterSpacing="0.06em"
-            >
-              {intl.formatMessage(m.balanceBudget)}
-            </Text>
-            <Text size="lg" weight="semibold" color="primary">
-              {typedBudget === null
-                ? intl.formatMessage(m.balanceNoBudget)
-                : formatMoney(typedBudget)}
-            </Text>
-          </Stack>
-
-          <Stack gap={0.5}>
-            <Text
-              size="xs"
-              color="muted"
-              textTransform="uppercase"
-              letterSpacing="0.06em"
-            >
-              {intl.formatMessage(m.balanceAssigned)}
-            </Text>
-            <Text size="lg" weight="semibold" color="primary">
-              {formatMoney(allocation.assigned)}
-            </Text>
-          </Stack>
-
-          {allocation.unassigned !== null && (
-            <Stack gap={0.5}>
-              <Text
-                size="xs"
-                color="muted"
-                textTransform="uppercase"
-                letterSpacing="0.06em"
-              >
-                {intl.formatMessage(
-                  allocation.overrun ? m.balanceOverrun : m.balanceUnassigned,
-                )}
-              </Text>
-              <Text
-                size="lg"
-                weight="semibold"
-                color={allocation.overrun ? 'overBudget' : 'primary'}
-                data-testid="budget-step-remainder"
-              >
-                {formatMoney(Math.abs(allocation.unassigned))}
-              </Text>
-            </Stack>
-          )}
-        </Grid>
-
-        {typedBudget !== null && typedBudget > 0 && (
-          <Progress
-            value={(allocation.assigned / typedBudget) * 100}
-            h={2}
-            aria-label={intl.formatMessage(m.balanceAssigned)}
-            indicatorProps={
-              allocation.overrun ? { bg: 'overBudget' } : undefined
-            }
-          />
-        )}
-
-        <Text size="xs" color={allocation.overrun ? 'overBudget' : 'muted'}>
-          {allocation.unassigned === null
-            ? intl.formatMessage(m.totalsWithoutBudget, {
-                assigned: formatMoney(allocation.assigned),
-              })
-            : allocation.overrun
-              ? intl.formatMessage(m.totalsOverrun, {
-                  assigned: formatMoney(allocation.assigned),
-                  excess: formatMoney(-allocation.unassigned),
-                })
-              : intl.formatMessage(m.totals, {
-                  assigned: formatMoney(allocation.assigned),
-                  unassigned: formatMoney(allocation.unassigned),
-                })}
-        </Text>
-      </Stack>
+      <AllocationBalance
+        allocation={summarizeAllocation(project, draft, tasks)}
+      />
     </Stack>
   )
 }

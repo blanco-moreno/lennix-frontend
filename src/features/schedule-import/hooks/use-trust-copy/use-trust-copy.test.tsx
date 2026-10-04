@@ -57,7 +57,7 @@ describe('useTrustCopy — the ledger', () => {
     const copy = copyIn('en')
 
     expect(copy.ledgerAssumption(entry({}))).toBe(
-      'I read the start dates as day/month/year.',
+      'Dates in the start column read as day/month/year.',
     )
     expect(copy.ledgerAlternative(entry({}))).toBe(
       'The other reading: month/day/year',
@@ -68,7 +68,7 @@ describe('useTrustCopy — the ledger', () => {
     const copy = copyIn('es')
 
     expect(copy.ledgerAssumption(entry({}))).toBe(
-      'Leí las fechas de inicio como día/mes/año.',
+      'Fechas de inicio leídas como día/mes/año.',
     )
     expect(copy.ledgerAlternative(entry({}))).toBe(
       'La otra lectura: mes/día/año',
@@ -106,7 +106,7 @@ describe('useTrustCopy — the ledger', () => {
           alternativeAction: 'group_rows_manually',
         }),
       ),
-    ).toBe('You can group the rows by hand in the review tray.')
+    ).toBe('You can group them by hand from the schedule.')
     expect(
       copy.ledgerAlternative(
         entry({
@@ -115,7 +115,7 @@ describe('useTrustCopy — the ledger', () => {
           alternativeAction: 'confirm_edge_candidates',
         }),
       ),
-    ).toBe('You can confirm the candidate predecessors by hand.')
+    ).toBe('You can choose the predecessor on each marked activity.')
     expect(
       copy.ledgerAlternative(
         entry({
@@ -124,7 +124,7 @@ describe('useTrustCopy — the ledger', () => {
           alternativeAction: 'state_the_year',
         }),
       ),
-    ).toBe('You can state the year explicitly when reviewing the dates.')
+    ).toBe('You can correct the year by editing each activity.')
   })
 
   it('says nothing when there is nothing to do about it', () => {
@@ -148,7 +148,7 @@ describe('useTrustCopy — the ledger', () => {
       copy.ledgerAssumption(
         entry({ cause: 'sheet_choice', scope: 'sheet', chosen: 'CARTA GANTT' }),
       ),
-    ).toBe('Usé la hoja «CARTA GANTT».')
+    ).toBe('Se usó la hoja «CARTA GANTT».')
   })
 })
 
@@ -224,7 +224,7 @@ describe('useTrustCopy — the report', () => {
 
   it('says how to bring back links that name a column the file lacks', () => {
     expect(copyIn('es').skippedEdgeReason('no_key_column')).toBe(
-      'la columna a la que se refiere no está en el archivo; vuelve a exportarlo con la columna Id',
+      'la columna a la que se refiere no está en el archivo; volvé a exportarlo con la columna Id',
     )
   })
 

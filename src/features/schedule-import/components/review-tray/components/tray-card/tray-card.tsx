@@ -18,9 +18,9 @@ export interface TrayCardProps {
   kind: ReviewExceptionKind
   blocking: boolean
   title: string
-  body: string
+  body?: string | null
   meta?: string
-  children: ReactNode
+  children?: ReactNode
 }
 
 export function TrayCard({
@@ -45,9 +45,11 @@ export function TrayCard({
         <Text weight="semibold" size="base" color="primary">
           {title}
         </Text>
-        <Text size="sm" color="muted">
-          {body}
-        </Text>
+        {body && (
+          <Text size="sm" color="muted">
+            {body}
+          </Text>
+        )}
         {meta && (
           <Text size="xs" color="muted">
             {meta}

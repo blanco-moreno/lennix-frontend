@@ -26,30 +26,4 @@ export const importStepperMessages = defineMessages({
     defaultMessage: 'Confirm',
     description: 'Step 4 of the import wizard — preview and go live',
   },
-  hintUpload: {
-    id: 'importStepper.hintUpload',
-    defaultMessage: 'What Lennix read',
-    description: 'One-line hint under the upload step',
-  },
-  hintSchedule: {
-    id: 'importStepper.hintSchedule',
-    defaultMessage: 'Fix and assign',
-    description: 'One-line hint under the schedule step',
-  },
-  hintBudget: {
-    id: 'importStepper.hintBudget',
-    defaultMessage: 'Per main activity',
-    description: 'One-line hint under the budget step',
-  },
-  hintConfirm: {
-    id: 'importStepper.hintConfirm',
-    defaultMessage: 'Preview and activate',
-    description: 'One-line hint under the confirm step',
-  },
-  locked: {
-    id: 'importStepper.locked',
-    defaultMessage: 'Not available yet',
-    description:
-      'Why a later step cannot be opened — the draft is not there yet',
-  },
 })

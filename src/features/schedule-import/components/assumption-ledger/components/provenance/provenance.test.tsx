@@ -33,7 +33,7 @@ describe('Provenance', () => {
     )
 
     await userEvent.click(
-      screen.getByRole('button', { name: 'Where did this come from?' }),
+      screen.getByRole('button', { name: 'See it in the file' }),
     )
 
     expect(screen.getByTestId('cause-provenance')).toHaveTextContent(
@@ -45,7 +45,7 @@ describe('Provenance', () => {
     renderWithProviders(<Provenance cause={seededCause()} />)
 
     const toggle = screen.getByRole('button', {
-      name: 'Where did this come from?',
+      name: 'See it in the file',
     })
     await userEvent.click(toggle)
     expect(screen.getByTestId('cause-provenance')).toBeInTheDocument()

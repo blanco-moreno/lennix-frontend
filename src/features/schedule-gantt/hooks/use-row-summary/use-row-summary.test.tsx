@@ -122,7 +122,7 @@ describe('useRowSummary', () => {
 
     expect(
       screen.getByText(
-        `Main activity · Obras preliminares. ${displayedDate('2026-03-01')} to ${displayedDate('2026-03-10')}. Source row A-120 · 25% done`,
+        `Main activity · Obras preliminares. ${displayedDate('2026-03-01')} to ${displayedDate('2026-03-10')}. Source ID A-120 · 25% done`,
       ),
     ).toBeInTheDocument()
   })

@@ -73,6 +73,7 @@ export {
 
 export { AtRiskBadge } from './at-risk-badge'
 export { HeroKpis } from './hero-kpis'
+export { ProgressPicker } from './progress-picker'
 export { ProjectListHeader } from './project-list-header'
 export { ProjectRow } from './project-row'
 export { ProjectTable } from './project-table'

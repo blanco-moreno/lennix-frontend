@@ -3,29 +3,8 @@ import { defineMessages } from 'react-intl'
 export const scheduleCanvasMessages = defineMessages({
   emptyTitle: {
     id: 'scheduleCanvas.emptyTitle',
-    defaultMessage: 'This draft has no rows yet',
+    defaultMessage: 'This draft has no activities',
     description: 'Empty state when a draft carries no imported tasks',
-  },
-  emptyDescription: {
-    id: 'scheduleCanvas.emptyDescription',
-    defaultMessage:
-      'Nothing from the file landed on the timeline. Import another file to start over.',
-    description: 'Empty-state body for a draft with no tasks',
-  },
-  undated: {
-    id: 'scheduleCanvas.undated',
-    defaultMessage: 'No dates',
-    description: 'Shown on a row the file gave no start or finish date',
-  },
-  dateRange: {
-    id: 'scheduleCanvas.dateRange',
-    defaultMessage: '{start} → {end}',
-    description: 'Start and finish of one schedule row',
-  },
-  durationDays: {
-    id: 'scheduleCanvas.durationDays',
-    defaultMessage: '{count, plural, one {# day} other {# days}}',
-    description: 'Calendar span of one schedule row',
   },
   editedBadge: {
     id: 'scheduleCanvas.editedBadge',
@@ -37,53 +16,78 @@ export const scheduleCanvasMessages = defineMessages({
     defaultMessage: 'Row {row}',
     description: 'Where this row came from in the source file',
   },
-  columnTask: {
-    id: 'scheduleCanvas.columnTask',
-    defaultMessage: 'Activity',
-    description: 'Column header of the draft schedule listing',
-  },
-  columnDates: {
-    id: 'scheduleCanvas.columnDates',
-    defaultMessage: 'Dates',
-    description: 'Column header holding each row’s start and finish',
-  },
-  columnDuration: {
-    id: 'scheduleCanvas.columnDuration',
-    defaultMessage: 'Duration',
-    description: 'Column header holding each row’s calendar span',
-  },
-  expand: {
-    id: 'scheduleCanvas.expand',
-    defaultMessage:
-      'Show {count, plural, one {# subactivity} other {# subactivities}}',
-    description: 'Accessible name of the control opening a phase’s rows',
-  },
-  collapse: {
-    id: 'scheduleCanvas.collapse',
-    defaultMessage:
-      'Hide {count, plural, one {# subactivity} other {# subactivities}}',
-    description: 'Accessible name of the control closing a phase’s rows',
-  },
-  editRow: {
-    id: 'scheduleCanvas.editRow',
-    defaultMessage: 'Edit {title}',
-    description: 'Accessible name of a row’s edit control in the listing',
-  },
-  phaseCount: {
-    id: 'scheduleCanvas.phaseCount',
-    defaultMessage:
-      '{phases, plural, one {# main activity} other {# main activities}} · {activities, plural, one {# subactivity} other {# subactivities}}',
-    description: 'What the draft schedule listing holds, above its header',
-  },
-  title: {
-    id: 'scheduleCanvas.title',
-    defaultMessage: 'The schedule Lennix read',
-    description: 'Heading above the draft schedule listing',
-  },
   mirrorNote: {
     id: 'scheduleCanvas.mirrorNote',
-    defaultMessage: 'Lennix adds one subactivity here when you activate.',
+    defaultMessage:
+      'No subactivities. Activating creates one with the same name.',
     description:
       'A childless main activity: ms-bk creates the mirror subactivity itself',
+  },
+  selectHint: {
+    id: 'scheduleCanvas.selectHint',
+    defaultMessage:
+      'Select an activity to edit it, add subactivities or see what it waits on.',
+    description: 'Shown above the chart while no row is selected',
+  },
+  phaseProgressNote: {
+    id: 'scheduleCanvas.phaseProgressNote',
+    defaultMessage:
+      'Its progress is the file’s until activation, when it is recalculated from its subactivities.',
+    description:
+      'A draft main activity keeps the imported figure; go-live derives it (TSK-4, IMP-10)',
+  },
+  answerQuestion: {
+    id: 'scheduleCanvas.answerQuestion',
+    defaultMessage: 'Resolve open question',
+    description:
+      'Opens the drawer on the selected row’s unresolved predecessor reference',
+  },
+  addPhase: {
+    id: 'scheduleCanvas.addPhase',
+    defaultMessage: 'Add main activity',
+    description: 'Toolbar action creating a main activity in the draft',
+  },
+  actionEdit: {
+    id: 'scheduleCanvas.actionEdit',
+    defaultMessage: 'Edit',
+    description: 'Row action opening the row drawer',
+  },
+  actionAddSubtask: {
+    id: 'scheduleCanvas.actionAddSubtask',
+    defaultMessage: 'Add subactivity',
+    description: 'Main-activity row action creating a subactivity under it',
+  },
+  actionDelete: {
+    id: 'scheduleCanvas.actionDelete',
+    defaultMessage: 'Delete',
+    description: 'Row action deleting the row, after confirmation',
+  },
+  deleteTitle: {
+    id: 'scheduleCanvas.deleteTitle',
+    defaultMessage: 'Delete “{title}”?',
+    description: 'Delete confirmation title',
+  },
+  deleteBody: {
+    id: 'scheduleCanvas.deleteBody',
+    defaultMessage:
+      '{count, plural, =0 {It goes to the trash.} one {It goes to the trash with its subactivity.} other {It goes to the trash with its # subactivities.}} Dependencies waiting on it are left broken.',
+    description: 'What deleting a row does',
+  },
+  deleteOnlyChild: {
+    id: 'scheduleCanvas.deleteOnlyChild',
+    defaultMessage:
+      'It is the only subactivity of its main activity. Delete the main activity instead.',
+    description:
+      'Why the last subactivity of a main activity cannot be deleted',
+  },
+  deleted: {
+    id: 'scheduleCanvas.deleted',
+    defaultMessage: 'Activity deleted',
+    description: 'Toast after a row is deleted',
+  },
+  deleteFailed: {
+    id: 'scheduleCanvas.deleteFailed',
+    defaultMessage: 'The activity could not be deleted. Try again.',
+    description: 'Toast when the delete fails',
   },
 })

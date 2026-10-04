@@ -12,33 +12,31 @@
 import { Flex, Grid, Stack } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
-import { Badge, Label, Text } from '@/components'
+import { Badge, Label } from '@/components'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ScheduleExportButton } from '@/features'
+import { ScheduleExportButton } from '@/features/schedule-export'
 
 import type { ProjectDetailsDraft } from '../../project-details-draft'
 
 import { draftHeaderMessages as m } from './draft-header-messages'
 
 export interface DraftHeaderProps {
-  /**
-   * The draft's unsaved edits, owned by the wizard: identity and money are one
-   * draft of one project, and there is one Save for both.
-   */
   /** The draft being reviewed — the export takes what it has today. */
   projectId: string
+  /**
+   * The draft's unsaved edits, owned by the wizard: identity and money are one
+   * draft of one project, and there is one Save for both — whose pending count
+   * the nav shows, beside it.
+   */
   draft: ProjectDetailsDraft
   onEdit: (patch: Partial<ProjectDetailsDraft>) => void
-  /** How many fields the one Save would write — the wizard counts them. */
-  pending: number
 }
 
 export function DraftHeader({
   projectId,
   draft,
   onEdit: edit,
-  pending,
 }: DraftHeaderProps) {
   const intl = useIntl()
 
@@ -56,11 +54,6 @@ export function DraftHeader({
         <Badge variant="gray" flexShrink={0}>
           {intl.formatMessage(m.draftBadge)}
         </Badge>
-        <Text size="xs" color="muted" data-testid="draft-header-pending">
-          {pending > 0
-            ? intl.formatMessage(m.pendingChanges, { count: pending })
-            : intl.formatMessage(m.explainer)}
-        </Text>
         {/* "Download what I have": the draft leaves as a workbook at any step,
             edits included — the same file a live project exports. */}
         <ScheduleExportButton projectId={projectId} ml="auto" />
@@ -120,9 +113,6 @@ export function DraftHeader({
             value={draft.location}
             onChange={(event) => edit({ location: event.currentTarget.value })}
           />
-          <Text size="xs" color="muted">
-            {intl.formatMessage(m.locationHint)}
-          </Text>
         </Stack>
       </Grid>
     </Stack>

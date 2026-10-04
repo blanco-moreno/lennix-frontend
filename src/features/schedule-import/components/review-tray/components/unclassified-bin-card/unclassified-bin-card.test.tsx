@@ -46,7 +46,7 @@ describe('UnclassifiedBinCard', () => {
     renderCard()
 
     expect(
-      screen.getByText('Lennix could not place “TOTAL GENERAL”'),
+      screen.getByText('“TOTAL GENERAL” did not land under any main activity'),
     ).toBeInTheDocument()
     expect(
       screen.getByText('Sheet CARTA GANTT, row 17 · read as a footer total'),

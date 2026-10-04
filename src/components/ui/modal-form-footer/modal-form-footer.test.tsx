@@ -86,4 +86,20 @@ describe('ModalFormFooter', () => {
     expect(screen.getByRole('button', { name: 'Actions' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sending…' })).toBeInTheDocument()
   })
+
+  it('submits a form it sits outside of, when told which one', () => {
+    renderWithProviders(
+      <ModalFormFooter
+        submitLabel={commonMessages.save}
+        isLoading={false}
+        onCancel={vi.fn()}
+        formId="row-form"
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveAttribute(
+      'form',
+      'row-form',
+    )
+  })
 })

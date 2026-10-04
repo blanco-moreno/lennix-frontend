@@ -1,19 +1,31 @@
 /**
- * Derives the tray's exceptions — what the parser could not resolve — from review
- * state; only discard and mirror acceptance are read from the local journal.
+ * Derives the review band's items from review state: the parser's
+ * high-consequence assumptions, what it could not resolve, and the
+ * relationships the file stated that never became an edge. Only discards are
+ * read from the local journal.
  */
 
 import type {
   ReviewTask,
   ReviewUnresolvedEdge,
   ScheduleReviewState,
+  SkippedEdge,
   UnclassifiedRow,
 } from '@/types'
+
+import {
+  buildLedgerView,
+  type LedgerCause,
+} from '../assumption-ledger/ledger-model'
 
 import type { ReviewJournal } from './review-journal'
 import { normalizeName } from './text-match'
 
-export type ReviewExceptionKind = 'unclassified_row' | 'unresolved_edge'
+export type ReviewExceptionKind =
+  | 'assumption'
+  | 'unclassified_row'
+  | 'unresolved_edge'
+  | 'skipped_edges'
 
 interface ReviewExceptionBase {
   /** Stable across reloads — the tray re-derives, it never re-numbers. */
@@ -37,7 +49,27 @@ export interface UnresolvedEdgeException extends ReviewExceptionBase {
   successorTaskId: string
 }
 
-export type ReviewException = UnclassifiedRowException | UnresolvedEdgeException
+/** A loud ledger cause: a decision with a viable other reading (`IMP-5`). */
+export interface AssumptionException extends ReviewExceptionBase {
+  kind: 'assumption'
+  blocking: false
+  cause: LedgerCause
+}
+
+/** Every relationship the file stated that never became an edge, as one item. */
+export interface SkippedEdgesException extends ReviewExceptionBase {
+  kind: 'skipped_edges'
+  blocking: false
+  edges: SkippedEdge[]
+  /** The full count — `edges` is capped by the parser. */
+  total: number
+}
+
+export type ReviewException =
+  | AssumptionException
+  | UnclassifiedRowException
+  | UnresolvedEdgeException
+  | SkippedEdgesException
 
 /** `sheet:row` — the row's own address in the user's file. */
 export function unclassifiedRowId(row: UnclassifiedRow): string {
@@ -66,12 +98,12 @@ export function allReviewRows(tasks: ReviewTask[]): ReviewRow[] {
 }
 
 /**
- * Build the tray.
+ * Build the band.
  *
- * Order is by consequence: the rows that never landed, then the optional
- * dependency questions. Nothing here blocks go-live any more — ms-bk creates
- * the mirror subactivity a childless main task needs on activation, so asking
- * the user to accept it was asking permission for something already decided.
+ * Order is by consequence: readings that move many dates, the rows that never
+ * landed, the dependency questions, then what the file stated but did not
+ * carry. Nothing here blocks go-live — ms-bk creates the mirror subactivity a
+ * childless main task needs on activation.
  */
 export function buildReviewExceptions(
   state: ScheduleReviewState,
@@ -94,13 +126,14 @@ export function buildReviewExceptions(
       row,
     }))
 
-  // An edge whose successor row is not on the canvas has nothing to attach to,
-  // so the tray does not pretend it is answerable — it stays a receipt caveat.
+  // An edge whose successor row is not on the canvas — never landed, or
+  // deleted since — has no row to answer it on, so it is not offered.
   const withDependency = new Set(state.dependencies.map((dep) => dep.taskId))
+  const onCanvas = new Set(allReviewRows(state.tasks).map((row) => row.id))
   const edges: UnresolvedEdgeException[] = state.unresolvedEdges
     .filter(
       (edge): edge is ReviewUnresolvedEdge & { successorTaskId: string } =>
-        edge.successorTaskId !== null,
+        edge.successorTaskId !== null && onCanvas.has(edge.successorTaskId),
     )
     .filter((edge) => !withDependency.has(edge.successorTaskId))
     .map((edge) => ({
@@ -111,7 +144,30 @@ export function buildReviewExceptions(
       successorTaskId: edge.successorTaskId,
     }))
 
-  return [...unclassified, ...edges]
+  const assumptions: AssumptionException[] = buildLedgerView(state).loud.map(
+    (cause) => ({
+      id: `assumption:${cause.entry.cause}:${cause.entry.scope}`,
+      kind: 'assumption',
+      blocking: false,
+      cause,
+    }),
+  )
+
+  const { skippedEdges, skippedEdgesTotal } = state.report
+  const skipped: SkippedEdgesException[] =
+    skippedEdgesTotal > 0
+      ? [
+          {
+            id: 'skipped_edges',
+            kind: 'skipped_edges',
+            blocking: false,
+            edges: skippedEdges,
+            total: skippedEdgesTotal,
+          },
+        ]
+      : []
+
+  return [...assumptions, ...unclassified, ...edges, ...skipped]
 }
 
 /**

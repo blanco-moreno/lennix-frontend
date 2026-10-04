@@ -12,7 +12,6 @@
 import { Flex, Stack } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
-import { useSearchParams } from 'react-router'
 
 import {
   Badge,
@@ -29,6 +28,8 @@ import {
   filterRows,
   GanttZoom,
   SCHEDULE_FILTERS,
+  SelectionPanel,
+  useScheduleSelection,
   ZOOM_DAY_WIDTH,
   type ScheduleFilter,
   type ScheduleRow,
@@ -37,7 +38,6 @@ import {
 import { ScheduleExportButton } from '@/features'
 import { TaskDependencies } from '@/features/dependency-edits/components/task-dependencies/task-dependencies'
 import { ScheduleGantt } from '@/features/schedule-gantt/schedule-gantt'
-import { SCHEDULE_TASK_PARAM, resolveScheduleSelection } from '@/router'
 import {
   useGetDependencyChainsQuery,
   useListProjectTasksQuery,
@@ -47,7 +47,6 @@ import type { DependencyNode } from '@/types'
 import { BrokenDependency } from '../broken-dependency'
 import { useParentAutoCompleteToast } from '../hooks/use-parent-auto-complete-toast'
 
-import { SelectionPanel } from './components/selection-panel'
 import { FILTER_LABEL } from './constants'
 import { useEdgeActions } from './hooks/use-edge-actions'
 import { scheduleSurfaceMessages as m } from './schedule-surface-messages'
@@ -77,7 +76,6 @@ export function ScheduleSurface({
   const [collapsedIds, setCollapsedIds] = useState<ReadonlySet<string>>(
     new Set(),
   )
-  const [searchParams, setSearchParams] = useSearchParams()
 
   const toggleCollapse = useCallback((rowId: string) => {
     setCollapsedIds((current) => {
@@ -123,26 +121,7 @@ export function ScheduleSurface({
   const { isCreating, isRemoving, handleRemoveEdge, handleRelink } =
     useEdgeActions({ projectId })
 
-  // The selection lives in the URL, not in component state: a selected row is
-  // a link. It resolves against every loaded row rather than `visibleRows`, so
-  // a filter narrows what is drawn without discarding what is selected.
-  const selectedRowId = resolveScheduleSelection(
-    searchParams.get(SCHEDULE_TASK_PARAM),
-    rows,
-  )
-
-  // `replace`, like the project's tabs: selecting is a mode of this surface,
-  // and pushing an entry per clicked row would make Back a way out of the
-  // schedule only after undoing every click.
-  const selectRow = useCallback(
-    (rowId: string | null) => {
-      const next = new URLSearchParams(searchParams)
-      if (rowId) next.set(SCHEDULE_TASK_PARAM, rowId)
-      else next.delete(SCHEDULE_TASK_PARAM)
-      setSearchParams(next, { replace: true })
-    },
-    [searchParams, setSearchParams],
-  )
+  const { selectedRowId, selectRow } = useScheduleSelection(rows)
 
   const broken = edges.filter((edge) => edge.isBroken)
   const selectedRow = rows.find((row) => row.id === selectedRowId) ?? null

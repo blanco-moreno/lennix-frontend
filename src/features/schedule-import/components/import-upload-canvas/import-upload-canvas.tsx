@@ -13,7 +13,7 @@ import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 
 import { Alert, Button, Heading, Text } from '@/components'
-import { PlanUsageMeter } from '@/features'
+import { PlanUsageMeter } from '@/features/plan-usage-meter'
 import { buildAssistedMappingPath, buildDraftReviewPath } from '@/router'
 import type { ApiError } from '@/services'
 import { useGetMeQuery } from '@/services/auth'

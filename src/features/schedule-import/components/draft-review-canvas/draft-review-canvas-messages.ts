@@ -41,8 +41,7 @@ export const draftReviewCanvasMessages = defineMessages({
   },
   divertedDescription: {
     id: 'draftReviewCanvas.divertedDescription',
-    defaultMessage:
-      'Lennix could not resolve it into a schedule, so it will not pretend to have one.',
+    defaultMessage: 'It could not be read as a schedule.',
     description: 'Why the canvas refuses to render this draft',
   },
   saveSuccess: {
@@ -50,15 +49,30 @@ export const draftReviewCanvasMessages = defineMessages({
     defaultMessage: 'Draft saved',
     description: 'Toast after the wizard writes the draft',
   },
-  saveFailed: {
-    id: 'draftReviewCanvas.saveFailed',
-    defaultMessage: 'The draft could not be saved. Try again.',
-    description: 'Toast when the draft save fails',
-  },
   stepSaveFailed: {
     id: 'draftReviewCanvas.stepSaveFailed',
-    defaultMessage:
-      'Your changes are safe, but we could not remember which step you were on.',
+    defaultMessage: 'Your changes are saved, but the step you were on was not.',
     description: 'Toast when persisting the review step fails',
+  },
+  scheduleTitle: {
+    id: 'draftReviewCanvas.scheduleTitle',
+    defaultMessage: 'Review activities and dates',
+    description: 'Schedule step heading',
+  },
+  budgetTitle: {
+    id: 'draftReviewCanvas.budgetTitle',
+    defaultMessage: 'Split per main activity',
+    description: 'Budget step heading',
+  },
+  confirmTitle: {
+    id: 'draftReviewCanvas.confirmTitle',
+    defaultMessage: 'What goes live',
+    description: 'Confirm step heading',
+  },
+  confirmLine: {
+    id: 'draftReviewCanvas.confirmLine',
+    defaultMessage:
+      'Activating starts the delay and critical-path calculations.',
+    description: 'The one consequence of activating, under the confirm heading',
   },
 })

@@ -16,15 +16,54 @@ const kinds = (state: ScheduleReviewState, journal = EMPTY_REVIEW_JOURNAL) =>
   buildReviewExceptions(state, journal).map((exception) => exception.kind)
 
 describe('buildReviewExceptions', () => {
-  it('asks only about what the parser could not resolve', () => {
+  it('orders the band by consequence: loud readings, then unplaced rows', () => {
     const state = seededState()
     const exceptions = buildReviewExceptions(state, EMPTY_REVIEW_JOURNAL)
 
-    // The seeded file leaves one row the parser could not classify. Its date
-    // assumption is NOT here: the parser resolved it, so it belongs to the
-    // ledger — one ambiguity, one mechanism.
-    expect(kinds(state)).toEqual(['unclassified_row'])
+    // The seeded file reads one date column day-first — a reading with a live
+    // alternative — and leaves one row the parser could not classify.
+    expect(kinds(state).slice(0, 2)).toEqual(['assumption', 'unclassified_row'])
     expect(countBlocking(exceptions)).toBe(0)
+  })
+
+  it('keeps quiet ledger causes out of the band', () => {
+    const state = seededState()
+    const quiet: ScheduleReviewState = {
+      ...state,
+      ledger: state.ledger.map((entry) => ({
+        ...entry,
+        consequence: 'cosmetic' as const,
+      })),
+    }
+
+    expect(kinds(quiet)).not.toContain('assumption')
+  })
+
+  it('counts every skipped relationship as one item, with the full total', () => {
+    const state = seededState()
+    const skipped: ScheduleReviewState = {
+      ...state,
+      report: {
+        ...state.report,
+        skippedEdges: [
+          {
+            text: '4FS',
+            sheet: 'Gantt',
+            row: 7,
+            successorRef: null,
+            predecessorRef: null,
+            reason: 'no_key_column',
+          },
+        ],
+        skippedEdgesTotal: 12,
+      },
+    }
+
+    const items = buildReviewExceptions(skipped, EMPTY_REVIEW_JOURNAL).filter(
+      (exception) => exception.kind === 'skipped_edges',
+    )
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({ total: 12 })
   })
 
   it('never asks the user to accept the mirror subactivity', () => {
@@ -115,5 +154,22 @@ describe('buildReviewExceptions', () => {
     }
 
     expect(kinds(orphan)).not.toContain('unresolved_edge')
+  })
+
+  it('drops a question whose row was deleted since', () => {
+    const state = seededState()
+    const gone: ScheduleReviewState = {
+      ...state,
+      unresolvedEdges: [
+        {
+          successorRef: '9',
+          successorTaskId: 'not-on-the-canvas',
+          sourceText: 'ALGO',
+          candidates: [],
+        },
+      ],
+    }
+
+    expect(kinds(gone)).not.toContain('unresolved_edge')
   })
 })

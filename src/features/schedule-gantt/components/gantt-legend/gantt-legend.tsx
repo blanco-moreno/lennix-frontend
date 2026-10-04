@@ -2,7 +2,7 @@ import { Flex } from '@chakra-ui/react'
 import { useIntl } from 'react-intl'
 
 import { Badge, Text, Tooltip } from '@/components'
-import { dependencyEditorMessages as dm } from '@/features'
+import { dependencyEditorMessages as dm } from '@/features/dependency-edits'
 import { RELATIONSHIP_ORDER } from '@/utils'
 
 import { MARK_SIZE, ROW_MARKS } from '../../row-marks'
@@ -18,7 +18,8 @@ import { LegendSwatch } from '../legend-swatch'
 
 interface GanttLegendProps {
   /**
-   * `draft` drops everything the engine owns.
+   * `draft` drops everything the engine owns and keeps the one mark a draft
+   * has: the open question.
    *
    * A draft's chart has no critical path, no propagated delay and no blocked
    * or forced rows — the engine has not run. Explaining swatches that cannot
@@ -68,20 +69,21 @@ export function GanttLegend({ scope = 'live' }: GanttLegendProps) {
       {/*
         The row marks. They are icons in the label column — which is what
         gave the name its width back — so the chart owes the reader their
-        meaning. Rendered from ROW_MARKS, the same list the rows render.
+        meaning. Rendered from ROW_MARKS, the same list the rows render,
+        narrowed to the marks this scope can carry.
       */}
-      {!isDraft && (
-        <Flex gap={4} mt={2} wrap="wrap" data-testid="gantt-marks-legend">
-          {ROW_MARKS.map((mark) => (
+      <Flex gap={4} mt={2} wrap="wrap" data-testid="gantt-marks-legend">
+        {ROW_MARKS.filter((mark) => (mark.draft ?? false) === isDraft).map(
+          (mark) => (
             <Flex key={mark.id} align="center" gap={1.5}>
               <mark.icon size={MARK_SIZE} color={mark.color} aria-hidden />
               <Text size="xs" color="muted">
                 {intl.formatMessage(mark.label)}
               </Text>
             </Flex>
-          ))}
-        </Flex>
-      )}
+          ),
+        )}
+      </Flex>
 
       {/*
         The dependency legend. FS/SS/FF/SF is international PDM notation, which

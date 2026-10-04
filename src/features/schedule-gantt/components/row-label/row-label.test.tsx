@@ -134,4 +134,13 @@ describe('RowLabel', () => {
       BAR_DELAY,
     )
   })
+
+  it('marks a draft row carrying an open question, and says so', () => {
+    renderLabel({ row: row({ openQuestion: true }), scope: 'draft' })
+
+    expect(screen.getByTestId('gantt-mark-question')).toBeInTheDocument()
+    expect(screen.getByTestId('gantt-row-label')).toHaveAccessibleName(
+      /Open question/,
+    )
+  })
 })

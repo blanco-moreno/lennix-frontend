@@ -1,155 +1,317 @@
 /**
- * The draft's schedule, as a listing.
+ * The draft's schedule, on the same Gantt and selection grammar project detail
+ * uses: the chart reads the activities, their progress and their dependencies
+ * at a glance; selecting a row lifts it into the panel, where its actions are.
  *
- * Rows are ordered by the file's own dates (source dates are authoritative
- * until go-live) and laid out on one column template under one header — the
- * same shape `/tasks` uses, because it is the same job: read a lot of
- * activities down a page. The card-per-phase this replaced stood ~200px tall
- * before its first row, so a screen held two phases.
- *
- * Editing stays in place, opened per row instead of printed under every row.
+ * `scope="draft"` throughout — the engine has not run (`IMP-10`), so no status,
+ * critical path, delay or block is drawn or stated. Deleting confirms first,
+ * in the app's own dialog.
  */
 
-import { Box, Flex, Stack } from '@chakra-ui/react'
-import { Calendar } from 'lucide-react'
-import { useState } from 'react'
+import { Box, Stack } from '@chakra-ui/react'
+import { Calendar, CircleHelp, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import { EmptyState, Heading, Text } from '@/components'
-import type { ReviewTask } from '@/types'
+import {
+  Badge,
+  Button,
+  Card,
+  commonMessages,
+  EmptyState,
+  ListToolbar,
+  Modal,
+  Text,
+} from '@/components'
+import { usePermission } from '@/hooks'
+import { useIntlToast } from '@/i18n'
+import { useDeleteReviewRowMutation } from '@/services/schedule-import'
+import type { ReviewDependency, ReviewSubtask, ReviewTask } from '@/types'
+import { getDestructiveActionTextColor } from '@/utils'
 
-import { sortChronologically } from './canvas-model'
-import { ScheduleListHeader } from './components/schedule-list-header'
-import { ScheduleRow } from './components/schedule-row'
+import {
+  collapseRows,
+  GanttZoom,
+  SELECTION_ACTION,
+  SelectionPanel,
+  useScheduleSelection,
+  ZOOM_DAY_WIDTH,
+  type ScheduleRow,
+  type ZoomLevel,
+} from '../../../schedule-gantt'
+import { ScheduleGantt } from '../../../schedule-gantt/schedule-gantt'
+import { usePhaseFolding } from '../../hooks/use-phase-folding'
+import type { RowDrawerTarget } from '../row-drawer'
+import {
+  buildReviewGanttEdges,
+  buildReviewScheduleRows,
+} from '../schedule-preview/review-gantt-rows'
+
 import { scheduleCanvasMessages as m } from './schedule-canvas-messages'
 
-export interface ScheduleCanvasProps {
-  tasks: ReviewTask[]
-  /** Highlights the rows the receipt's active number refers to. */
-  highlight?: 'phases' | 'activities' | null
-  /**
-   * The draft being reviewed. With it every row is editable in place — the
-   * universal correction floor; without it the canvas is a read-only render.
-   */
-  projectId?: string
+interface DeleteTarget {
+  level: 'task' | 'subtask'
+  id: string
+  title: string
+  /** Phase: its subactivities go with it. */
+  childCount: number
+  /** Subactivity: the only one its phase has, which the backend refuses. */
+  onlyChild: boolean
 }
 
+type Selected =
+  | { level: 'task'; row: ReviewTask }
+  | { level: 'subtask'; row: ReviewSubtask; parent: ReviewTask }
+
+function findRow(tasks: ReviewTask[], id: string | null): Selected | null {
+  if (!id) return null
+  for (const task of tasks) {
+    if (task.id === id) return { level: 'task', row: task }
+    const subtask = task.subtasks.find((sub) => sub.id === id)
+    if (subtask) return { level: 'subtask', row: subtask, parent: task }
+  }
+  return null
+}
+
+export interface ScheduleCanvasProps {
+  projectId: string
+  tasks: ReviewTask[]
+  dependencies: ReviewDependency[]
+  /** Rows carrying an open question — marked, and answered from the panel. */
+  markedRowIds?: ReadonlySet<string>
+  onOpenRow: (target: RowDrawerTarget) => void
+}
+
+const NO_MARKS: ReadonlySet<string> = new Set()
+
 export function ScheduleCanvas({
-  tasks,
-  highlight = null,
   projectId,
+  tasks,
+  dependencies,
+  markedRowIds = NO_MARKS,
+  onOpenRow,
 }: ScheduleCanvasProps) {
   const intl = useIntl()
-  // Only the first phase opens. A file with twelve sections opened flat was
-  // 200 rows before the second heading — the listing has to be readable as a
-  // list of phases first, and expandable from there.
-  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(
-    () =>
-      new Set(
-        sortChronologically(tasks)
-          .slice(1)
-          .map((task) => task.id),
-      ),
+  const toast = useIntlToast()
+  const canCreate = usePermission('task.create')
+  const canEdit = usePermission('task.edit')
+  const canDelete = usePermission('task.delete')
+  const canLink = usePermission('project.dependencies.manage')
+  const canReport = usePermission('task.registerProgress')
+  const [deleteRow, { isLoading: isDeleting }] = useDeleteReviewRowMutation()
+  const [deleting, setDeleting] = useState<DeleteTarget | null>(null)
+  // Week, like the live schedule: the chart scrolls through the span.
+  const [zoom, setZoom] = useState<ZoomLevel>('week')
+
+  const rows = useMemo(
+    () => buildReviewScheduleRows(tasks, markedRowIds),
+    [tasks, markedRowIds],
   )
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const edges = useMemo(
+    () => buildReviewGanttEdges(dependencies, rows),
+    [dependencies, rows],
+  )
+  const { collapsedIds, toggleCollapse } = usePhaseFolding(rows)
+  const visibleRows = useMemo(
+    () => collapseRows(rows, collapsedIds),
+    [rows, collapsedIds],
+  )
+  const { selectedRowId, selectRow } = useScheduleSelection(rows)
+
+  const addPhase = canCreate && (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => onOpenRow({ mode: 'create-task' })}
+    >
+      <Box as={Plus} boxSize={4} />
+      {intl.formatMessage(m.addPhase)}
+    </Button>
+  )
 
   if (tasks.length === 0) {
     return (
       <EmptyState
         icon={Calendar}
         title={intl.formatMessage(m.emptyTitle)}
-        description={intl.formatMessage(m.emptyDescription)}
+        action={
+          canCreate
+            ? {
+                label: intl.formatMessage(m.addPhase),
+                onClick: () => onOpenRow({ mode: 'create-task' }),
+              }
+            : undefined
+        }
       />
     )
   }
 
-  const toggle = (taskId: string) =>
-    setCollapsed((current) => {
-      const next = new Set(current)
-      if (!next.delete(taskId)) next.add(taskId)
-      return next
-    })
+  const selected = findRow(tasks, selectedRowId)
+  const selectedRow = rows.find((row) => row.id === selectedRowId)
 
-  const activityCount = tasks.reduce(
-    (total, task) => total + task.subtasks.length,
-    0,
-  )
+  const confirmDelete = async () => {
+    if (!deleting) return
+    try {
+      await deleteRow({
+        projectId,
+        level: deleting.level,
+        id: deleting.id,
+      }).unwrap()
+      toast.success(m.deleted)
+      setDeleting(null)
+    } catch {
+      toast.error(m.deleteFailed)
+    }
+  }
+
+  const panel = (current: Selected, scheduleRow: ScheduleRow) => {
+    const { row } = current
+    const isPhase = current.level === 'task'
+    const sourceRow = current.level === 'subtask' ? row.source?.row : null
+    const edit = () => onOpenRow({ mode: 'edit', rowId: row.id })
+    return (
+      <SelectionPanel
+        scope="draft"
+        row={scheduleRow}
+        dependencyCount={
+          dependencies.filter((edge) => edge.taskId === row.id).length
+        }
+        onClear={() => selectRow(null)}
+        badges={
+          <>
+            {row.edited && (
+              <Badge variant="gray" flexShrink={0}>
+                {intl.formatMessage(m.editedBadge)}
+              </Badge>
+            )}
+            {sourceRow && (
+              <Text as="span" size="xs" color="muted" flexShrink={0}>
+                {intl.formatMessage(m.sourceRow, { row: sourceRow })}
+              </Text>
+            )}
+          </>
+        }
+        actions={
+          <>
+            {markedRowIds.has(row.id) && canLink && (
+              <Button
+                {...SELECTION_ACTION}
+                variant="outline"
+                color="warning"
+                onClick={edit}
+              >
+                <Box as={CircleHelp} boxSize={4} />
+                {intl.formatMessage(m.answerQuestion)}
+              </Button>
+            )}
+            {(canEdit || canLink || (!isPhase && canReport)) && (
+              <Button {...SELECTION_ACTION} variant="outline" onClick={edit}>
+                <Box as={Pencil} boxSize={4} />
+                {intl.formatMessage(m.actionEdit)}
+              </Button>
+            )}
+            {isPhase && canCreate && (
+              <Button
+                {...SELECTION_ACTION}
+                variant="ghost"
+                onClick={() =>
+                  onOpenRow({ mode: 'create-subtask', parentId: row.id })
+                }
+              >
+                <Box as={Plus} boxSize={4} />
+                {intl.formatMessage(m.actionAddSubtask)}
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                {...SELECTION_ACTION}
+                variant="ghost"
+                {...getDestructiveActionTextColor()}
+                onClick={() =>
+                  setDeleting({
+                    level: current.level,
+                    id: row.id,
+                    title: row.title,
+                    childCount:
+                      current.level === 'task'
+                        ? current.row.subtasks.length
+                        : 0,
+                    onlyChild:
+                      current.level === 'subtask' &&
+                      current.parent.subtasks.length === 1,
+                  })
+                }
+              >
+                <Box as={Trash2} boxSize={4} />
+                {intl.formatMessage(m.actionDelete)}
+              </Button>
+            )}
+          </>
+        }
+      >
+        {current.level === 'task' && (
+          <Text size="xs" color="muted">
+            {intl.formatMessage(
+              // ms-bk adds the mirror subactivity itself at go-live (`TSK-3`);
+              // until then a draft main activity keeps the file's figure.
+              current.row.subtasks.length === 0
+                ? m.mirrorNote
+                : m.phaseProgressNote,
+            )}
+          </Text>
+        )}
+      </SelectionPanel>
+    )
+  }
 
   return (
     <Stack gap="tight" data-testid="schedule-canvas">
-      <Flex align="baseline" gap="tight" wrap="wrap">
-        <Heading size="h4" color="primary">
-          {intl.formatMessage(m.title)}
-        </Heading>
-        <Text size="sm" color="muted">
-          {intl.formatMessage(m.phaseCount, {
-            phases: tasks.length,
-            activities: activityCount,
-          })}
-        </Text>
-      </Flex>
+      {selected && selectedRow ? (
+        panel(selected, selectedRow)
+      ) : (
+        <Card p={4} data-testid="schedule-selection-hint">
+          <Text size="xs" color="muted">
+            {intl.formatMessage(m.selectHint)}
+          </Text>
+        </Card>
+      )}
 
-      <Box
-        rounded="lg"
-        borderWidth="1px"
-        borderColor={highlight ? 'complementary' : 'border'}
-        bg="bg.panel"
-        overflow="hidden"
-      >
-        <ScheduleListHeader />
+      <ListToolbar direction="row" justify="flex-end" wrap="wrap">
+        <GanttZoom value={zoom} onChange={setZoom} />
+        {addPhase}
+      </ListToolbar>
 
-        {sortChronologically(tasks).map((task) => {
-          const isOpen = !collapsed.has(task.id)
-          return (
-            <Box key={task.id}>
-              <ScheduleRow
-                level="task"
-                row={task}
-                projectId={projectId}
-                childCount={task.subtasks.length}
-                isOpen={isOpen}
-                onToggle={() => toggle(task.id)}
-                isEditing={editingId === task.id}
-                onEditingChange={(editing) =>
-                  setEditingId(editing ? task.id : null)
-                }
-              />
+      <ScheduleGantt
+        rows={visibleRows}
+        edges={edges}
+        dayWidth={ZOOM_DAY_WIDTH[zoom]}
+        scope="draft"
+        selectedRowId={selectedRowId}
+        onSelectRow={selectRow}
+        collapsedIds={collapsedIds}
+        onToggleCollapse={toggleCollapse}
+      />
 
-              {isOpen &&
-                (task.subtasks.length > 0 ? (
-                  sortChronologically(task.subtasks).map((subtask) => (
-                    <ScheduleRow
-                      key={subtask.id}
-                      level="subtask"
-                      row={subtask}
-                      projectId={projectId}
-                      sourceRow={subtask.source?.row ?? null}
-                      pathPrefix={subtask.depth > 1 ? subtask.path : undefined}
-                      isEditing={editingId === subtask.id}
-                      onEditingChange={(editing) =>
-                        setEditingId(editing ? subtask.id : null)
-                      }
-                    />
-                  ))
-                ) : (
-                  // One quiet line, not a proposal to accept: ms-bk adds the
-                  // mirror subactivity itself at go-live.
-                  <Box
-                    pl={{ base: 3, md: 11 }}
-                    pr={3}
-                    py={2}
-                    borderTopWidth="1px"
-                    borderColor="border.muted"
-                  >
-                    <Text size="xs" color="muted">
-                      {intl.formatMessage(m.mirrorNote)}
-                    </Text>
-                  </Box>
-                ))}
-            </Box>
-          )
+      <Modal
+        variant="confirmation"
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={intl.formatMessage(m.deleteTitle, {
+          title: deleting?.title ?? '',
         })}
-      </Box>
+        description={
+          deleting?.onlyChild
+            ? intl.formatMessage(m.deleteOnlyChild)
+            : intl.formatMessage(m.deleteBody, {
+                count: deleting?.childCount ?? 0,
+              })
+        }
+        confirmLabel={intl.formatMessage(m.actionDelete)}
+        cancelLabel={intl.formatMessage(commonMessages.cancel)}
+        confirmDisabled={deleting?.onlyChild}
+        isConfirming={isDeleting}
+        onConfirm={() => void confirmDelete()}
+      />
     </Stack>
   )
 }

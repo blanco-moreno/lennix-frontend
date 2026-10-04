@@ -1,127 +1,252 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
 
+import { server } from '@/mocks/server'
 import { mapScheduleReviewStateDTO } from '@/services/schedule-import'
 import { makeStore } from '@/stores'
 import { seedImportReviewStateDTO } from '@/tests/fixtures'
-import { renderWithProviders } from '@/tests/render-with-providers'
-import type { ReviewTask } from '@/types'
+import {
+  renderWithProviders,
+  SEARCH_TEST_ID,
+} from '@/tests/render-with-providers'
+import { signedInStore } from '@/tests/signed-in-store'
+import type { ReviewDependency, ReviewTask } from '@/types'
 
-import { sortChronologically } from './canvas-model'
-import { ScheduleCanvas } from './schedule-canvas'
+import { buildReviewScheduleRows } from '../schedule-preview/review-gantt-rows'
 
-const seededTasks = (): ReviewTask[] =>
-  mapScheduleReviewStateDTO(seedImportReviewStateDTO()).tasks
+import { ScheduleCanvas, type ScheduleCanvasProps } from './schedule-canvas'
+
+const seeded = () => mapScheduleReviewStateDTO(seedImportReviewStateDTO())
+const seededTasks = (): ReviewTask[] => seeded().tasks
+
+function renderCanvas(
+  props: Partial<ScheduleCanvasProps> = {},
+  store = signedInStore(),
+) {
+  const onOpenRow = vi.fn()
+  renderWithProviders(
+    <ScheduleCanvas
+      projectId={seeded().project.id}
+      tasks={seededTasks()}
+      dependencies={[]}
+      onOpenRow={onOpenRow}
+      {...props}
+    />,
+    { store, route: '/drafts/d/review?step=schedule' },
+  )
+  return { onOpenRow }
+}
+
+/** Main activities with subactivities, in the order the chart paints them. */
+const groups = (tasks: ReviewTask[]) => {
+  const order = buildReviewScheduleRows(tasks).map((row) => row.id)
+  return tasks
+    .filter((task) => task.subtasks.length > 0)
+    .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
+}
+
+const label = (title: string) =>
+  screen
+    .getAllByTestId('gantt-row-label')
+    .find((element) => element.textContent?.startsWith(title))
+
+async function select(title: string) {
+  await userEvent.click(label(title)!)
+  return screen.findByTestId('schedule-selection')
+}
 
 describe('ScheduleCanvas', () => {
-  it('renders the imported schedule the user lands on', () => {
-    renderWithProviders(<ScheduleCanvas tasks={seededTasks()} />)
+  it('draws the draft on the schedule Gantt, claiming nothing the engine owns', () => {
+    renderCanvas()
 
-    expect(screen.getByTestId('schedule-canvas')).toBeInTheDocument()
-    expect(screen.getByText('OBRAS PRELIMINARES')).toBeInTheDocument()
-    expect(screen.getByText('Cierre perimetral')).toBeInTheDocument()
+    expect(screen.getByTestId('schedule-gantt')).toBeInTheDocument()
+    expect(screen.queryByTestId('gantt-bar-critical')).toBeNull()
+    expect(screen.queryByTestId('gantt-dependency-legend')).toBeNull()
   })
 
-  it('lays the rows out as one listing under one header', () => {
-    renderWithProviders(<ScheduleCanvas tasks={seededTasks()} />)
+  it('opens the first main activity only, and folds it away on demand', async () => {
+    const [first, second] = groups(seededTasks())
+    renderCanvas()
 
-    // Columns under a shared header, the same shape `/tasks` uses — not a
-    // card per phase, which stood 200px tall before its first row.
-    expect(screen.getByText('Activity')).toBeInTheDocument()
-    expect(screen.getByText('Dates')).toBeInTheDocument()
-    expect(screen.getByText('Duration')).toBeInTheDocument()
-  })
-
-  it('renders phases in chronological order', () => {
-    const tasks = seededTasks()
-    renderWithProviders(<ScheduleCanvas tasks={tasks} />)
-
-    const expected = sortChronologically(tasks).map((task) => task.title)
-    const rendered = screen
-      .getAllByTestId('schedule-phase')
-      .map((phase) => phase.textContent ?? '')
-
-    expect(rendered).toHaveLength(expected.length)
-    expected.forEach((title, index) => {
-      expect(rendered[index]).toContain(title)
-    })
-    // The seeded file starts with the site-preparation section.
-    expect(rendered[0]).toContain('OBRAS PRELIMINARES')
-  })
-
-  it('opens the first phase only, and folds it away on demand', async () => {
-    const tasks = sortChronologically(
-      seededTasks().filter((task) => task.subtasks.length > 0),
-    )
-    renderWithProviders(<ScheduleCanvas tasks={tasks} />)
-
-    const first = tasks[0].subtasks[0].title
-    expect(screen.getByText(first)).toBeInTheDocument()
-    // Everything after it starts collapsed: twelve open sections is 200 rows
-    // before the second heading.
-    expect(screen.queryByText(tasks[1].subtasks[0].title)).toBeNull()
+    expect(label(first.subtasks[0].title)).toBeDefined()
+    expect(label(second.subtasks[0].title)).toBeUndefined()
 
     await userEvent.click(
-      screen.getByRole('button', { name: /Hide \d+ subactivit/ }),
+      screen.getByRole('button', { name: `Collapse “${first.title}”` }),
     )
-    expect(screen.queryByText(first)).not.toBeInTheDocument()
+    expect(label(first.subtasks[0].title)).toBeUndefined()
   })
 
-  it('says a row is undated instead of inventing a date', () => {
+  it('draws an edge between the rows it links', () => {
     const tasks = seededTasks()
-    tasks[0] = { ...tasks[0], startDate: null, dueDate: null, subtasks: [] }
+    const [a, b] = groups(tasks)
+    const dependencies: ReviewDependency[] = [
+      {
+        id: 1,
+        taskId: b.id,
+        dependsOnId: a.id,
+        relationshipType: 'FS',
+        lagDays: 0,
+        source: 'manual',
+      },
+    ]
+    renderCanvas({ tasks, dependencies })
 
-    renderWithProviders(<ScheduleCanvas tasks={tasks} />)
-
-    expect(screen.getAllByText('No dates').length).toBeGreaterThan(0)
+    expect(screen.getAllByTestId('gantt-edge').length).toBeGreaterThan(0)
   })
 
-  it('states what a childless phase gets, without asking permission for it', () => {
+  it('selects a row into the URL and states it in the panel, with no status', async () => {
+    const tasks = seededTasks()
+    const [group] = groups(tasks)
+    const subtask = { ...group.subtasks[0], edited: true }
+    group.subtasks[0] = subtask
+    renderCanvas({ tasks })
+
+    const panel = await select(subtask.title)
+
+    expect(screen.getByTestId(SEARCH_TEST_ID)).toHaveTextContent(
+      `task=${subtask.id}`,
+    )
+    expect(panel).toHaveTextContent('Subactivity')
+    expect(panel).toHaveTextContent('Edited')
+    expect(panel).not.toHaveTextContent('Pending')
+    expect(panel).not.toHaveTextContent('Owner')
+    expect(panel).toHaveTextContent(`Row ${subtask.source!.row}`)
+  })
+
+  it('counts the predecessors the selected row waits on', async () => {
+    const tasks = seededTasks()
+    const [a, b] = groups(tasks)
+    renderCanvas({
+      tasks,
+      dependencies: [
+        {
+          id: 1,
+          taskId: b.id,
+          dependsOnId: a.id,
+          relationshipType: 'FS',
+          lagDays: 0,
+          source: 'manual',
+        },
+      ],
+    })
+
+    const panel = await select(b.title)
+    expect(panel).toHaveTextContent('Dependencies1')
+  })
+
+  it('edits the selected row, or adds a subactivity under a main activity', async () => {
+    const [group] = groups(seededTasks())
+    const { onOpenRow } = renderCanvas()
+
+    const panel = await select(group.title)
+    await userEvent.click(
+      within(panel).getByRole('button', { name: 'Add subactivity' }),
+    )
+    expect(onOpenRow).toHaveBeenCalledWith({
+      mode: 'create-subtask',
+      parentId: group.id,
+    })
+
+    await userEvent.click(within(panel).getByRole('button', { name: 'Edit' }))
+    expect(onOpenRow).toHaveBeenCalledWith({ mode: 'edit', rowId: group.id })
+  })
+
+  it('says a main activity’s progress is the file’s until go-live', async () => {
+    const [group] = groups(seededTasks())
+    renderCanvas()
+
+    expect(await select(group.title)).toHaveTextContent(
+      /progress is the file’s until activation/,
+    )
+  })
+
+  it('says what a childless main activity gets at go-live', async () => {
     const tasks = seededTasks().map((task) => ({ ...task, subtasks: [] }))
+    renderCanvas({ tasks })
 
-    renderWithProviders(<ScheduleCanvas tasks={tasks} />)
-
-    // One quiet line on the open phase, no accept button: ms-bk creates the
-    // mirror itself, so there is nothing for the user to consent to.
-    expect(
-      screen.getByText('Lennix adds one subactivity here when you activate.'),
-    ).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /accept/i })).toBeNull()
+    expect(await select(tasks[0].title)).toHaveTextContent(
+      'No subactivities. Activating creates one with the same name.',
+    )
   })
 
-  it('marks a row the user already edited', () => {
-    const tasks = seededTasks()
-    tasks[0] = { ...tasks[0], edited: true }
+  it('adds a main activity from the toolbar', async () => {
+    const { onOpenRow } = renderCanvas()
 
-    renderWithProviders(<ScheduleCanvas tasks={tasks} />)
-
-    expect(screen.getAllByText('Edited').length).toBeGreaterThan(0)
-  })
-
-  it('opens the edit form under the row it edits, never inside a column', async () => {
-    const tasks = [seededTasks()[0]]
-    renderWithProviders(<ScheduleCanvas tasks={tasks} projectId="p1" />, {
-      store: makeStore(),
-    })
-
-    expect(screen.queryByTestId('inline-row-edit')).not.toBeInTheDocument()
     await userEvent.click(
-      screen.getByRole('button', { name: `Edit ${tasks[0].title}` }),
+      screen.getByRole('button', { name: 'Add main activity' }),
     )
 
-    const form = screen.getByTestId('inline-row-edit')
-    expect(within(form).getByLabelText('Name')).toBeInTheDocument()
+    expect(onOpenRow).toHaveBeenCalledWith({ mode: 'create-task' })
   })
 
-  it('is read-only without a draft to write to', () => {
-    renderWithProviders(<ScheduleCanvas tasks={seededTasks()} />)
+  it('marks a row with an open question and opens its drawer on it', async () => {
+    const [group] = groups(seededTasks())
+    const { onOpenRow } = renderCanvas({ markedRowIds: new Set([group.id]) })
 
-    expect(screen.queryByRole('button', { name: /^Edit / })).toBeNull()
+    expect(
+      within(label(group.title)!).getByTestId('gantt-mark-question'),
+    ).toBeInTheDocument()
+
+    const panel = await select(group.title)
+    await userEvent.click(
+      within(panel).getByRole('button', { name: 'Resolve open question' }),
+    )
+
+    expect(onOpenRow).toHaveBeenCalledWith({ mode: 'edit', rowId: group.id })
   })
 
-  it('offers an honest empty state instead of a blank canvas', () => {
-    renderWithProviders(<ScheduleCanvas tasks={[]} />)
+  it('deletes only after the in-app confirmation', async () => {
+    const [group] = groups(seededTasks())
+    const deleted = vi.fn()
+    server.use(
+      http.delete('*/v1/tasks/:taskId', ({ params }) => {
+        deleted(params.taskId)
+        return new HttpResponse(null, { status: 204 })
+      }),
+    )
+    renderCanvas()
 
-    expect(screen.getByText('This draft has no rows yet')).toBeInTheDocument()
+    const panel = await select(group.title)
+    await userEvent.click(within(panel).getByRole('button', { name: 'Delete' }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText(/goes to the trash/)).toBeInTheDocument()
+    expect(deleted).not.toHaveBeenCalled()
+
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: 'Delete' }),
+    )
+
+    await waitFor(() => expect(deleted).toHaveBeenCalledWith(group.id))
+  })
+
+  it('refuses to delete the only subactivity a main activity has', async () => {
+    const [group] = groups(seededTasks())
+    const only = { ...group, subtasks: [group.subtasks[0]] }
+    renderCanvas({ tasks: [only] })
+
+    const panel = await select(only.subtasks[0].title)
+    await userEvent.click(within(panel).getByRole('button', { name: 'Delete' }))
+
+    const dialog = await screen.findByRole('dialog')
+    expect(
+      within(dialog).getByText(/only subactivity of its main activity/),
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole('button', { name: 'Delete' }),
+    ).toBeDisabled()
+  })
+
+  it('offers no row actions to whoever holds none of the permissions', async () => {
+    const [group] = groups(seededTasks())
+    renderCanvas({}, makeStore())
+
+    const panel = await select(group.title)
+    expect(within(panel).queryByRole('button', { name: 'Edit' })).toBeNull()
+    expect(within(panel).queryByRole('button', { name: 'Delete' })).toBeNull()
+    expect(
+      screen.queryByRole('button', { name: 'Add main activity' }),
+    ).toBeNull()
   })
 })

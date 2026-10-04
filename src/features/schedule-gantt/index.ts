@@ -1,4 +1,6 @@
 export { ScheduleGantt } from './schedule-gantt'
+export { SELECTION_ACTION, SelectionPanel } from './components/selection-panel'
+export { useScheduleSelection } from './hooks/use-schedule-selection'
 export {
   GanttZoom,
   ZOOM_DAY_WIDTH,

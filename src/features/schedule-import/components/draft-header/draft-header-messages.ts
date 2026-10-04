@@ -31,26 +31,9 @@ export const draftHeaderMessages = defineMessages({
     defaultMessage: 'What is being built here?',
     description: 'Placeholder of the project description field',
   },
-  explainer: {
-    id: 'draftHeader.explainer',
-    defaultMessage:
-      'Lennix took these from your file. Edits are applied when you activate — nothing here holds the wizard up.',
-    description: 'Why the header fields are optional and when they are written',
-  },
-  pendingChanges: {
-    id: 'draftHeader.pendingChanges',
-    defaultMessage:
-      '{count, plural, one {# change is applied when you activate} other {# changes are applied when you activate}}',
-    description: 'Tells the user the header edits travel with go-live',
-  },
   draftBadge: {
     id: 'draftHeader.draftBadge',
     defaultMessage: 'Draft',
     description: 'Says this project is not live yet',
-  },
-  locationHint: {
-    id: 'draftHeader.locationHint',
-    defaultMessage: 'City or site — whatever your team calls it.',
-    description: 'What to put in the location field',
   },
 })

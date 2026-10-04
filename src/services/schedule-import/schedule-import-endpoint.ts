@@ -11,7 +11,11 @@ import type {
   ReviewTaskPatch,
   TaskBudgetAllocation,
 } from '@/types'
-import type { SubtaskCreateRequestDTO } from '@/types/dto/subtask-dto'
+import type {
+  SubtaskCreateRequestDTO,
+  SubtaskProgressUpdateRequestDTO,
+} from '@/types/dto/subtask-dto'
+import type { TaskCreateRequestDTO } from '@/types/dto/task-dto'
 
 /**
  * A review correction, addressed by level — the discrimination is what keeps a
@@ -112,4 +116,45 @@ export const placeReviewRow = ({
   url: `/v1/tasks/${taskId}/subtasks`,
   method: 'POST',
   body,
+})
+
+/** Add a main activity to the draft. `is_draft` keeps it out of the live lists. */
+export const createReviewPhase = ({
+  projectId,
+  body,
+}: {
+  projectId: string
+  body: TaskCreateRequestDTO
+}) => ({
+  url: `/v1/tasks/projects/${projectId}/tasks`,
+  method: 'POST',
+  body: { ...body, is_draft: true },
+})
+
+/**
+ * Correct a draft subactivity's progress. Status follows it on the server
+ * (`TSK-9`); a draft is never blocked, so the `DEP-7` refusal cannot apply.
+ */
+export const updateReviewProgress = ({
+  id,
+  body,
+}: {
+  id: string
+  body: SubtaskProgressUpdateRequestDTO
+}) => ({
+  url: `/v1/tasks/subtasks/${id}/progress`,
+  method: 'PATCH',
+  body,
+})
+
+/** Remove a row from the draft — a soft delete, restorable from the trash. */
+export const deleteReviewRow = ({
+  level,
+  id,
+}: {
+  level: 'task' | 'subtask'
+  id: string
+}) => ({
+  url: level === 'task' ? `/v1/tasks/${id}` : `/v1/tasks/subtasks/${id}`,
+  method: 'DELETE',
 })

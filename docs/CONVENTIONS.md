@@ -53,6 +53,9 @@ primitives — a hook that builds table columns uses the same ones everything
 else does — but imports each from its own folder (`@/components/ui/badge`),
 never the `@/components` barrel: components import `@/hooks`, and the two
 barrels importing each other is a cycle the bundler splits across chunks.
+A feature reaches another feature the same way, by its folder
+(`@/features/dependency-edits`): the `@/features` barrel re-exports the
+importing feature back, which is the same cycle.
 
 ## 2. Barrels and doors
 

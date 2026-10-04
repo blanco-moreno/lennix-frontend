@@ -38,6 +38,8 @@ export {
   GanttZoom,
   ScheduleGantt,
   SCHEDULE_FILTERS,
+  SelectionPanel,
+  useScheduleSelection,
   ZOOM_DAY_WIDTH,
   type ScheduleFilter,
   type ScheduleRow,

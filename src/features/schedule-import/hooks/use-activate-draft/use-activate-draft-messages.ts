@@ -3,7 +3,7 @@ import { defineMessages } from 'react-intl'
 export const useActivateDraftMessages = defineMessages({
   activatedToast: {
     id: 'activateSchedule.activatedToast',
-    defaultMessage: 'Your project is live. Lennix is tracking it from here.',
+    defaultMessage: 'Your project is live.',
     description:
       'Success toast at the moment of highest product value — go-live',
   },

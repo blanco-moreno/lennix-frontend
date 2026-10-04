@@ -10,6 +10,7 @@
 
 import {
   Ban,
+  CircleHelp,
   Clock,
   Flame,
   TriangleAlert,
@@ -29,13 +30,15 @@ import {
 export const MARK_SIZE = 14
 
 export interface RowMark {
-  id: 'critical' | 'blocked' | 'delay' | 'at-risk' | 'over-budget'
+  id: 'critical' | 'blocked' | 'delay' | 'at-risk' | 'over-budget' | 'question'
   icon: LucideIcon
   /** A `gantt.*` CSS variable — the same one the bar it describes uses. */
   color: string
   label: (typeof m)[keyof typeof m]
   /** Whether this row carries the mark. */
   applies: (row: ScheduleRow) => boolean
+  /** A draft's mark: the engine marks never apply to one, and this one only does. */
+  draft?: boolean
 }
 
 export const ROW_MARKS: readonly RowMark[] = [
@@ -73,5 +76,13 @@ export const ROW_MARKS: readonly RowMark[] = [
     color: EDGE_BROKEN,
     label: m.overBudgetBadge,
     applies: (row) => row.isOverBudget,
+  },
+  {
+    id: 'question',
+    icon: CircleHelp,
+    color: BAR_DELAY,
+    label: m.openQuestionMark,
+    applies: (row) => row.openQuestion === true,
+    draft: true,
   },
 ]

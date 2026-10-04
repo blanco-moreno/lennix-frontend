@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router'
 
 import { Button, Text } from '@/components'
 import { PATHS } from '@/constants'
-import { PlanLimitButton } from '@/features'
+import { PlanLimitButton } from '@/features/plan-limit-button'
 
 import type { DraftSaveOutcome } from '../../hooks/use-draft-edits'
 
@@ -131,23 +131,16 @@ export function WizardNav({
       </Flex>
 
       {pending > 0 && !isSaving && (
-        <Text
-          size="xs"
-          color="muted"
-          hideBelow="lg"
-          data-testid="wizard-nav-pending"
-        >
+        <Text size="xs" color="muted" data-testid="wizard-nav-pending">
           {intl.formatMessage(m.pendingChanges, { count: pending })}
         </Text>
       )}
 
-      {saveOutcome && saveOutcome.kind !== 'noop' && (
-        <Text
-          size="xs"
-          color={saveOutcome.kind === 'saved' ? 'muted' : 'error'}
-          data-testid="wizard-nav-save-outcome"
-        >
-          {saveOutcome.kind === 'saved' && intl.formatMessage(m.saved)}
+      {/* A save that lands leaves for the drafts list, whose toast says so;
+          only a failure stays here to be read. */}
+      {(saveOutcome?.kind === 'failed' ||
+        saveOutcome?.kind === 'unknown-tasks') && (
+        <Text size="xs" color="error" data-testid="wizard-nav-save-outcome">
           {saveOutcome.kind === 'failed' && intl.formatMessage(m.saveFailed)}
           {saveOutcome.kind === 'unknown-tasks' &&
             intl.formatMessage(m.unknownTasks, { count: saveOutcome.count })}

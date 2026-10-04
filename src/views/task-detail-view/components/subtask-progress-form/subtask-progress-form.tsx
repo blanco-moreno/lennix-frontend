@@ -1,4 +1,4 @@
-import { Box, Flex, HStack, Stack, chakra } from '@chakra-ui/react'
+import { Box, Flex, HStack, Stack } from '@chakra-ui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -9,8 +9,8 @@ import {
   Badge,
   Label,
   ModalFormFooter,
+  ProgressPicker,
   Select,
-  Slider,
   Text,
   FormDrawer,
 } from '@/components'
@@ -97,13 +97,6 @@ function SubtaskProgressFormInner({
   const isLate = subtask.delayDays > 0
   const reasonChanged = delayReason !== (subtask.delayReason ?? null)
   const hasChanged = progress !== subtask.progress || reasonChanged
-
-  const handleProgressChange = (value: number) => {
-    form.setValue('progress', Math.max(value, minProgress), {
-      shouldDirty: true,
-      shouldValidate: true,
-    })
-  }
 
   const onSubmit = async () => {
     try {
@@ -200,94 +193,23 @@ function SubtaskProgressFormInner({
           </HStack>
         </Flex>
 
-        <Stack gap={0}>
-          <Label mb={3} display="block">
-            <FormattedMessage {...m.progressLabel} />
-          </Label>
-          <Slider
-            colorPalette="accent"
-            value={[progress]}
-            onValueChange={(v) => handleProgressChange(v[0])}
-            min={0}
-            max={100}
-            step={5}
+        <Stack gap={2}>
+          <ProgressPicker
+            value={progress}
+            min={minProgress}
+            onChange={(value) =>
+              form.setValue('progress', value, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
           />
-          <Flex
-            mt={2}
-            width="full"
-            justify="space-between"
-            wrap="wrap"
-            fontSize="xs"
-            color="fg.subtle"
-            gap={2}
-          >
-            <Box as="span">0%</Box>
-            <Box as="span">25%</Box>
-            <Box as="span">50%</Box>
-            <Box as="span">75%</Box>
-            <Box as="span">100%</Box>
-          </Flex>
-          {minProgress > 0 && (
-            <Text size="xs" color="muted" mt={2}>
-              <FormattedMessage
-                {...m.progressMinWarning}
-                values={{ minProgress }}
-              />
-            </Text>
-          )}
           {form.formState.errors.progress && (
-            <Text size="sm" color="error" mt={2}>
+            <Text size="sm" color="error">
               {form.formState.errors.progress.message}
             </Text>
           )}
         </Stack>
-
-        <Flex flexWrap="wrap" gap={2}>
-          {[0, 25, 50, 75, 100].map((v) => {
-            const disabled = v < minProgress
-            const selected = progress === v
-            return (
-              <chakra.button
-                key={v}
-                type="button"
-                disabled={disabled}
-                onClick={() => handleProgressChange(v)}
-                rounded="md"
-                borderWidth="1px"
-                px={3}
-                py={1.5}
-                fontSize="xs"
-                fontWeight="medium"
-                transition="colors"
-                cursor={disabled ? 'not-allowed' : undefined}
-                borderColor={
-                  disabled ? 'border' : selected ? 'complementary' : 'border'
-                }
-                bg={
-                  disabled
-                    ? 'bg.subtle'
-                    : selected
-                      ? 'complementary/10'
-                      : undefined
-                }
-                color={
-                  disabled
-                    ? 'fg.subtle'
-                    : selected
-                      ? 'complementary'
-                      : 'fg.muted'
-                }
-                _hover={
-                  !disabled && !selected
-                    ? { borderColor: 'border', bg: 'bg.subtle' }
-                    : undefined
-                }
-              >
-                {v}%
-              </chakra.button>
-            )
-          })}
-        </Flex>
 
         {/* Always available so a delay can be flagged proactively; the
             "N days behind" notice appears only once the engine derives one. */}

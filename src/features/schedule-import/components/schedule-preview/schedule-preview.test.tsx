@@ -35,9 +35,6 @@ describe('SchedulePreview', () => {
     renderWithProviders(<SchedulePreview tasks={tasks} dependencies={edges} />)
 
     expect(screen.getAllByTestId('gantt-edge')).toHaveLength(1)
-    expect(screen.getByTestId('schedule-preview-edges')).toHaveTextContent(
-      '1 link between activities',
-    )
   })
 
   it('offers the same zoom control the live schedule has', () => {
@@ -66,16 +63,14 @@ describe('SchedulePreview', () => {
     }
   })
 
-  it('states the import’s vitals: row counts and the full span', () => {
+  it('repeats none of the summary the confirm step already states', () => {
     const { tasks, dependencies } = state()
     renderWithProviders(
       <SchedulePreview tasks={tasks} dependencies={dependencies} />,
     )
 
-    const summary = screen.getByTestId('schedule-preview-summary')
-    expect(summary).toHaveTextContent(/phase/)
-    expect(summary).toHaveTextContent(/activit/)
-    expect(summary).toHaveTextContent(/day/)
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('schedule-facts')).not.toBeInTheDocument()
   })
 
   it('is read-only: the confirm step previews, it does not edit', () => {
@@ -86,8 +81,5 @@ describe('SchedulePreview', () => {
 
     // The chart never edits the graph — links are managed in the row panel.
     expect(screen.queryByTestId('gantt-linking-banner')).not.toBeInTheDocument()
-    expect(screen.getByTestId('schedule-preview-edges')).toHaveTextContent(
-      'No links between activities',
-    )
   })
 })

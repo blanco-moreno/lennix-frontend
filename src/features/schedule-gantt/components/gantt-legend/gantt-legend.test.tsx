@@ -28,4 +28,20 @@ describe('GanttLegend', () => {
     expect(fs).toHaveTextContent('FS')
     expect(fs).toHaveTextContent('starts when the other finishes')
   })
+
+  it('explains only the open-question mark on a draft', () => {
+    renderWithProviders(<GanttLegend scope="draft" />)
+
+    const marks = screen.getByTestId('gantt-marks-legend')
+    expect(marks).toHaveTextContent('Open question')
+    expect(marks).not.toHaveTextContent('Critical')
+  })
+
+  it('never explains the open-question mark on a live chart', () => {
+    renderWithProviders(<GanttLegend />)
+
+    expect(screen.getByTestId('gantt-marks-legend')).not.toHaveTextContent(
+      'Open question',
+    )
+  })
 })
