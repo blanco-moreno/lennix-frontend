@@ -1,6 +1,9 @@
 /** PDM relationship types. Predecessor → successor. */
 export type RelationshipTypeDTO = 'FS' | 'SS' | 'FF' | 'SF'
 
+/** `DependencySource` — parsed from an export, or drawn by hand. */
+export type DependencySourceDTO = 'project_import' | 'manual'
+
 /** POST /v1/tasks/:task_id/dependencies — request */
 export interface TaskDependencyCreateRequestDTO {
   depends_on_id: string

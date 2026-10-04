@@ -1,4 +1,6 @@
 export { TaskDependencies } from './components/task-dependencies'
+export { DependencyEditor } from './components/dependency-editor'
+export { RelationshipFields } from './components/relationship-fields'
 export {
   LinkComposer,
   buildCandidateOptions,

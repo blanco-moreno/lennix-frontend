@@ -120,11 +120,6 @@ export const reviewTrayMessages = defineMessages({
     defaultMessage: 'Link it',
     description: 'Creates the dependency with the picked predecessor',
   },
-  edgeFailed: {
-    id: 'reviewTray.edgeFailed',
-    defaultMessage: 'The dependency could not be created. Try again.',
-    description: 'Error shown when linking a predecessor fails',
-  },
   working: {
     id: 'reviewTray.working',
     defaultMessage: 'Saving…',

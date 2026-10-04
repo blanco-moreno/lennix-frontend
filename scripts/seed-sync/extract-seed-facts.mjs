@@ -509,6 +509,54 @@ export function extractSeedFacts(msBkRoot) {
     status: 'draft_ready',
   }
 
+  // ── The explicit-dependency draft (project 8, an MS Project export) ───
+  // Its contract is a literal ms-ai emitted, kept verbatim; its parsed edges
+  // land tagged `project_import`, which the wiring guard below pins.
+  const p8Contract = requireValue(
+    importModule.VIADUCTO_CONTRACT,
+    'VIADUCTO_CONTRACT',
+  )
+  requireList(p8Contract.rows, 'VIADUCTO_CONTRACT.rows')
+  requireList(p8Contract.edges, 'VIADUCTO_CONTRACT.edges')
+  const p8Filename = requireValue(
+    importModule.VIADUCTO_FILENAME,
+    'VIADUCTO_FILENAME',
+  )
+  const p8TaskIdByRef = requireValue(
+    importModule._VIADUCTO_TASK_ID_BY_REF,
+    '_VIADUCTO_TASK_ID_BY_REF',
+  )
+  for (const [ref, taskId] of Object.entries(p8TaskIdByRef)) {
+    if (!p8Contract.rows.some((row) => row.ref === ref))
+      throw new Error(
+        `seed drift: _VIADUCTO_TASK_ID_BY_REF ref '${ref}' has no row`,
+      )
+    if (typeof taskId !== 'string')
+      throw new Error(
+        `seed drift: _VIADUCTO_TASK_ID_BY_REF['${ref}'] is not an id`,
+      )
+  }
+  for (const literal of [
+    'id=uuid.UUID(P8_SCHEDULE_IMPORT_ID)',
+    'contract=VIADUCTO_CONTRACT',
+    'f"imports/{ORG_LENNIX_ID}/{PROJECT_DRAFT_VIADUCTO_ID}/{VIADUCTO_FILENAME}"',
+    'source=DependencySource.PROJECT_IMPORT.value',
+  ])
+    assertLiteral(importSrc, literal, '15_schedule_import.py')
+
+  const p8ScheduleImport = {
+    id: ids.P8_SCHEDULE_IMPORT_ID,
+    projectId: ids.PROJECT_DRAFT_VIADUCTO_ID,
+    organizationId: ids.ORG_LENNIX_ID,
+    sourceFilename: p8Filename,
+    sourceObject: `imports/${ids.ORG_LENNIX_ID}/${ids.PROJECT_DRAFT_VIADUCTO_ID}/${p8Filename}`,
+    sheet: p8Contract.sheet,
+    contractVersion: p8Contract.contract_version,
+    outcome: p8Contract.outcome,
+    contract: p8Contract,
+    taskIdByRef: p8TaskIdByRef,
+  }
+
   return {
     digest: digestSources(msBkRoot),
     ids,
@@ -526,6 +574,7 @@ export function extractSeedFacts(msBkRoot) {
     forceStart,
     scheduleImport,
     importJob,
+    p8ScheduleImport,
   }
 }
 

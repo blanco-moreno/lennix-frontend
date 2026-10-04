@@ -159,6 +159,7 @@ export function useDependencyEdits(projectId: string) {
         removeDependency({
           taskId: edge.task.id,
           depId: Number(edge.id),
+          projectId,
         }).unwrap(),
       m.edgeRemoved,
       m.edgeRemoveFailed,

@@ -115,6 +115,12 @@ export const dependencyEditorMessages = defineMessages({
     defaultMessage: 'Add successor',
     description: 'Button that opens the composer on the "blocks" list',
   },
+  addOpen: {
+    id: 'dependencyEditor.addOpen',
+    defaultMessage: 'Add a dependency',
+    description:
+      'Button that opens the composer on a list of every edge, which is about no single row',
+  },
   addNoCandidates: {
     id: 'dependencyEditor.addNoCandidates',
     defaultMessage: 'Nothing left to link: every legal pairing already exists.',

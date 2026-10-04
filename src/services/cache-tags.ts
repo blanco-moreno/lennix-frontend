@@ -84,19 +84,24 @@ export function buildExpenseInvalidationTags({
   return tags
 }
 
-// Tags invalidated when a dependency edge is created, edited or removed.
-// Scoped to the edge's project when the caller knows it; the same tag types
-// stay type-wide otherwise (today's callers only have the task id in hand).
+// Tags invalidated when a dependency edge is created, edited or removed, all
+// scoped to the edge's project. A draft's edges live in its review state.
 export function buildDependencyInvalidationTags(
   taskId: string,
-  projectId?: string,
+  projectId: string,
 ): CacheTag[] {
   return [
     // The successor's own row — its blocked/critical state derives from edges.
     { type: 'Task', id: taskId },
-    projectId ? { type: 'Task', id: `project-${projectId}` } : { type: 'Task' },
+    { type: 'Task', id: `project-${projectId}` },
     ...scopeTagTypes(
-      ['Dependency', 'CriticalPath', 'Dashboard', 'DelayAnalysis'],
+      [
+        'Dependency',
+        'CriticalPath',
+        'Dashboard',
+        'DelayAnalysis',
+        'ScheduleReviewState',
+      ],
       projectId,
     ),
   ]

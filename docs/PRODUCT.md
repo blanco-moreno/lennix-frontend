@@ -72,6 +72,18 @@ two places** unless it is an explicit overview → drill-down.
   alternative plus a one-flip reversal.
 - **Dropped rows are shown, not hidden.** The parse report names what was
   scanned, imported and dropped, with the reason and the source location.
+- **The draft's graph is the user's before go-live.** The schedule step lists
+  every dependency, each badged with where it came from — read from the file or
+  added by hand — and lets the user add one with its type and lag in the same
+  act, change a type or lag in place, or delete it (`DEP-2`, `DEP-5`). A link
+  that would repeat an edge or close a loop is shown disabled, with the reason,
+  before it can be picked (`DEP-4`). An answered predecessor question in the
+  review tray carries a type and lag too. Every edge change is saved the
+  moment it is made: activation confirms the graph as it stands (`IMP-10`).
+- **Relationships the file states but that never became an edge are shown, not
+  hidden.** Each quotes the file's own text, its sheet and row, and the reason
+  in the user's language; the count is the full one even when the list is
+  capped.
 - **A file that did not resolve goes to assisted mapping**, never to a broken
   Gantt.
 - **The mirror subactivity is rendered honestly** (`TSK-3`) — a collapsed leaf on

@@ -7,7 +7,9 @@ import {
   seedImportJobStatusDTO,
   seedImportReviewStateDTO,
   seedImportUploadDTO,
+  seedP8ImportReviewStateDTO,
 } from '@/tests/fixtures'
+import { SEED_IDS } from '@/tests/seed'
 
 export const importUploadHandler = http.post('*/v1/schedule/import', () => {
   return HttpResponse.json(seedImportUploadDTO(), { status: 201 })
@@ -29,11 +31,18 @@ export const importJobStatusHandler = http.get(
   },
 )
 
-/** The resumable review state. */
+/**
+ * The resumable review state. The MS Project draft answers with its parsed
+ * edges; every other id with the hand-made Gantt.
+ */
 export const importReviewStateHandler = http.get(
   '*/v1/schedule/review/:projectId',
-  () => {
-    return HttpResponse.json(seedImportReviewStateDTO())
+  ({ params }) => {
+    return HttpResponse.json(
+      params.projectId === SEED_IDS.PROJECT_DRAFT_VIADUCTO_ID
+        ? seedP8ImportReviewStateDTO()
+        : seedImportReviewStateDTO(),
+    )
   },
 )
 

@@ -9,6 +9,8 @@
 
 import type { ImportJobStatus } from '../schedule-import'
 
+import type { DependencySourceDTO, RelationshipTypeDTO } from './dependency-dto'
+
 export interface ImportEditConflictDTO {
   task_id: string
   ref: string
@@ -114,9 +116,9 @@ export interface ReviewDependencyDTO {
   id: number
   task_id: string
   depends_on_id: string
-  relationship_type: string
+  relationship_type: RelationshipTypeDTO
   lag_days: number
-  source: string
+  source: DependencySourceDTO
 }
 
 /** A predecessor reference no row matched — a question, never an edge. */

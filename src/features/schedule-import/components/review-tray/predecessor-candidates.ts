@@ -1,23 +1,20 @@
 /**
  * Ranks candidate rows for a predecessor name that matched nothing.
- * Only rows the backend would accept are offered: phase→phase (`inter_phase`)
- * or two activities under the same phase (`intra_phase`).
+ * Only rows the backend would accept are offered: the pairing rule
+ * (`inter_phase` / `intra_phase`), and no link that repeats an edge or closes
+ * a loop in the draft's current graph.
  */
 
 import type { ReviewTask, ReviewUnresolvedEdge } from '@/types'
-import { dependencyTypeFor, type DependencyType } from '@/utils'
+import { buildUpstreamGraph, evaluateLink, type ExistingEdge } from '@/utils'
 
 import { allReviewRows } from './review-exceptions'
 import { normalizeName, similarity } from './text-match'
-
-export { dependencyTypeFor }
-export type { DependencyType }
 
 export interface PredecessorOption {
   taskId: string
   title: string
   ref: string | null
-  dependencyType: DependencyType
   /** True when the parser itself proposed this row as a candidate. */
   proposed: boolean
   /** Best similarity against the raw text or any proposed candidate, 0–1. */
@@ -37,21 +34,28 @@ export const CANDIDATE_FLOOR = 0.34
 export function buildPredecessorOptions(
   edge: ReviewUnresolvedEdge,
   tasks: ReviewTask[],
+  existing: ExistingEdge[] = [],
 ): PredecessorOption[] {
   const rows = allReviewRows(tasks)
   const successor = rows.find((row) => row.id === edge.successorTaskId)
   if (!successor) return []
 
+  const linkable = new Map(rows.map((row) => [row.id, row]))
+  const graph = buildUpstreamGraph(existing)
   const proposedNames = edge.candidates.map(normalizeName)
   const needles = [edge.sourceText, ...edge.candidates].filter(
     (value): value is string => !!value,
   )
 
   return rows
-    .filter((row) => row.id !== successor.id)
     .flatMap((row) => {
-      const dependencyType = dependencyTypeFor(successor, row)
-      if (!dependencyType) return []
+      const verdict = evaluateLink(
+        { predecessorId: row.id, successorId: successor.id },
+        linkable,
+        existing,
+        graph,
+      )
+      if (!verdict.ok) return []
 
       const proposed =
         proposedNames.includes(normalizeName(row.title)) ||
@@ -66,7 +70,6 @@ export function buildPredecessorOptions(
           taskId: row.id,
           title: row.title,
           ref: row.ref,
-          dependencyType,
           proposed,
           score,
         },

@@ -4,6 +4,7 @@ import {
   seedImportJobStatusDTO,
   seedImportReviewStateDTO,
   seedImportUploadDTO,
+  seedP8ImportReviewStateDTO,
   FIXTURE_DIVERTED_JOB_ID,
 } from '@/tests/fixtures'
 import { SEED_IDS, SEED_SCHEDULE_IMPORT } from '@/tests/seed'
@@ -55,6 +56,35 @@ describe('mapScheduleReviewStateDTO', () => {
     const state = mapScheduleReviewStateDTO(dto)
 
     expect(state.tasks[0].subtasks.map((s) => s.title)).not.toContain('mirror')
+  })
+
+  it('reads the relationships the file stated that were not imported', () => {
+    const { report, dependencies } = mapScheduleReviewStateDTO(
+      seedP8ImportReviewStateDTO(),
+    )
+
+    expect(report.skippedEdges.map((edge) => edge.reason)).toEqual([
+      'unconvertible_lag',
+      'unresolved_reference',
+    ])
+    expect(report.skippedEdges[0]).toMatchObject({
+      sheet: 'Task_Table',
+      row: 8,
+      text: '3FC+2 díast',
+    })
+    expect(report.skippedEdgesTotal).toBe(2)
+    // The parsed edges keep their provenance and their PDM shape.
+    expect(dependencies.every((edge) => edge.source === 'project_import')).toBe(
+      true,
+    )
+    expect(dependencies.map((edge) => edge.relationshipType)).toContain('SS')
+  })
+
+  it('reads a contract older than 2.2 as nothing skipped', () => {
+    const { report } = mapScheduleReviewStateDTO(seedImportReviewStateDTO())
+
+    expect(report.skippedEdges).toEqual([])
+    expect(report.skippedEdgesTotal).toBe(0)
   })
 
   it('survives a report shape it does not know', () => {

@@ -22,12 +22,10 @@ export const dependencyApi = api.injectEndpoints({
   endpoints: (builder) => ({
     createDependency: builder.mutation<
       TaskDependency,
-      // `projectId` is optional so the invalidation can scope to one project's
-      // schedule when the caller passes it; without it the same tag types are
-      // busted type-wide.
+      // `projectId` is not in the URL; it scopes the invalidation.
       {
         taskId: string
-        projectId?: string
+        projectId: string
         body: TaskDependencyCreateRequestDTO
       }
     >({
@@ -43,7 +41,7 @@ export const dependencyApi = api.injectEndpoints({
       {
         taskId: string
         depId: number
-        projectId?: string
+        projectId: string
         body: TaskDependencyUpdateRequestDTO
       }
     >({
@@ -55,7 +53,7 @@ export const dependencyApi = api.injectEndpoints({
 
     removeDependency: builder.mutation<
       void,
-      { taskId: string; depId: number; projectId?: string }
+      { taskId: string; depId: number; projectId: string }
     >({
       query: removeDependency,
       invalidatesTags: (_result, _error, { taskId, projectId }) =>

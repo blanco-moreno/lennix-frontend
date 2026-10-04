@@ -21,7 +21,7 @@ export {
   type DependencyChain,
   type DependencyNode,
   type DependencyNodeTask,
-  RELATIONSHIP_TYPES,
+  type DependencySource,
   type RelationshipType,
   type TaskDependency,
 } from './dependency'
@@ -116,6 +116,8 @@ export {
   type SectionSignal,
   type SheetEvidence,
   type SheetReasonCode,
+  type SkippedEdge,
+  type SkippedEdgeReason,
   type TaskBudgetAllocation,
   type UnclassifiedRow,
   type UnknownReviewTasksFailure,

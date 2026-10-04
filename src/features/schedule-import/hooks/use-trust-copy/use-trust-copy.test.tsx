@@ -6,14 +6,20 @@ import type {
   AssumptionLedgerEntry,
   ParseQuality,
   SheetEvidence,
+  SkippedEdgeReason,
 } from '@/types'
 
 import enMessages from '../../../../../lang/en.json'
 import esMessages from '../../../../../lang/es.json'
+import ptMessages from '../../../../../lang/pt-BR.json'
 
 import { useTrustCopy } from './use-trust-copy'
 
-const CATALOGS = { en: enMessages, es: esMessages } as const
+const CATALOGS = {
+  en: enMessages,
+  es: esMessages,
+  'pt-BR': ptMessages,
+} as const
 
 function copyIn(locale: keyof typeof CATALOGS) {
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -182,6 +188,43 @@ describe('useTrustCopy — the report', () => {
   it('translates why a binned row could not be placed', () => {
     expect(copyIn('es').unclassifiedCause('dropped_total')).toBe(
       'leída como total al pie',
+    )
+  })
+
+  it.each(['en', 'es', 'pt-BR'] as const)(
+    'names every reason a relationship was not imported, in %s',
+    (locale) => {
+      // The closed set of contract 2.2 — one phrase each, never the token.
+      const reasons: SkippedEdgeReason[] = [
+        'type_not_stated',
+        'unknown_type',
+        'unconvertible_lag',
+        'lag_out_of_range',
+        'unresolved_reference',
+        'no_key_column',
+        'external_reference',
+        'truncated',
+        'malformed',
+        'self_loop',
+        'duplicate',
+        'cycle',
+        'marked_for_deletion',
+      ]
+      const copy = copyIn(locale)
+      const phrases = reasons.map((reason) => copy.skippedEdgeReason(reason))
+
+      phrases.forEach((phrase, index) => {
+        expect(phrase, `no phrase for ${reasons[index]}`).not.toBe('')
+        expect(phrase).not.toBe(reasons[index])
+      })
+      // Thirteen reasons, thirteen different things said.
+      expect(new Set(phrases).size).toBe(reasons.length)
+    },
+  )
+
+  it('says why a relationship was not imported in the reader’s language', () => {
+    expect(copyIn('es').skippedEdgeReason('unconvertible_lag')).toBe(
+      'un desfase en una unidad que no se puede convertir a días',
     )
   })
 })

@@ -4,8 +4,8 @@
  * upload → narration receipt → the schedule you land on → review it → Activate,
  * plus the quality-floor divert. This folder is the only import surface.
  * Corrections split by nature and never overlap: the tray answers what the
- * parser could not resolve, the ledger reverses what it decided, and the
- * canvas floor is under both.
+ * parser could not resolve, the ledger reverses what it decided, the
+ * dependency panel edits the graph, and the canvas floor is under all three.
  */
 
 export { ImportUploadCanvas } from './components/import-upload-canvas'

@@ -37,6 +37,8 @@ import type {
   SectionSignal,
   SheetEvidence,
   SheetReasonCode,
+  SkippedEdge,
+  SkippedEdgeReason,
   UnclassifiedRow,
   UnknownReviewTasksFailure,
 } from '@/types'
@@ -110,6 +112,22 @@ const SHEET_REASON_CODES: readonly SheetReasonCode[] = [
   'no_rows_under_header',
 ]
 
+const SKIPPED_EDGE_REASONS: readonly SkippedEdgeReason[] = [
+  'type_not_stated',
+  'unknown_type',
+  'unconvertible_lag',
+  'lag_out_of_range',
+  'unresolved_reference',
+  'no_key_column',
+  'external_reference',
+  'truncated',
+  'malformed',
+  'self_loop',
+  'duplicate',
+  'cycle',
+  'marked_for_deletion',
+]
+
 function mapSheetEvidence(value: unknown): SheetEvidence {
   const evidence = asRecord(value)
   return {
@@ -166,8 +184,22 @@ function mapUnclassifiedRow(value: unknown): UnclassifiedRow {
   }
 }
 
+function mapSkippedEdge(value: unknown): SkippedEdge {
+  const edge = asRecord(value)
+  return {
+    sheet: text(edge.sheet),
+    row: num(edge.row),
+    text: text(edge.text),
+    successorRef: optionalText(edge.successor_ref),
+    predecessorRef: optionalText(edge.predecessor_ref),
+    reason: token(edge.reason, SKIPPED_EDGE_REASONS, 'malformed'),
+  }
+}
+
 export function mapParseReport(value: unknown): ParseReport {
   const report = asRecord(value)
+  // Absent before contract 2.2: an older draft reads as nothing skipped.
+  const skippedEdges = asArray(report.skipped_edges).map(mapSkippedEdge)
   return {
     rowsScanned: num(report.rows_scanned),
     rowsImported: num(report.rows_imported),
@@ -179,6 +211,11 @@ export function mapParseReport(value: unknown): ParseReport {
     dateAssumptions: asArray(report.date_assumptions).map(mapDateAssumption),
     unclassified: asArray(report.unclassified).map(mapUnclassifiedRow),
     unclassifiedTotal: num(report.unclassified_total),
+    skippedEdges,
+    skippedEdgesTotal: Math.max(
+      num(report.skipped_edges_total),
+      skippedEdges.length,
+    ),
   }
 }
 

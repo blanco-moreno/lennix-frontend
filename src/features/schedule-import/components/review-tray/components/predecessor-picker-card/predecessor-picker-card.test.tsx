@@ -38,6 +38,7 @@ function renderCard(review = state(), tasks = review.tasks) {
       projectId={review.project.id}
       exception={edgeOn(review)}
       tasks={tasks}
+      dependencies={review.dependencies}
     />,
     { store: makeStore() },
   )
@@ -62,9 +63,9 @@ describe('PredecessorPickerCard', () => {
     )
   })
 
-  it('creates the dependency the user picked, typed as the backend expects', async () => {
+  it('creates the dependency the user picked, with the type and lag they chose', async () => {
     let successorId = ''
-    let body: { depends_on_id?: string; dependency_type?: string } = {}
+    let body: Record<string, unknown> = {}
     server.use(
       http.post(
         '*/v1/tasks/:taskId/dependencies',
@@ -81,12 +82,20 @@ describe('PredecessorPickerCard', () => {
       screen.getByRole('combobox', { name: 'Predecessor row' }),
       review.tasks[0].id,
     )
+    // A file's reference can mean more than finish-to-start: the answer
+    // carries the PDM shape instead of landing FS/0 for a second pass.
+    await userEvent.click(screen.getByRole('button', { name: /^SS —/ }))
+    const lag = screen.getByLabelText('Lag (days; negative starts earlier)')
+    await userEvent.clear(lag)
+    await userEvent.type(lag, '-2')
     await userEvent.click(screen.getByRole('button', { name: 'Link it' }))
 
     await waitFor(() => expect(successorId).toBe(review.tasks[1].id))
     expect(body).toEqual({
       depends_on_id: review.tasks[0].id,
       dependency_type: 'inter_phase',
+      relationship_type: 'SS',
+      lag_days: -2,
     })
   })
 

@@ -8,7 +8,6 @@ import type {
   ScheduleReviewState,
   TaskBudgetAllocation,
 } from '@/types'
-import type { TaskDependencyCreateRequestDTO } from '@/types/dto/dependency-dto'
 import type {
   ImportExecuteResponseDTO,
   ReviewTaskBudgetsResponseDTO,
@@ -22,7 +21,6 @@ import {
   activateSchedule,
   getImportJob,
   getScheduleReviewState,
-  linkReviewPredecessor,
   placeReviewRow,
   updateReviewRow,
   updateReviewStep,
@@ -114,9 +112,10 @@ export const scheduleImportApi = api.injectEndpoints({
 
     // --- The correction surface ---
     //
-    // Three writes, one invalidation rule: whatever the review changes, the
-    // review state is what the canvas re-reads. Each carries `projectId` so the
-    // refetch is scoped to this draft instead of every cached project.
+    // One invalidation rule: whatever the review changes, the review state is
+    // what the canvas re-reads. Each write carries `projectId` so the refetch
+    // is scoped to this draft instead of every cached project. Edges are
+    // written through the dependency endpoints, whose tags carry it too.
 
     updateReviewRow: builder.mutation<void, UpdateReviewRowArg>({
       query: updateReviewRow,
@@ -158,21 +157,6 @@ export const scheduleImportApi = api.injectEndpoints({
         mapReviewTaskBudgetsDTO(dto),
       invalidatesTags: reviewInvalidation,
     }),
-
-    linkReviewPredecessor: builder.mutation<
-      void,
-      {
-        projectId: string
-        taskId: string
-        body: TaskDependencyCreateRequestDTO
-      }
-    >({
-      query: linkReviewPredecessor,
-      invalidatesTags: (_result, _error, { projectId }) => [
-        ...reviewInvalidation(_result, _error, { projectId }),
-        { type: 'Dependency', id: projectId },
-      ],
-    }),
   }),
 })
 
@@ -185,5 +169,4 @@ export const {
   useUpdateReviewStepMutation,
   useUpdateReviewTaskBudgetsMutation,
   usePlaceReviewRowMutation,
-  useLinkReviewPredecessorMutation,
 } = scheduleImportApi

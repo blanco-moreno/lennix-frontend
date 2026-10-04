@@ -1,6 +1,7 @@
 /**
  * One directional half of the dependency chain: the rows this one waits for,
- * or the rows waiting on it. Each edge is a compact row — the other row's
+ * or the rows waiting on it — or, for a surface that is not about one row,
+ * every edge with both its ends. Each edge is a compact row — the other row's
  * name, its state, and the `FS +3d` chip — and the controls only exist once
  * the row is opened: on a phone, four type pills and a lag input per edge
  * was a wall before it was an editor.
@@ -44,11 +45,18 @@ export interface DependencyEditorProps {
    * Which end of each edge this list names. `upstream` lists predecessors
    * (what has to happen first), `downstream` successors (what waits on this
    * one) — the row shown is always the *other* end, since the pivot card
-   * already names this one.
+   * already names this one. `both` names the two ends, for a list with no
+   * pivot.
    */
-  direction: 'upstream' | 'downstream'
-  heading: React.ReactNode
+  direction: 'upstream' | 'downstream' | 'both'
+  /** Omitted when the surface around the list already titles it. */
+  heading?: React.ReactNode
   emptyText: React.ReactNode
+  /**
+   * What sits beside the chip. Defaults to the other end's live status; a
+   * draft has none — the engine has not run — so it passes its own badge.
+   */
+  renderBadge?: (edge: DependencyNode) => ReactNode
   /** Read-only when the user may see the graph but not change it. */
   readOnly?: boolean
   onChangeRelationship: (edge: DependencyNode, next: RelationshipType) => void
@@ -110,6 +118,7 @@ export function DependencyEditor({
   direction,
   heading,
   emptyText,
+  renderBadge,
   readOnly = false,
   onChangeRelationship,
   onChangeLag,
@@ -126,14 +135,16 @@ export function DependencyEditor({
 
   return (
     <Stack gap="tight" data-testid="dependency-editor">
-      <Text size="sm" weight="medium" color="primary">
-        {heading}
-      </Text>
+      {heading && (
+        <Text size="sm" weight="medium" color="primary">
+          {heading}
+        </Text>
+      )}
 
       {isLoading ? (
         // The same panel the edges land in, at the same row height — one
         // title, one chip and one status per row.
-        <ListPanel p={0} overflow="hidden" aria-busy>
+        <ListPanel p={0} gap={0} overflow="hidden" aria-busy>
           {Array.from({ length: 2 }).map((_, i) => (
             <ListRow
               key={i}
@@ -154,7 +165,9 @@ export function DependencyEditor({
           {emptyText}
         </Text>
       ) : (
-        <ListPanel p={0} overflow="hidden">
+        // Rows meet at their rules: the card's own gap would open a band
+        // between every edge.
+        <ListPanel p={0} gap={0} overflow="hidden">
           {edges.map((edge) => {
             const other = direction === 'upstream' ? edge.dependsOn : edge.task
             if (!other) return null
@@ -182,12 +195,21 @@ export function DependencyEditor({
                   onClick={() => setOpenId(open ? null : edge.id)}
                 >
                   <Text size="sm" color="primary" minW={0}>
-                    {other.title}
+                    {direction === 'both'
+                      ? intl.formatMessage(m.edgeLabel, {
+                          predecessor: edge.dependsOn?.title ?? '—',
+                          successor: edge.task.title,
+                        })
+                      : other.title}
                   </Text>
                   <Badge variant="gray" data-testid="dependency-edge-chip">
                     {edgeChip(edge)}
                   </Badge>
-                  <StatusBadge domain="status" value={other.status} />
+                  {renderBadge ? (
+                    renderBadge(edge)
+                  ) : (
+                    <StatusBadge domain="status" value={other.status} />
+                  )}
                   <Box
                     as={open ? ChevronUp : ChevronDown}
                     boxSize={4}
@@ -339,7 +361,9 @@ export function DependencyEditor({
               {intl.formatMessage(
                 direction === 'upstream'
                   ? m.addOpenUpstream
-                  : m.addOpenDownstream,
+                  : direction === 'downstream'
+                    ? m.addOpenDownstream
+                    : m.addOpen,
               )}
             </Button>
           </Box>

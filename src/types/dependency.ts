@@ -1,12 +1,8 @@
 /** PDM relationship types. Predecessor → successor. */
 export type RelationshipType = 'FS' | 'SS' | 'FF' | 'SF'
 
-export const RELATIONSHIP_TYPES: readonly RelationshipType[] = [
-  'FS',
-  'SS',
-  'FF',
-  'SF',
-]
+/** Who drew an edge: parsed from a P6 / MS Project export, or by a person. */
+export type DependencySource = 'project_import' | 'manual'
 
 export interface TaskDependency {
   id: number

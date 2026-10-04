@@ -27,6 +27,7 @@ import {
   seedImportJobStatusDTO,
   seedImportReviewStateDTO,
   seedImportUploadDTO,
+  seedP8ImportReviewStateDTO,
   seedOrganizationDashboardDTO,
   seedOrganizationDTO,
   seedOrganizationMemberListDTO,
@@ -54,6 +55,7 @@ import {
   SEED_IDS,
   SEED_IMPORT_JOB,
   SEED_ORGANIZATION,
+  SEED_P8_SCHEDULE_IMPORT,
   SEED_PLANS,
   SEED_PROJECTS,
   SEED_ROLES,
@@ -327,6 +329,24 @@ describe('import fixtures', () => {
     // Childless phases stay childless in the draft (the mirror-subtask
     // invariant is enforced at go-live, not on drafts).
     expect(state.tasks.some((task) => task.subtasks.length === 0)).toBe(true)
+  })
+
+  it('lands the MS Project draft’s parsed edges on its seeded rows, tagged as read from the file', () => {
+    const state = seedP8ImportReviewStateDTO()
+    const ids = new Set(Object.values(SEED_P8_SCHEDULE_IMPORT.taskIdByRef))
+
+    expect(state.project.id).toBe(SEED_IDS.PROJECT_DRAFT_VIADUCTO_ID)
+    expect(state.dependencies).toHaveLength(
+      SEED_P8_SCHEDULE_IMPORT.contract.edges.length,
+    )
+    for (const edge of state.dependencies) {
+      expect(ids.has(edge.task_id) && ids.has(edge.depends_on_id)).toBe(true)
+      expect(edge.source).toBe('project_import')
+    }
+    expect(state.stats.dependencies).toBe(state.dependencies.length)
+    // What the file stated but did not carry travels in the report, verbatim.
+    expect(state.report).toBe(SEED_P8_SCHEDULE_IMPORT.contract.report)
+    expect(state.report.skipped_edges_total).toBeGreaterThan(0)
   })
 
   it('serves the trust outputs verbatim off the immutable contract', () => {

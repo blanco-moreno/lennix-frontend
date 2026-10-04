@@ -1,5 +1,6 @@
 /**
- * A predecessor name that matched no row — answered by picking the row it meant.
+ * A predecessor name that matched no row — answered by picking the row it meant,
+ * with the link's type and lag.
  *
  * The parser kept the raw text and its closest candidates rather than inventing
  * an edge (the human owns the graph), so the closed set is right here: the rows it proposed first,
@@ -7,19 +8,22 @@
  * predecessor costs a dependency, never the go-live.
  */
 
-import { Flex, NativeSelect } from '@chakra-ui/react'
+import { Flex, NativeSelect, Stack } from '@chakra-ui/react'
 import { useId, useMemo, useState } from 'react'
 import { useIntl } from 'react-intl'
 
-import { Button, Text } from '@/components'
-import { useLinkReviewPredecessorMutation } from '@/services/schedule-import'
-import type { ReviewTask } from '@/types'
+import { Button } from '@/components'
+import { RelationshipFields, useDependencyEdits } from '@/features'
+import type { RelationshipType, ReviewDependency, ReviewTask } from '@/types'
 
 import {
   buildPredecessorOptions,
   suggestedOptions,
 } from '../../predecessor-candidates'
-import type { UnresolvedEdgeException } from '../../review-exceptions'
+import {
+  allReviewRows,
+  type UnresolvedEdgeException,
+} from '../../review-exceptions'
 import { reviewTrayMessages as m } from '../../review-tray-messages'
 import { TrayCard } from '../tray-card'
 
@@ -27,47 +31,52 @@ export interface PredecessorPickerCardProps {
   projectId: string
   exception: UnresolvedEdgeException
   tasks: ReviewTask[]
+  /** The draft's current graph, so no offered row repeats an edge or loops. */
+  dependencies: ReviewDependency[]
 }
 
 export function PredecessorPickerCard({
   projectId,
   exception,
   tasks,
+  dependencies,
 }: PredecessorPickerCardProps) {
   const intl = useIntl()
   const selectId = useId()
   const [predecessorId, setPredecessorId] = useState('')
-  const [failed, setFailed] = useState(false)
-  const [linkPredecessor, { isLoading }] = useLinkReviewPredecessorMutation()
+  const [type, setType] = useState<RelationshipType>('FS')
+  const [lag, setLag] = useState(0)
+  const { createLink, isCreating } = useDependencyEdits(projectId)
 
+  const existing = useMemo(
+    () =>
+      dependencies.map((edge) => ({
+        taskId: edge.taskId,
+        dependsOnId: edge.dependsOnId,
+      })),
+    [dependencies],
+  )
   const options = useMemo(
-    () => buildPredecessorOptions(exception.edge, tasks),
-    [exception.edge, tasks],
+    () => buildPredecessorOptions(exception.edge, tasks, existing),
+    [exception.edge, tasks, existing],
   )
   const suggested = useMemo(() => suggestedOptions(options), [options])
   const others = options.filter((option) => !suggested.includes(option))
 
-  const successor = tasks
-    .flatMap((task) => [task, ...task.subtasks])
-    .find((row) => row.id === exception.successorTaskId)
-
+  const rows = allReviewRows(tasks)
+  const successor = rows.find((row) => row.id === exception.successorTaskId)
   const chosen = options.find((option) => option.taskId === predecessorId)
 
   const handleLink = async () => {
     if (!chosen) return
-    setFailed(false)
-    try {
-      await linkPredecessor({
-        projectId,
-        taskId: exception.successorTaskId,
-        body: {
-          depends_on_id: chosen.taskId,
-          dependency_type: chosen.dependencyType,
-        },
-      }).unwrap()
-    } catch {
-      setFailed(true)
-    }
+    await createLink({
+      predecessorId: chosen.taskId,
+      successorId: exception.successorTaskId,
+      rows: new Map(rows.map((row) => [row.id, row])),
+      existingEdges: existing,
+      relationshipType: type,
+      lagDays: lag,
+    })
   }
 
   return (
@@ -86,7 +95,7 @@ export function PredecessorPickerCard({
       }
     >
       {options.length > 0 && (
-        <Flex gap={2} wrap="wrap" align="center">
+        <Stack gap={3}>
           <NativeSelect.Root size="sm" width={{ base: 'full', sm: '18rem' }}>
             <NativeSelect.Field
               id={selectId}
@@ -117,20 +126,22 @@ export function PredecessorPickerCard({
             <NativeSelect.Indicator />
           </NativeSelect.Root>
 
-          <Button
-            size="sm"
-            disabled={!chosen || isLoading}
-            onClick={handleLink}
-          >
-            {intl.formatMessage(isLoading ? m.working : m.edgeAction)}
-          </Button>
-        </Flex>
-      )}
+          <RelationshipFields
+            type={type}
+            onTypeChange={setType}
+            onLagChange={setLag}
+          />
 
-      {failed && (
-        <Text size="xs" color="error">
-          {intl.formatMessage(m.edgeFailed)}
-        </Text>
+          <Flex>
+            <Button
+              size="sm"
+              disabled={!chosen || isCreating}
+              onClick={handleLink}
+            >
+              {intl.formatMessage(isCreating ? m.working : m.edgeAction)}
+            </Button>
+          </Flex>
+        </Stack>
       )}
     </TrayCard>
   )

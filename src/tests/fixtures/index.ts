@@ -86,6 +86,7 @@ export {
   seedImportJobStatusDTO,
   seedImportReviewStateDTO,
   seedImportUploadDTO,
+  seedP8ImportReviewStateDTO,
 } from './project-import-fixtures'
 export {
   seedForceStartRequestDTO,

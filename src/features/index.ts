@@ -5,8 +5,10 @@ export {
 } from './blocked-reason'
 export {
   buildCandidateOptions,
+  DependencyEditor,
   dependencyEditorMessages,
   LinkComposer,
+  RelationshipFields,
   TaskDependencies,
   useDependencyEdits,
   type CandidateOption,

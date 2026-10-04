@@ -16,11 +16,9 @@
 import type {
   DependencyNode,
   DependencyNodeTask,
-  RelationshipType,
   ReviewDependency,
   ReviewTask,
 } from '@/types'
-import { RELATIONSHIP_TYPES } from '@/types'
 
 import type { ScheduleRow } from '../../../schedule-gantt'
 
@@ -111,11 +109,6 @@ export function buildReviewScheduleRows(tasks: ReviewTask[]): ScheduleRow[] {
   ])
 }
 
-const asRelationshipType = (value: string): RelationshipType =>
-  RELATIONSHIP_TYPES.includes(value as RelationshipType)
-    ? (value as RelationshipType)
-    : 'FS'
-
 function nodeTask(row: ScheduleRow): DependencyNodeTask {
   return {
     id: row.id,
@@ -153,7 +146,7 @@ export function buildReviewGanttEdges(
         id: String(edge.id),
         task: nodeTask(successor),
         dependsOn: predecessor ? nodeTask(predecessor) : null,
-        relationshipType: asRelationshipType(edge.relationshipType),
+        relationshipType: edge.relationshipType,
         lagDays: edge.lagDays,
         isBroken: predecessor === undefined,
       },

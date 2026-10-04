@@ -11,6 +11,7 @@ import type {
   ParseQuality,
   SheetEvidence,
   SheetReasonCode,
+  SkippedEdgeReason,
 } from '@/types'
 
 import { trustCopyMessages as m } from './use-trust-copy-messages'
@@ -36,6 +37,25 @@ const UNCLASSIFIED_CAUSE_MESSAGES = {
   dropped_header: m.unclassifiedDroppedHeader,
   dropped_total: m.unclassifiedDroppedTotal,
 } as const
+
+const SKIPPED_EDGE_MESSAGES: Record<
+  SkippedEdgeReason,
+  (typeof m)['skippedMalformed']
+> = {
+  type_not_stated: m.skippedTypeNotStated,
+  unknown_type: m.skippedUnknownType,
+  unconvertible_lag: m.skippedUnconvertibleLag,
+  lag_out_of_range: m.skippedLagOutOfRange,
+  unresolved_reference: m.skippedUnresolvedReference,
+  no_key_column: m.skippedNoKeyColumn,
+  external_reference: m.skippedExternalReference,
+  truncated: m.skippedTruncated,
+  malformed: m.skippedMalformed,
+  self_loop: m.skippedSelfLoop,
+  duplicate: m.skippedDuplicate,
+  cycle: m.skippedCycle,
+  marked_for_deletion: m.skippedMarkedForDeletion,
+}
 
 const DROP_REASON_MESSAGES = {
   empty: m.dropEmpty,
@@ -108,6 +128,8 @@ export interface TrustCopy {
   dropReasons: (reasons: string[]) => string
   /** Why a binned row could not be placed. */
   unclassifiedCause: (cause: string) => string
+  /** Why a relationship the file states did not become an edge. */
+  skippedEdgeReason: (reason: SkippedEdgeReason) => string
 }
 
 export function useTrustCopy(): TrustCopy {
@@ -186,6 +208,10 @@ export function useTrustCopy(): TrustCopy {
           cause as keyof typeof UNCLASSIFIED_CAUSE_MESSAGES
         ]
       return message ? intl.formatMessage(message) : cause
+    },
+
+    skippedEdgeReason(reason) {
+      return intl.formatMessage(SKIPPED_EDGE_MESSAGES[reason])
     },
 
     dropReasons(reasons) {

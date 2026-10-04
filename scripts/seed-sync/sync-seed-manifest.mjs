@@ -218,6 +218,20 @@ export interface SeedContractRow {
     content_hash: string
     task_id: string | null
   }
+  [key: string]: unknown
+}
+
+/** One dependency of the contract, as ms-ai parsed it from the file. */
+export interface SeedContractEdge {
+  predecessor_ref: string
+  successor_ref: string
+  type: string
+  lag: number
+  lag_unit: string
+  source_text: string | null
+  resolution: string
+  candidates: readonly string[]
+  [key: string]: unknown
 }
 
 /**
@@ -231,7 +245,7 @@ export interface SeedScheduleContract {
   sheet: string
   outcome: string
   rows: readonly SeedContractRow[]
-  edges: readonly Record<string, unknown>[]
+  edges: readonly SeedContractEdge[]
   report: Record<string, unknown>
   ledger: readonly Record<string, unknown>[]
   quality: Record<string, unknown>
@@ -315,6 +329,9 @@ export const SEED_FORCE_START: SeedForceStart = ${literal(facts.forceStart)}
 export const SEED_SCHEDULE_IMPORT: SeedScheduleImport = ${literal(facts.scheduleImport)}
 
 export const SEED_IMPORT_JOB: SeedImportJob = ${literal(facts.importJob)}
+
+/** The MS Project draft (project 8): parsed edges and skipped relationships. */
+export const SEED_P8_SCHEDULE_IMPORT: SeedScheduleImport = ${literal(facts.p8ScheduleImport)}
 `
 }
 

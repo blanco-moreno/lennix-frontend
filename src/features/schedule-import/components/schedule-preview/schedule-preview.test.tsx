@@ -29,7 +29,7 @@ describe('SchedulePreview', () => {
         dependsOnId: tasks[0].id,
         relationshipType: 'FS',
         lagDays: 0,
-        source: 'file',
+        source: 'project_import',
       },
     ]
     renderWithProviders(<SchedulePreview tasks={tasks} dependencies={edges} />)

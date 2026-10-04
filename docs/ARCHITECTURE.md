@@ -129,9 +129,21 @@ active step's surface on the right — `upload → schedule → budget → confi
 
 **One draft, one Save.** The header edits the project's identity and the budget
 step edits its money, but they are one draft of one project: a single hook owns
-both, and "save and continue later" is the only write. A step with a Save of its
-own meant the button whose name promises a save could walk away from what the
-step above it was holding.
+both, and "save and continue later" is the one write for them. A step with a
+Save of its own meant the button whose name promises a save could walk away from
+what the step above it was holding. Corrections to the schedule itself — a row,
+a placement, an edge — are written the moment they are made.
+
+**Edges are edited on the review state.** Activation sends no edges, so every
+edge change goes straight through the dependency endpoints
+(`useDependencyEdits`), from the `draft-dependencies/` panel and from the
+tray's predecessor questions alike. Those writes invalidate the draft's review
+state, scoped to its project. Rows and edges come from the review state
+(`buildReviewScheduleRows`, `state.dependencies`), never from the live task
+list, so no engine-owned status is drawn. A new link is judged by
+`utils/dependency/edge-rules` against that graph — pairing, duplicate, cycle —
+before it is offered. Changing or deleting an existing edge is never re-judged,
+so a parsed edge that sits outside the pairing rule stays editable.
 
 **Where the step lives.** The URL owns it, like every other navigable state
 here; the backend's saved step is the _memory_ behind it, so a review resumes on
@@ -149,6 +161,7 @@ split client-side.
 | `schedule-canvas/`     | The result-first canvas the user lands on                             |
 | `narration-receipt/`   | The checkable receipt of what the parse did                           |
 | `review-tray/`         | The one review mechanism, where rows get resolved                     |
+| `draft-dependencies/`  | The draft's graph with each edge's provenance, and what was skipped   |
 | `assumption-ledger/`   | Assumptions by cause, with the alternative and a one-flip reversal    |
 | `inline-row-edit/`     | Editing rows in place, with edit-pinning so the touched row stays put |
 | `draft-review-canvas/` | The wizard shell over the resumable review state                      |

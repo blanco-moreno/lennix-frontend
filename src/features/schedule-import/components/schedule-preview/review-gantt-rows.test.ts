@@ -145,7 +145,7 @@ describe('buildReviewGanttEdges', () => {
     dependsOnId: 'a',
     relationshipType: 'FS',
     lagDays: 0,
-    source: 'file',
+    source: 'project_import',
     ...over,
   })
 
@@ -159,14 +159,6 @@ describe('buildReviewGanttEdges', () => {
     })
     expect(drawn.task.id).toBe('b')
     expect(drawn.dependsOn?.id).toBe('a')
-  })
-
-  it('falls back to FS on a relationship type it does not know', () => {
-    const [drawn] = buildReviewGanttEdges(
-      [edge({ relationshipType: 'SOMETHING' })],
-      rows,
-    )
-    expect(drawn.relationshipType).toBe('FS')
   })
 
   it('keeps an edge whose predecessor is gone, marked broken', () => {

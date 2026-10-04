@@ -9,15 +9,15 @@
  */
 
 import { Flex, Stack, chakra } from '@chakra-ui/react'
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useState, type ReactNode } from 'react'
 import { useIntl } from 'react-intl'
 
-import { Button, Combobox, Text, Tooltip } from '@/components'
+import { Button, Combobox, Text } from '@/components'
 import type { RelationshipType } from '@/types'
-import { clampLag, MAX_LAG_DAYS, RELATIONSHIP_ORDER } from '@/utils'
 import type { LinkCandidate } from '@/utils'
 
 import { dependencyEditorMessages as m } from '../../dependency-editor-messages'
+import { RelationshipFields } from '../relationship-fields'
 
 import { CandidateOption } from './candidate-option'
 import {
@@ -27,31 +27,15 @@ import {
 } from './candidate-options'
 
 const TypeButton = chakra('button')
-const LagInput = chakra('input')
-
-const TYPE_LABEL: Record<RelationshipType, keyof typeof m> = {
-  FS: 'relationshipFS',
-  SS: 'relationshipSS',
-  FF: 'relationshipFF',
-  SF: 'relationshipSF',
-}
-
-const TYPE_HELP: Record<RelationshipType, keyof typeof m> = {
-  FS: 'relationshipFSHelp',
-  SS: 'relationshipSSHelp',
-  FF: 'relationshipFFHelp',
-  SF: 'relationshipSFHelp',
-}
-
-const TYPE_LONG: Record<RelationshipType, keyof typeof m> = {
-  FS: 'relationshipFSLong',
-  SS: 'relationshipSSLong',
-  FF: 'relationshipFFLong',
-  SF: 'relationshipSFLong',
-}
 
 export interface LinkComposerProps {
   direction: 'upstream' | 'downstream'
+  /**
+   * The row the link is drawn from, picked inside the composer — for a surface
+   * that is not about one row. Until it is picked `candidates` is empty and
+   * the row picker stays disabled.
+   */
+  subject?: ReactNode
   /** Every other row, judged by the one rule — refused ones included. */
   candidates: LinkCandidate[]
   rows: Map<string, CandidateRowMeta>
@@ -67,6 +51,7 @@ export interface LinkComposerProps {
 
 export function LinkComposer({
   direction,
+  subject,
   candidates,
   rows,
   pivot,
@@ -76,7 +61,6 @@ export function LinkComposer({
 }: LinkComposerProps) {
   const intl = useIntl()
   const pickerId = useId()
-  const lagId = useId()
   const [pickedId, setPickedId] = useState('')
   const [type, setType] = useState<RelationshipType>('FS')
   const [lag, setLag] = useState(0)
@@ -98,10 +82,18 @@ export function LinkComposer({
       ? options
       : options.filter((option) => !option.offLevel)
 
+  // A pick the candidates no longer allow — the subject or the graph moved
+  // under it — is no pick at all.
+  const picked = candidates.some(
+    (candidate) => candidate.id === pickedId && candidate.verdict.ok,
+  )
+    ? pickedId
+    : ''
+
   const submit = async () => {
-    if (!pickedId) return
+    if (!picked) return
     const created = await onSubmit({
-      otherId: pickedId,
+      otherId: picked,
       relationshipType: type,
       lagDays: lag,
     })
@@ -119,6 +111,7 @@ export function LinkComposer({
       borderColor="border"
       data-testid="link-composer"
     >
+      {subject}
       <Stack gap={1}>
         <Text as="label" size="xs" color="muted" htmlFor={pickerId}>
           {intl.formatMessage(
@@ -128,8 +121,9 @@ export function LinkComposer({
         <Combobox<Option>
           id={pickerId}
           size="sm"
-          value={pickedId}
+          value={picked}
           options={visible}
+          disabled={candidates.length === 0}
           renderOption={(option) => <CandidateOption option={option} />}
           onValueChange={setPickedId}
           onTermChange={setTerm}
@@ -153,87 +147,24 @@ export function LinkComposer({
         )}
       </Stack>
 
-      <Flex align="center" gap={4} wrap="wrap">
-        <Flex
-          as="fieldset"
-          align="center"
-          gap={1}
-          aria-label={intl.formatMessage(m.composerType)}
+      <RelationshipFields
+        type={type}
+        onTypeChange={setType}
+        onLagChange={setLag}
+      />
+
+      <Flex gap={2} justify="flex-end">
+        <Button size="sm" variant="outline" onClick={onClose}>
+          {intl.formatMessage(m.addCancel)}
+        </Button>
+        <Button
+          size="sm"
+          disabled={!picked || isBusy}
+          data-testid="dependency-add-submit"
+          onClick={submit}
         >
-          {RELATIONSHIP_ORDER.map((value) => {
-            const active = value === type
-            return (
-              <Tooltip
-                key={value}
-                content={intl.formatMessage(m[TYPE_LONG[value]])}
-              >
-                <TypeButton
-                  type="button"
-                  px={2}
-                  py={0.5}
-                  rounded="md"
-                  borderWidth="1px"
-                  fontSize="xs"
-                  fontWeight="medium"
-                  borderColor={active ? 'complementary' : 'gray.200'}
-                  bg={active ? 'complementary/10' : 'transparent'}
-                  color={active ? 'complementary' : 'fg.muted'}
-                  aria-pressed={active}
-                  // Visible text first, so voice control still matches "click
-                  // FS" (WCAG 2.5.3), then what FS means.
-                  aria-label={`${intl.formatMessage(
-                    m[TYPE_LABEL[value]],
-                  )} — ${intl.formatMessage(m[TYPE_HELP[value]])}`}
-                  onClick={() => setType(value)}
-                >
-                  {intl.formatMessage(m[TYPE_LABEL[value]])}
-                </TypeButton>
-              </Tooltip>
-            )
-          })}
-        </Flex>
-
-        <Flex align="center" gap={2}>
-          <Text as="label" size="xs" color="muted" htmlFor={lagId}>
-            {intl.formatMessage(m.lagLabel)}
-          </Text>
-          <LagInput
-            id={lagId}
-            type="number"
-            min={-MAX_LAG_DAYS}
-            max={MAX_LAG_DAYS}
-            w="16"
-            px={2}
-            py={0.5}
-            fontSize="xs"
-            rounded="md"
-            borderWidth="1px"
-            borderColor="border"
-            value={lag}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setLag(clampLag(Number(event.target.value)))
-            }
-          />
-        </Flex>
-      </Flex>
-
-      <Flex align="center" gap={2} justify="space-between" wrap="wrap">
-        <Text size="xs" color="muted">
-          {intl.formatMessage(m[TYPE_HELP[type]])}
-        </Text>
-        <Flex gap={2}>
-          <Button size="sm" variant="outline" onClick={onClose}>
-            {intl.formatMessage(m.addCancel)}
-          </Button>
-          <Button
-            size="sm"
-            disabled={!pickedId || isBusy}
-            data-testid="dependency-add-submit"
-            onClick={submit}
-          >
-            {intl.formatMessage(m.addSubmit)}
-          </Button>
-        </Flex>
+          {intl.formatMessage(m.addSubmit)}
+        </Button>
       </Flex>
     </Stack>
   )

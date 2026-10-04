@@ -11,7 +11,6 @@ import type {
   ReviewTaskPatch,
   TaskBudgetAllocation,
 } from '@/types'
-import type { TaskDependencyCreateRequestDTO } from '@/types/dto/dependency-dto'
 import type { SubtaskCreateRequestDTO } from '@/types/dto/subtask-dto'
 
 /**
@@ -111,19 +110,6 @@ export const placeReviewRow = ({
   body: SubtaskCreateRequestDTO
 }) => ({
   url: `/v1/tasks/${taskId}/subtasks`,
-  method: 'POST',
-  body,
-})
-
-/** Answer a predecessor the parser could not match — the human decides. */
-export const linkReviewPredecessor = ({
-  taskId,
-  body,
-}: {
-  taskId: string
-  body: TaskDependencyCreateRequestDTO
-}) => ({
-  url: `/v1/tasks/${taskId}/dependencies`,
   method: 'POST',
   body,
 })

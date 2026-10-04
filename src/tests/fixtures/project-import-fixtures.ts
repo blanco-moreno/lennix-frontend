@@ -5,16 +5,28 @@
  * seed-manifest digest — a rule change invalidates this fixture set.
  */
 
-import { SEED_IDS, SEED_IMPORT_JOB, SEED_SCHEDULE_IMPORT } from '@/tests/seed'
-import type { SeedContractRow } from '@/tests/seed'
+import {
+  SEED_IDS,
+  SEED_IMPORT_JOB,
+  SEED_P8_SCHEDULE_IMPORT,
+  SEED_SCHEDULE_IMPORT,
+} from '@/tests/seed'
+import type {
+  SeedContractEdge,
+  SeedContractRow,
+  SeedScheduleImport,
+} from '@/tests/seed'
+import type { RelationshipTypeDTO } from '@/types/dto/dependency-dto'
 import type {
   ImportAssistedMappingErrorDTO,
   ImportExecuteResponseDTO,
   ImportJobStatusResponseDTO,
   ImportUploadResponseDTO,
+  ReviewDependencyDTO,
   ReviewRowSourceDTO,
   ReviewSubtaskDTO,
   ReviewTaskDTO,
+  ReviewUnresolvedEdgeDTO,
   ScheduleReviewStateResponseDTO,
 } from '@/types/dto/project-import-dto'
 
@@ -35,48 +47,6 @@ export const FIXTURE_DIVERTED_JOB_ID = 'e0000000-00ff-00ff-0000-000000000000'
 
 // Contract → draft, mirroring `mapping.py`
 
-function taskIdOf(ref: string): string {
-  const id = SEED_SCHEDULE_IMPORT.taskIdByRef[ref]
-  if (id === undefined)
-    throw new Error(
-      `contract row '${ref}' has no seeded task id — run \`pnpm seed:sync\` ` +
-        'and update the fixture that referenced it.',
-    )
-  return id
-}
-
-/** `_root_refs()`: arbitrary depth collapses onto main task → subtask. */
-function rootRefOf(row: SeedContractRow): string {
-  const byRef = new Map(CONTRACT.rows.map((r) => [r.ref, r]))
-  const seen = new Set([row.ref])
-  let current = row.ref
-  for (;;) {
-    const parent = byRef.get(current)?.parent_ref
-    if (!parent || !byRef.has(parent)) break
-    if (seen.has(parent)) return row.ref // a cycle costs structure, never a row
-    seen.add(parent)
-    current = parent
-  }
-  return current
-}
-
-const isMain = (row: SeedContractRow) => rootRefOf(row) === row.ref
-
-/** The ancestors the 2-level collapse flattened: root main (exclusive) → parent, root→leaf. */
-function collapsedAncestors(row: SeedContractRow): SeedContractRow[] {
-  const byRef = new Map(CONTRACT.rows.map((r) => [r.ref, r]))
-  const rootRef = rootRefOf(row)
-  const chain: SeedContractRow[] = []
-  const seen = new Set([row.ref])
-  let current = row.parent_ref ? byRef.get(row.parent_ref) : undefined
-  while (current && current.ref !== rootRef && !seen.has(current.ref)) {
-    chain.unshift(current)
-    seen.add(current.ref)
-    current = current.parent_ref ? byRef.get(current.parent_ref) : undefined
-  }
-  return chain
-}
-
 /** `build_context_description()`: what the domain model has no column for. */
 function contextDescription(row: SeedContractRow): string | null {
   const parts: string[] = []
@@ -93,12 +63,6 @@ function contextDescription(row: SeedContractRow): string | null {
   return parts.length > 0 ? parts.join('; ') : null
 }
 
-/** `_progress()`: main tasks derive theirs from their subtasks. */
-function progressOf(row: SeedContractRow): number {
-  if (isMain(row) || row.percent_complete === null) return 0
-  return Math.min(Math.max(row.percent_complete, 0), 100)
-}
-
 function sourceOf(row: SeedContractRow): ReviewRowSourceDTO {
   return {
     sheet: row.source.sheet,
@@ -107,57 +71,192 @@ function sourceOf(row: SeedContractRow): ReviewRowSourceDTO {
   }
 }
 
-const mainRows = () => CONTRACT.rows.filter(isMain)
-const childRowsOf = (ref: string) =>
-  CONTRACT.rows.filter((row) => !isMain(row) && rootRefOf(row) === ref)
+/** One seeded import's contract, landed as review rows on its seeded ids. */
+function reviewTasksOf(seeded: SeedScheduleImport): ReviewTaskDTO[] {
+  const rows = seeded.contract.rows
+  const byRef = new Map(rows.map((row) => [row.ref, row]))
 
-function toReviewSubtask(row: SeedContractRow): ReviewSubtaskDTO {
-  const path = collapsedAncestors(row).map((ancestor) => ancestor.name)
-  return {
-    id: taskIdOf(row.ref),
-    ref: row.ref,
-    title: row.name,
-    description: contextDescription(row),
-    start_date: row.start,
-    due_date: row.finish,
-    progress: progressOf(row),
-    // No seeded resource matches an org member, so nothing is assigned.
-    assignee_id: null,
-    // Drafts carry no mirror subtask (the one the backend creates for a bare
-    // task): the invariant is enforced at go-live.
-    system_generated: false,
-    // The seed lands the draft and stops — nothing was reviewed yet.
-    edited: false,
-    source: sourceOf(row),
-    source_parent_ref: row.parent_ref,
-    depth: path.length + 1,
-    path,
+  const taskIdOf = (ref: string): string => {
+    const id = seeded.taskIdByRef[ref]
+    if (id === undefined)
+      throw new Error(
+        `contract row '${ref}' has no seeded task id — run \`pnpm seed:sync\` ` +
+          'and update the fixture that referenced it.',
+      )
+    return id
   }
-}
 
-function toReviewTask(row: SeedContractRow): ReviewTaskDTO {
-  return {
-    id: taskIdOf(row.ref),
-    ref: row.ref,
-    title: row.name,
-    description: contextDescription(row),
-    start_date: row.start,
-    due_date: row.finish,
-    // The wallet is set during review, never guessed from the file.
-    budget: null,
-    progress: progressOf(row),
-    edited: false,
-    source: sourceOf(row),
-    subtasks: childRowsOf(row.ref).map(toReviewSubtask),
+  /** `_root_refs()`: arbitrary depth collapses onto main task → subtask. */
+  const rootRefOf = (row: SeedContractRow): string => {
+    const seen = new Set([row.ref])
+    let current = row.ref
+    for (;;) {
+      const parent = byRef.get(current)?.parent_ref
+      if (!parent || !byRef.has(parent)) break
+      if (seen.has(parent)) return row.ref // a cycle costs structure, never a row
+      seen.add(parent)
+      current = parent
+    }
+    return current
   }
+
+  const isMain = (row: SeedContractRow) => rootRefOf(row) === row.ref
+
+  /** The ancestors the 2-level collapse flattened: root main (exclusive) → parent, root→leaf. */
+  const collapsedAncestors = (row: SeedContractRow): SeedContractRow[] => {
+    const rootRef = rootRefOf(row)
+    const chain: SeedContractRow[] = []
+    const seen = new Set([row.ref])
+    let current = row.parent_ref ? byRef.get(row.parent_ref) : undefined
+    while (current && current.ref !== rootRef && !seen.has(current.ref)) {
+      chain.unshift(current)
+      seen.add(current.ref)
+      current = current.parent_ref ? byRef.get(current.parent_ref) : undefined
+    }
+    return chain
+  }
+
+  /** `_progress()`: main tasks derive theirs from their subtasks. */
+  const progressOf = (row: SeedContractRow): number => {
+    if (isMain(row) || row.percent_complete === null) return 0
+    return Math.min(Math.max(row.percent_complete, 0), 100)
+  }
+
+  const toReviewSubtask = (row: SeedContractRow): ReviewSubtaskDTO => {
+    const path = collapsedAncestors(row).map((ancestor) => ancestor.name)
+    return {
+      id: taskIdOf(row.ref),
+      ref: row.ref,
+      title: row.name,
+      description: contextDescription(row),
+      start_date: row.start,
+      due_date: row.finish,
+      progress: progressOf(row),
+      // No seeded resource matches an org member, so nothing is assigned.
+      assignee_id: null,
+      // Drafts carry no mirror subtask (the one the backend creates for a bare
+      // task): the invariant is enforced at go-live.
+      system_generated: false,
+      // The seed lands the draft and stops — nothing was reviewed yet.
+      edited: false,
+      source: sourceOf(row),
+      source_parent_ref: row.parent_ref,
+      depth: path.length + 1,
+      path,
+    }
+  }
+
+  return rows.filter(isMain).map(
+    (row): ReviewTaskDTO => ({
+      id: taskIdOf(row.ref),
+      ref: row.ref,
+      title: row.name,
+      description: contextDescription(row),
+      start_date: row.start,
+      due_date: row.finish,
+      // The wallet is set during review, never guessed from the file.
+      budget: null,
+      progress: progressOf(row),
+      edited: false,
+      source: sourceOf(row),
+      subtasks: rows
+        .filter((child) => !isMain(child) && rootRefOf(child) === row.ref)
+        .map(toReviewSubtask),
+    }),
+  )
 }
 
 // The review state and import job surfaces
 
-/** `GET /v1/schedule/review/:id` — resumable by id. */
-export function seedImportReviewStateDTO(): ScheduleReviewStateResponseDTO {
-  const project = seedProject(DRAFT_PROJECT_ID)
-  const tasks = mainRows().map(toReviewTask)
+const RESOLVED = ['id', 'name']
+const RELATIONSHIP_TYPES: readonly RelationshipTypeDTO[] = [
+  'FS',
+  'SS',
+  'FF',
+  'SF',
+]
+/** `MAX_LAG_DAYS` — a lag past it never becomes an edge. */
+const MAX_LAG_DAYS = 365
+
+/** Python's `round()`: a half goes to the even neighbour. */
+function roundHalfEven(value: number): number {
+  const rounded = Math.round(value)
+  return Math.abs(value % 1) === 0.5 && rounded % 2 !== 0
+    ? rounded - 1
+    : rounded
+}
+
+/** `_lag_days()`: whole working days on an 8-hour day and a 40-hour week. */
+function lagDaysOf(edge: SeedContractEdge): number {
+  if (edge.lag_unit === 'weeks') return roundHalfEven((edge.lag * 40) / 8)
+  if (edge.lag_unit === 'hours') return roundHalfEven(edge.lag / 8)
+  return roundHalfEven(edge.lag)
+}
+
+/**
+ * `map_contract_to_draft()` and the landing: an edge resolved to two rows of
+ * the file, stated once, with a known type and a lag inside the bound, lands
+ * tagged `project_import`. Postgres numbers the rows; the fixture numbers them
+ * in contract order.
+ */
+function reviewDependenciesOf(
+  seeded: SeedScheduleImport,
+): ReviewDependencyDTO[] {
+  const seen = new Set<string>()
+  return seeded.contract.edges.flatMap((edge) => {
+    const successor = seeded.taskIdByRef[edge.successor_ref]
+    const predecessor = seeded.taskIdByRef[edge.predecessor_ref]
+    const type = RELATIONSHIP_TYPES.find(
+      (known) => known === edge.type.toUpperCase(),
+    )
+    const lag = lagDaysOf(edge)
+    const pair = `${edge.successor_ref}→${edge.predecessor_ref}`
+    if (
+      !RESOLVED.includes(edge.resolution) ||
+      !successor ||
+      !predecessor ||
+      successor === predecessor ||
+      seen.has(pair) ||
+      !type ||
+      Math.abs(lag) > MAX_LAG_DAYS
+    )
+      return []
+    seen.add(pair)
+    return [
+      {
+        id: seen.size,
+        task_id: successor,
+        depends_on_id: predecessor,
+        relationship_type: type,
+        lag_days: lag,
+        source: 'project_import',
+      },
+    ]
+  })
+}
+
+/** A reference the parser could only guess at is a question, never an edge. */
+function unresolvedEdgesOf(
+  seeded: SeedScheduleImport,
+): ReviewUnresolvedEdgeDTO[] {
+  return seeded.contract.edges
+    .filter((edge) => !RESOLVED.includes(edge.resolution))
+    .map((edge) => ({
+      successor_ref: edge.successor_ref,
+      successor_task_id: seeded.taskIdByRef[edge.successor_ref] ?? null,
+      source_text: edge.source_text,
+      candidates: [...edge.candidates],
+    }))
+}
+
+/** The review state a seeded import serves, graph included. */
+function reviewStateOf(
+  seeded: SeedScheduleImport,
+): ScheduleReviewStateResponseDTO {
+  const project = seedProject(seeded.projectId)
+  const tasks = reviewTasksOf(seeded)
+  const dependencies = reviewDependenciesOf(seeded)
+  const unresolved_edges = unresolvedEdgesOf(seeded)
   const subtaskDepths = tasks.flatMap((task) =>
     task.subtasks.map((subtask) => subtask.depth),
   )
@@ -178,34 +277,48 @@ export function seedImportReviewStateDTO(): ScheduleReviewStateResponseDTO {
       review_step: 'upload',
     },
     schedule_import: {
-      id: SEED_SCHEDULE_IMPORT.id,
-      source_filename: SEED_SCHEDULE_IMPORT.sourceFilename,
-      source_object: SEED_SCHEDULE_IMPORT.sourceObject,
-      contract_version: SEED_SCHEDULE_IMPORT.contractVersion,
-      outcome: SEED_SCHEDULE_IMPORT.outcome,
-      sheet: SEED_SCHEDULE_IMPORT.sheet,
+      id: seeded.id,
+      source_filename: seeded.sourceFilename,
+      source_object: seeded.sourceObject,
+      contract_version: seeded.contractVersion,
+      outcome: seeded.outcome,
+      sheet: seeded.sheet,
       created_at: FIXTURE_CREATED_AT,
     },
-    outcome: SEED_SCHEDULE_IMPORT.outcome,
+    outcome: seeded.outcome,
     // Served from the immutable contract, so the explanation never drifts.
-    report: CONTRACT.report,
-    ledger: [...CONTRACT.ledger],
-    quality: CONTRACT.quality,
+    report: seeded.contract.report,
+    ledger: [...seeded.contract.ledger],
+    quality: seeded.contract.quality,
     tasks,
-    // A hand-made Gantt carries no predecessor column: the human owns the
-    // graph, so there is nothing to resolve either.
-    dependencies: [],
-    unresolved_edges: [],
+    dependencies,
+    unresolved_edges,
     stats: {
       main_tasks: tasks.length,
       subtasks: tasks.reduce((total, task) => total + task.subtasks.length, 0),
-      dependencies: 0,
-      unresolved_edges: 0,
+      dependencies: dependencies.length,
+      unresolved_edges: unresolved_edges.length,
       edited_tasks: 0,
       collapsed_rows: subtaskDepths.filter((depth) => depth > 1).length,
       max_source_depth: Math.max(1, ...subtaskDepths),
     },
   }
+}
+
+/**
+ * `GET /v1/schedule/review/:id` — resumable by id. A hand-made Gantt carries
+ * no predecessor column: the human owns the graph, so it lands empty.
+ */
+export function seedImportReviewStateDTO(): ScheduleReviewStateResponseDTO {
+  return reviewStateOf(SEED_SCHEDULE_IMPORT)
+}
+
+/**
+ * The MS Project draft (project 8): its parsed edges, and the relationships the
+ * report names as skipped (contract 2.2).
+ */
+export function seedP8ImportReviewStateDTO(): ScheduleReviewStateResponseDTO {
+  return reviewStateOf(SEED_P8_SCHEDULE_IMPORT)
 }
 
 /** `GET /v1/schedule/import/jobs/:id` — the job that landed the seeded draft. */
@@ -290,7 +403,7 @@ export function seedImportExecuteDTO(): ImportExecuteResponseDTO {
     location: project.location,
     manager_name: seedUserName(project.managerId),
     filename: FIXTURE_IMPORT_FILENAME,
-    total_tasks: mainRows().length,
+    total_tasks: reviewTasksOf(SEED_SCHEDULE_IMPORT).length,
     total_budget: Number(project.budget ?? 0),
     total_duration_days: durationDays(project.startDate, project.dueDate),
     // The import contract always dates a draft; the seeded draft always has both.

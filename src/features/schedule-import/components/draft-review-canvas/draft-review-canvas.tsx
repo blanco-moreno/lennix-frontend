@@ -45,6 +45,7 @@ import {
 import { AssumptionLedger } from '../assumption-ledger'
 import { BudgetStep } from '../budget-step'
 import { ConfirmSummary } from '../confirm-summary'
+import { DraftDependencies } from '../draft-dependencies'
 import { DraftHeader } from '../draft-header'
 import { ImportStepper } from '../import-stepper'
 import {
@@ -299,10 +300,10 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
 
           {step === 'schedule' && (
             <>
-              {/* The receipt and the two surfaces that answer it read as one
+              {/* The receipt and the surfaces that answer it read as one
                   block; the schedule listing is a separate subject and gets
                   the wizard's full gap to itself, instead of butting into the
-                  tray's last card. */}
+                  last card. */}
               <Stack gap={4}>
                 <NarrationReceipt
                   narration={buildNarration(state)}
@@ -340,6 +341,11 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
                     highlighted={focus === 'caveats'}
                   />
                 </Grid>
+
+                {/* The graph the file carried, and what it stated but did
+                    not carry — editable here, because activation sends no
+                    edges of its own. */}
+                <DraftDependencies projectId={projectId} state={state} />
               </Stack>
 
               <ScheduleCanvas

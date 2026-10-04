@@ -8,6 +8,8 @@
  * here (`schedule-import-mappers`) and never re-read as raw JSON by a component.
  */
 
+import type { DependencySource, RelationshipType } from './dependency'
+
 /** `uploaded → parsing → draft_ready | needs_assisted_mapping | failed` */
 export type ImportJobStatus =
   | 'uploaded'
@@ -120,6 +122,33 @@ export interface UnclassifiedRow {
   ref: string | null
 }
 
+/** Why a relationship the file states did not become an edge (contract 2.2). */
+export type SkippedEdgeReason =
+  | 'type_not_stated'
+  | 'unknown_type'
+  | 'unconvertible_lag'
+  | 'lag_out_of_range'
+  | 'unresolved_reference'
+  | 'no_key_column'
+  | 'external_reference'
+  | 'truncated'
+  | 'malformed'
+  | 'self_loop'
+  | 'duplicate'
+  | 'cycle'
+  | 'marked_for_deletion'
+
+/** A relationship written in the file that was not imported, and why. */
+export interface SkippedEdge {
+  sheet: string
+  row: number
+  /** The relationship as written in the file, quoted verbatim. */
+  text: string
+  successorRef: string | null
+  predecessorRef: string | null
+  reason: SkippedEdgeReason
+}
+
 /** What happened to the file — the checkable receipt behind the narration. */
 export interface ParseReport {
   rowsScanned: number
@@ -133,6 +162,9 @@ export interface ParseReport {
   dateAssumptions: DateAssumption[]
   unclassified: UnclassifiedRow[]
   unclassifiedTotal: number
+  /** Capped by the parser; `skippedEdgesTotal` is the full count. */
+  skippedEdges: SkippedEdge[]
+  skippedEdgesTotal: number
 }
 
 /** `high` assumptions are the ones the receipt counts as "things to check". */
@@ -263,9 +295,9 @@ export interface ReviewDependency {
   id: number
   taskId: string
   dependsOnId: string
-  relationshipType: string
+  relationshipType: RelationshipType
   lagDays: number
-  source: string
+  source: DependencySource
 }
 
 /** A predecessor reference no row matched — a question, never an edge. */

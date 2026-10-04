@@ -74,6 +74,7 @@ export function ReviewTray({
                 projectId={projectId}
                 exception={exception}
                 tasks={state.tasks}
+                dependencies={state.dependencies}
               />
             )
           })}

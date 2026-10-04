@@ -212,6 +212,78 @@ export const trustCopyMessages = defineMessages({
     description: 'Drop reason: a footer aggregate',
   },
 
+  // --- why a relationship in the file was not imported -------------------
+  skippedTypeNotStated: {
+    id: 'trustCopy.skippedEdge.typeNotStated',
+    defaultMessage: 'the link type is not stated',
+    description:
+      'Skipped relationship: a predecessor list with ids and no FS/SS/FF/SF',
+  },
+  skippedUnknownType: {
+    id: 'trustCopy.skippedEdge.unknownType',
+    defaultMessage: 'a link type Lennix does not recognize',
+    description: 'Skipped relationship: a type code outside FS/SS/FF/SF',
+  },
+  skippedUnconvertibleLag: {
+    id: 'trustCopy.skippedEdge.unconvertibleLag',
+    defaultMessage: 'a lag in a unit that cannot be converted to days',
+    description:
+      'Skipped relationship: elapsed, percent or an unknown unit on the lag',
+  },
+  skippedLagOutOfRange: {
+    id: 'trustCopy.skippedEdge.lagOutOfRange',
+    defaultMessage: 'a lag beyond the 365-day limit',
+    description: 'Skipped relationship: the lag exceeds ±365 days',
+  },
+  skippedUnresolvedReference: {
+    id: 'trustCopy.skippedEdge.unresolvedReference',
+    defaultMessage: 'it points at no row in the schedule',
+    description:
+      'Skipped relationship: the predecessor matches no row and no candidate',
+  },
+  skippedNoKeyColumn: {
+    id: 'trustCopy.skippedEdge.noKeyColumn',
+    defaultMessage: 'the column it refers to is not in the file',
+    description:
+      'Skipped relationship: the id column the references point at is absent',
+  },
+  skippedExternalReference: {
+    id: 'trustCopy.skippedEdge.externalReference',
+    defaultMessage: 'it points at another project or file',
+    description: 'Skipped relationship: an external predecessor',
+  },
+  skippedTruncated: {
+    id: 'trustCopy.skippedEdge.truncated',
+    defaultMessage: 'the export cut the cell short',
+    description: 'Skipped relationship: the exporter truncated the cell',
+  },
+  skippedMalformed: {
+    id: 'trustCopy.skippedEdge.malformed',
+    defaultMessage: 'it cannot be read as a link',
+    description: 'Skipped relationship: the text follows no known grammar',
+  },
+  skippedSelfLoop: {
+    id: 'trustCopy.skippedEdge.selfLoop',
+    defaultMessage: 'the activity would wait on itself',
+    description: 'Skipped relationship: predecessor and successor are one row',
+  },
+  skippedDuplicate: {
+    id: 'trustCopy.skippedEdge.duplicate',
+    defaultMessage: 'it repeats a link already imported',
+    description: 'Skipped relationship: the same pair appears twice',
+  },
+  skippedCycle: {
+    id: 'trustCopy.skippedEdge.cycle',
+    defaultMessage: 'it would close a loop',
+    description: 'Skipped relationship: importing it would create a cycle',
+  },
+  skippedMarkedForDeletion: {
+    id: 'trustCopy.skippedEdge.markedForDeletion',
+    defaultMessage: 'the file marks it for deletion',
+    description:
+      'Skipped relationship: a P6 row flagged "Delete This Row" in the export',
+  },
+
   // --- how much of the file landed ---------------------------------------
   qualitySummary: {
     id: 'trustCopy.quality.summary',

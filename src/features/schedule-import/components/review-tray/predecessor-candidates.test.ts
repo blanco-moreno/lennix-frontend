@@ -4,7 +4,6 @@ import type { ReviewTask, ReviewUnresolvedEdge } from '@/types'
 
 import {
   buildPredecessorOptions,
-  dependencyTypeFor,
   suggestedOptions,
 } from './predecessor-candidates'
 
@@ -22,21 +21,6 @@ const edgeOn = (
   ...overrides,
 })
 
-describe('dependencyTypeFor', () => {
-  it('mirrors the pairing the backend accepts, and only that', () => {
-    const phaseA = { id: 'a', title: 'A', ref: null, parentId: null }
-    const phaseB = { id: 'b', title: 'B', ref: null, parentId: null }
-    const childA1 = { id: 'a1', title: 'A1', ref: null, parentId: 'a' }
-    const childA2 = { id: 'a2', title: 'A2', ref: null, parentId: 'a' }
-    const childB1 = { id: 'b1', title: 'B1', ref: null, parentId: 'b' }
-
-    expect(dependencyTypeFor(phaseA, phaseB)).toBe('inter_phase')
-    expect(dependencyTypeFor(childA1, childA2)).toBe('intra_phase')
-    expect(dependencyTypeFor(childA1, childB1)).toBeNull()
-    expect(dependencyTypeFor(childA1, phaseB)).toBeNull()
-  })
-})
-
 describe('buildPredecessorOptions', () => {
   it('puts the row the file meant first, despite the typo', () => {
     const tasks = seededTasks()
@@ -46,7 +30,6 @@ describe('buildPredecessorOptions', () => {
 
     expect(options[0].title).toBe('OBRAS PRELIMINARES')
     expect(options[0].proposed).toBe(true)
-    expect(options[0].dependencyType).toBe('inter_phase')
   })
 
   it('never offers a pick the backend would reject', () => {
@@ -81,9 +64,27 @@ describe('buildPredecessorOptions', () => {
     expect(options.map((option) => option.taskId)).toEqual(
       phase.subtasks.slice(1).map((subtask) => subtask.id),
     )
-    expect(
-      options.every((option) => option.dependencyType === 'intra_phase'),
-    ).toBe(true)
+  })
+
+  it('never offers a row that already waits on the successor — that link closes a loop', () => {
+    const tasks = seededTasks()
+    const [first, successor, third] = tasks
+    // A chain the draft already holds: successor → third → first. Making the
+    // successor wait on either of them would close it.
+    const existing = [
+      { taskId: third.id, dependsOnId: successor.id },
+      { taskId: first.id, dependsOnId: third.id },
+    ]
+
+    const offered = buildPredecessorOptions(
+      edgeOn(successor.id),
+      tasks,
+      existing,
+    ).map((option) => option.taskId)
+
+    expect(offered).not.toContain(third.id)
+    expect(offered).not.toContain(first.id)
+    expect(offered).toContain(tasks[3].id)
   })
 
   it('answers nothing when the edge points at a row that is gone', () => {
