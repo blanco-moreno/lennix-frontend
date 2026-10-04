@@ -1415,7 +1415,7 @@
   "trustCopy.skippedEdge.lagOutOfRange": "un desfase que supera el límite de 365 días",
   "trustCopy.skippedEdge.malformed": "no se puede leer como un vínculo",
   "trustCopy.skippedEdge.markedForDeletion": "el archivo lo marca para eliminar",
-  "trustCopy.skippedEdge.noKeyColumn": "la columna a la que se refiere no está en el archivo",
+  "trustCopy.skippedEdge.noKeyColumn": "la columna a la que se refiere no está en el archivo; vuelve a exportarlo con la columna Id",
   "trustCopy.skippedEdge.selfLoop": "la actividad se esperaría a sí misma",
   "trustCopy.skippedEdge.truncated": "la exportación cortó la celda",
   "trustCopy.skippedEdge.typeNotStated": "no indica el tipo de vínculo",

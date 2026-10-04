@@ -1,4 +1,5 @@
 import {
+  buildDependencyInvalidationTags,
   providesListTags,
   providesPageTags,
   providesScopedListTags,
@@ -70,5 +71,14 @@ describe('scopeTagTypes', () => {
     // Broad means no id key at all — `{ id: undefined }` matches differently
     // in RTK Query.
     expect(Object.keys(tags[0])).toEqual(['type'])
+  })
+})
+
+describe('buildDependencyInvalidationTags', () => {
+  it('refreshes the project record an edge write lands in, and only that one', () => {
+    const tags = buildDependencyInvalidationTags('task-1', 'project-1')
+
+    expect(tags).toContainEqual({ type: 'ProjectActivity', id: 'project-1' })
+    expect(tags).not.toContainEqual({ type: 'ProjectActivity' })
   })
 })

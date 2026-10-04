@@ -85,7 +85,8 @@ export function buildExpenseInvalidationTags({
 }
 
 // Tags invalidated when a dependency edge is created, edited or removed, all
-// scoped to the edge's project. A draft's edges live in its review state.
+// scoped to the edge's project. A draft's edges live in its review state, and
+// every edge write lands a row in the project record.
 export function buildDependencyInvalidationTags(
   taskId: string,
   projectId: string,
@@ -94,6 +95,7 @@ export function buildDependencyInvalidationTags(
     // The successor's own row — its blocked/critical state derives from edges.
     { type: 'Task', id: taskId },
     { type: 'Task', id: `project-${projectId}` },
+    { type: 'ProjectActivity', id: projectId },
     ...scopeTagTypes(
       [
         'Dependency',

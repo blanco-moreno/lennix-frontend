@@ -222,6 +222,12 @@ describe('useTrustCopy — the report', () => {
     },
   )
 
+  it('says how to bring back links that name a column the file lacks', () => {
+    expect(copyIn('es').skippedEdgeReason('no_key_column')).toBe(
+      'la columna a la que se refiere no está en el archivo; vuelve a exportarlo con la columna Id',
+    )
+  })
+
   it('says why a relationship was not imported in the reader’s language', () => {
     expect(copyIn('es').skippedEdgeReason('unconvertible_lag')).toBe(
       'un desfase en una unidad que no se puede convertir a días',

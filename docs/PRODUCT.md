@@ -83,7 +83,8 @@ two places** unless it is an explicit overview → drill-down.
 - **Relationships the file states but that never became an edge are shown, not
   hidden.** Each quotes the file's own text, its sheet and row, and the reason
   in the user's language; the count is the full one even when the list is
-  capped.
+  capped, and they count once among the receipt's things to check. A link whose
+  file lacks the ID column it names says to export the file again with it.
 - **A file that did not resolve goes to assisted mapping**, never to a broken
   Gantt.
 - **The mirror subactivity is rendered honestly** (`TSK-3`) — a collapsed leaf on

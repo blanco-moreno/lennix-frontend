@@ -19,6 +19,7 @@ export type NarrationFocus = 'phases' | 'activities' | 'dates' | 'caveats'
 export type CaveatKind =
   | 'assumption'
   | 'unresolved_edges'
+  | 'skipped_edges'
   | 'unclassified_rows'
   | 'dropped_rows'
 
@@ -74,8 +75,9 @@ function latest(dates: (string | null)[]): string | null {
  *
  * One cause, one entry: a high-consequence assumption is a caveat however
  * confident the parser was, while cosmetic per-cell marks stay off the receipt.
- * Unresolved predecessors, the unclassified bin and dropped rows each collapse
- * into a single caveat, because they are one question, not one per row.
+ * Unresolved predecessors, the links the file stated but that never became an
+ * edge, the unclassified bin and dropped rows each collapse into a single
+ * caveat, because they are one question, not one per row.
  */
 export function buildCaveats(state: ScheduleReviewState): NarrationCaveat[] {
   const caveats: NarrationCaveat[] = state.ledger
@@ -92,6 +94,13 @@ export function buildCaveats(state: ScheduleReviewState): NarrationCaveat[] {
       kind: 'unresolved_edges',
       id: 'unresolved_edges',
       affectedRows: state.unresolvedEdges.length,
+    })
+  }
+  if (state.report.skippedEdgesTotal > 0) {
+    caveats.push({
+      kind: 'skipped_edges',
+      id: 'skipped_edges',
+      affectedRows: state.report.skippedEdgesTotal,
     })
   }
   if (state.report.unclassifiedTotal > 0) {

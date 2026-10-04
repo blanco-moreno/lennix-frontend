@@ -120,6 +120,32 @@ describe('buildNarration', () => {
     ).toHaveLength(1)
   })
 
+  it('counts the links the file stated but never imported as one thing to check', () => {
+    const state = seededState()
+    state.report = {
+      ...state.report,
+      skippedEdges: [
+        {
+          sheet: 'Task_Table',
+          row: 8,
+          text: '3FC+2 díast',
+          successorRef: '6',
+          predecessorRef: null,
+          reason: 'unconvertible_lag',
+        },
+      ],
+      skippedEdgesTotal: 3,
+    }
+
+    const skipped = buildNarration(state).caveats.filter(
+      (caveat) => caveat.kind === 'skipped_edges',
+    )
+
+    expect(skipped).toHaveLength(1)
+    // The full count, not the capped list.
+    expect(skipped[0].affectedRows).toBe(3)
+  })
+
   it('reports a clean parse as nothing to check', () => {
     const state = seededState()
     state.ledger = []

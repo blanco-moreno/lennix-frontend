@@ -243,9 +243,10 @@ export const trustCopyMessages = defineMessages({
   },
   skippedNoKeyColumn: {
     id: 'trustCopy.skippedEdge.noKeyColumn',
-    defaultMessage: 'the column it refers to is not in the file',
+    defaultMessage:
+      'the column it refers to is not in the file; export it again with the ID column',
     description:
-      'Skipped relationship: the id column the references point at is absent',
+      'Skipped relationship: the id column the references point at is absent, so the file must be exported again with it',
   },
   skippedExternalReference: {
     id: 'trustCopy.skippedEdge.externalReference',

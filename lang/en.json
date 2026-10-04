@@ -1415,7 +1415,7 @@
   "trustCopy.skippedEdge.lagOutOfRange": "a lag beyond the 365-day limit",
   "trustCopy.skippedEdge.malformed": "it cannot be read as a link",
   "trustCopy.skippedEdge.markedForDeletion": "the file marks it for deletion",
-  "trustCopy.skippedEdge.noKeyColumn": "the column it refers to is not in the file",
+  "trustCopy.skippedEdge.noKeyColumn": "the column it refers to is not in the file; export it again with the ID column",
   "trustCopy.skippedEdge.selfLoop": "the activity would wait on itself",
   "trustCopy.skippedEdge.truncated": "the export cut the cell short",
   "trustCopy.skippedEdge.typeNotStated": "the link type is not stated",
