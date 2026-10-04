@@ -150,8 +150,13 @@ describe('TaskDetailView', () => {
       await screen.findByRole('tab', { name: /Dependencies/ }),
     )
 
+    // The swap goes through the URL and draws the dependency editor and its
+    // calendar — longer than the one second `findBy*` allows on a loaded
+    // machine.
     expect(
-      await screen.findByTestId('activity-section-dependencies'),
+      await screen.findByTestId('activity-section-dependencies', undefined, {
+        timeout: 3000,
+      }),
     ).toBeInTheDocument()
     expect(screen.getByTestId(SEARCH_TEST_ID)).toHaveTextContent(
       'panel=dependencies',

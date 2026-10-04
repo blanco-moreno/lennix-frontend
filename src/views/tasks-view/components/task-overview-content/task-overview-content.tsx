@@ -50,7 +50,7 @@ export function TaskOverviewContent({
       rounded="lg"
       bg="bg.panel"
     >
-      <TaskListHeader context="assignee" />
+      <TaskListHeader context="assignee" presentational={isLoading} />
 
       {isLoading && (
         <ListRowSkeleton

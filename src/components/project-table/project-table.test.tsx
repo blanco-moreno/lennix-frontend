@@ -23,8 +23,9 @@ describe('ProjectTable', () => {
     expect(
       screen.queryByRole('table', { name: 'Projects' }),
     ).not.toBeInTheDocument()
+    // The four bars plus the header: none of them is a row of anything yet.
     expect(
       container.querySelectorAll('[role="row"][aria-hidden="true"]'),
-    ).toHaveLength(4)
+    ).toHaveLength(5)
   })
 })

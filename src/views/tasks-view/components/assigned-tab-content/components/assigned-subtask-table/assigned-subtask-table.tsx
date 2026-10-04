@@ -36,7 +36,7 @@ export function AssignedSubtaskTable({
       rounded="lg"
       bg="bg.panel"
     >
-      <TaskListHeader context="project" />
+      <TaskListHeader context="project" presentational={isLoading} />
       {isLoading ? (
         <ListRowSkeleton
           templateColumns={TASK_GRID_COLUMNS}

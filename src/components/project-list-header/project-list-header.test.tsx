@@ -30,4 +30,11 @@ describe('ProjectListHeader', () => {
 
     expect(labels).toEqual(['Project', 'Review', 'Status', 'Waiting', 'Budget'])
   })
+
+  it('leaves the accessibility tree while its table is still loading', () => {
+    // A `columnheader` outside a `table` is an axe-critical violation.
+    renderWithProviders(<ProjectListHeader presentational />)
+
+    expect(screen.queryAllByRole('columnheader')).toHaveLength(0)
+  })
 })

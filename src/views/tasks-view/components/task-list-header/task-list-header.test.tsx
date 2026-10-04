@@ -33,4 +33,11 @@ describe('TaskListHeader', () => {
 
     expect(screen.queryByRole('columnheader', { name: 'Actions' })).toBeNull()
   })
+
+  it('leaves the accessibility tree while its table is still loading', () => {
+    // A `columnheader` outside a `table` is an axe-critical violation.
+    renderWithProviders(<TaskListHeader context="assignee" presentational />)
+
+    expect(screen.queryAllByRole('columnheader')).toHaveLength(0)
+  })
 })

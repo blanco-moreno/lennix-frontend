@@ -13,6 +13,8 @@ import { Then } from '../support/fixtures'
 Then(
   'the screen has no critical accessibility violations',
   async ({ page }) => {
+    // A listing still loading is not the screen the scenario reached.
+    await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
     const { violations } = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze()

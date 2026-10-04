@@ -12,6 +12,8 @@ interface TaskListHeaderProps {
    * already one person's, so the useful fact is which obra a row came from.
    */
   context: 'assignee' | 'project'
+  /** The listing is still loading, so this is not a table row yet. */
+  presentational?: boolean
 }
 
 /**
@@ -19,13 +21,17 @@ interface TaskListHeaderProps {
  * carry their own labels inline: a column header for columns that are not on
  * screen would be a promise the row does not keep.
  */
-export function TaskListHeader({ context }: TaskListHeaderProps) {
+export function TaskListHeader({
+  context,
+  presentational = false,
+}: TaskListHeaderProps) {
   // The "assigned to me" queue lists subactivities, which have nothing under
   // them: no row there ever draws a chevron, so no track is reserved for one.
   const expandable = context === 'assignee'
 
   return (
     <ListHeader
+      aria-hidden={presentational || undefined}
       templateColumns={taskGridColumns({ expandable })}
       columns={[
         // The expand track — a chevron labels itself, one row at a time.

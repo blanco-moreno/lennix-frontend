@@ -40,8 +40,10 @@ export function ProjectListHeader({
 
   return (
     <ListRow
-      // Under a loading table there is no `table` to be the row of yet.
-      role={presentational ? 'presentation' : 'row'}
+      role="row"
+      // Under a loading table there is no `table` to be the row of yet, and
+      // `columnheader`s outside one are invalid — so it leaves the tree.
+      aria-hidden={presentational || undefined}
       hideBelow="lg"
       templateColumns={projectGridColumns({ selectable })}
       bg="bg.subtle"
