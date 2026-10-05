@@ -99,6 +99,7 @@ const DATE_EVIDENCE: readonly DateEvidence[] = [
   'conflicting_day_positions',
   'column_runs_forward',
   'locale_prior',
+  'weekday_names',
   'no_dates_found',
 ]
 

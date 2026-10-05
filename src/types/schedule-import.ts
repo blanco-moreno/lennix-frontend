@@ -82,6 +82,7 @@ export type DateEvidence =
   | 'conflicting_day_positions'
   | 'column_runs_forward'
   | 'locale_prior'
+  | 'weekday_names'
   | 'no_dates_found'
 
 /** Why a worksheet won or lost the schedule-sheet choice. */

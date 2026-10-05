@@ -87,6 +87,23 @@ describe('mapScheduleReviewStateDTO', () => {
     expect(report.skippedEdgesTotal).toBe(0)
   })
 
+  it('keeps a date column settled by weekday names (contract 2.3)', () => {
+    const dto = seedImportReviewStateDTO()
+    const [assumption] = dto.report.date_assumptions as Record<
+      string,
+      unknown
+    >[]
+    const state = mapScheduleReviewStateDTO({
+      ...dto,
+      report: {
+        ...dto.report,
+        date_assumptions: [{ ...assumption, settled_by_code: 'weekday_names' }],
+      },
+    })
+
+    expect(state.report.dateAssumptions[0].settledByCode).toBe('weekday_names')
+  })
+
   it('survives a report shape it does not know', () => {
     const dto = seedImportReviewStateDTO()
     // ms-ai owns the report shape and may add to it without a bk deploy.
