@@ -58,6 +58,19 @@ export const importUploadCanvasMessages = defineMessages({
     description:
       'Body when the upload extension is not a supported schedule format',
   },
+  scheduleTooLargeTitle: {
+    id: 'importUploadCanvas.scheduleTooLargeTitle',
+    defaultMessage: 'This schedule is too long to import',
+    description:
+      'Headline when the schedule has more rows than the parser reads from one sheet',
+  },
+  scheduleTooLargeBody: {
+    id: 'importUploadCanvas.scheduleTooLargeBody',
+    defaultMessage:
+      'Lennix reads up to {maxRows, number} rows from one sheet, and this file has more. Nothing was imported. Split the schedule into smaller files, for example by phase, and import each one.',
+    description:
+      'Body when the schedule is longer than the sheet row limit; maxRows is that limit',
+  },
   promptInjectionTitle: {
     id: 'importUploadCanvas.promptInjectionTitle',
     defaultMessage: 'This file was not processed',

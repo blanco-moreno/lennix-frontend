@@ -408,6 +408,8 @@
   "importUploadCanvas.promptInjectionBody": "O arquivo contém texto que se lê como instruções para a IA, por isso não foi processado. Remova esse texto e envie novamente.",
   "importUploadCanvas.promptInjectionTitle": "Este arquivo não foi processado",
   "importUploadCanvas.reading": "Lendo {fileName}…",
+  "importUploadCanvas.scheduleTooLargeBody": "O Lennix lê até {maxRows, number} linhas de uma planilha e este arquivo tem mais. Nada foi importado. Divida o cronograma em arquivos menores, por exemplo por fase, e importe cada um.",
+  "importUploadCanvas.scheduleTooLargeTitle": "Este cronograma é extenso demais para importar",
   "importUploadCanvas.tooLarge": "Esse arquivo é grande demais para o Lennix ler.",
   "importUploadCanvas.tryAnother": "Tentar outro arquivo",
   "importUploadCanvas.unreadableBody": "Nada foi importado. Tente o arquivo com que seu time realmente planeja — um cronograma com nomes de tarefa e datas — ou exporte de novo como .xlsx ou .csv.",

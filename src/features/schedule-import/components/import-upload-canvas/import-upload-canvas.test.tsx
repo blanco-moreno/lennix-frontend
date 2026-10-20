@@ -114,6 +114,10 @@ describe('ImportUploadCanvas', () => {
       code: 'prompt_injection_detected',
       title: 'This file was not processed',
     },
+    {
+      code: 'schedule_too_large',
+      title: 'This schedule is too long to import',
+    },
   ])(
     'names a $code refusal instead of a generic read failure',
     async ({ code, title }) => {
@@ -143,6 +147,34 @@ describe('ImportUploadCanvas', () => {
       )
     },
   )
+
+  it('states the sheet row limit when a schedule is too long to import', async () => {
+    server.use(
+      http.post('*/v1/schedule/import', () =>
+        HttpResponse.json(
+          {
+            detail: {
+              code: 'schedule_too_large',
+              import_job_id: FIXTURE_DIVERTED_JOB_ID,
+              message: 'refused',
+            },
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+    renderCanvas()
+    await uploadFile()
+
+    // The limit is stated as a number, and nothing was imported.
+    expect(
+      await screen.findByText(/Lennix reads up to 5,000 rows from one sheet/),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Nothing was imported/)).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Try another file' }),
+    ).toBeInTheDocument()
+  })
 
   it('names the plan draft cap instead of failing generically', async () => {
     server.use(

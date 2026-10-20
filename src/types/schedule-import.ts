@@ -473,6 +473,7 @@ export type ImportFailureCode =
   | 'invalid_file_signature'
   | 'unsupported_file_type'
   | 'prompt_injection_detected'
+  | 'schedule_too_large'
 
 /** The 422 that routes an upload to assisted mapping (Lane F). */
 export interface AssistedMappingDivert {

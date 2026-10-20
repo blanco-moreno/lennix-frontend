@@ -492,6 +492,7 @@ const IMPORT_FAILURE_CODES: readonly ImportFailureCode[] = [
   'invalid_file_signature',
   'unsupported_file_type',
   'prompt_injection_detected',
+  'schedule_too_large',
 ]
 
 /** Read the failure code of a 422 that ended the import job in `failed`. */

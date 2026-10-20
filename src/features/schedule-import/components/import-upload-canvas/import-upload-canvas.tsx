@@ -35,8 +35,16 @@ type UploadFailure =
   | 'invalid_signature'
   | 'unsupported_type'
   | 'prompt_injection'
+  | 'schedule_too_large'
   | 'too_large'
   | 'generic'
+
+/**
+ * The rows ms-ai reads from one sheet (`MAX_SHEET_ROWS`), header included. A
+ * longer schedule is refused as `schedule_too_large` rather than landed
+ * clipped (ms-bk `IMP-12`); the two numbers move together.
+ */
+const MAX_SCHEDULE_SHEET_ROWS = 5000
 
 export function ImportUploadCanvas() {
   const intl = useIntl()
@@ -94,6 +102,10 @@ export function ImportUploadCanvas() {
       }
       if (failureCode === 'prompt_injection_detected') {
         setFailure('prompt_injection')
+        return
+      }
+      if (failureCode === 'schedule_too_large') {
+        setFailure('schedule_too_large')
         return
       }
       const apiError = error as ApiError
@@ -186,6 +198,17 @@ export function ImportUploadCanvas() {
                 </Text>
                 <Text size="sm">
                   {intl.formatMessage(m.promptInjectionBody)}
+                </Text>
+              </>
+            ) : failure === 'schedule_too_large' ? (
+              <>
+                <Text weight="medium" size="sm">
+                  {intl.formatMessage(m.scheduleTooLargeTitle)}
+                </Text>
+                <Text size="sm">
+                  {intl.formatMessage(m.scheduleTooLargeBody, {
+                    maxRows: MAX_SCHEDULE_SHEET_ROWS,
+                  })}
                 </Text>
               </>
             ) : failure === 'unreadable' ? (

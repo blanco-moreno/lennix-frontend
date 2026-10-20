@@ -408,6 +408,8 @@
   "importUploadCanvas.promptInjectionBody": "The file contains text that reads as instructions to the AI, so it was not processed. Remove that text and upload it again.",
   "importUploadCanvas.promptInjectionTitle": "This file was not processed",
   "importUploadCanvas.reading": "Reading {fileName}…",
+  "importUploadCanvas.scheduleTooLargeBody": "Lennix reads up to {maxRows, number} rows from one sheet, and this file has more. Nothing was imported. Split the schedule into smaller files, for example by phase, and import each one.",
+  "importUploadCanvas.scheduleTooLargeTitle": "This schedule is too long to import",
   "importUploadCanvas.tooLarge": "That file is too large for Lennix to read.",
   "importUploadCanvas.tryAnother": "Try another file",
   "importUploadCanvas.unreadableBody": "Nothing was imported. Try the file your team actually plans with — a schedule with task names and dates — or export it again as .xlsx or .csv.",
