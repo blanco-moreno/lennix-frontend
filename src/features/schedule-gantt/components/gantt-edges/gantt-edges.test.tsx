@@ -1,7 +1,11 @@
 import { renderWithProviders } from '@/tests/render-with-providers'
 import type { DependencyNode, DependencyNodeTask } from '@/types'
 
-import { BAR_HEIGHT, type BarGeometry } from '../../gantt-geometry'
+import {
+  BAR_HEIGHT,
+  type BarGeometry,
+  type RowRange,
+} from '../../gantt-geometry'
 import type { ScheduleRow } from '../../gantt-model'
 import { EDGE_BROKEN } from '../../schedule-palette'
 
@@ -126,5 +130,124 @@ describe('GanttEdges', () => {
     const { container } = renderEdges([edge()], [row('successor')])
 
     expect(container.querySelector('[data-testid="gantt-edge"]')).toBeNull()
+  })
+
+  describe('inside a row window', () => {
+    const ROW_PITCH = 30
+    const stack = (count: number) =>
+      Array.from({ length: count }, (_, index) => row(`r${index}`))
+    /** Row `rN` sits on the Nth line: its bar's y is N rows down. */
+    const stackedGeometry = (r: ScheduleRow): BarGeometry => {
+      const index = Number(r.id.slice(1))
+      return { x: index * 10, width: 8, delayWidth: 0, y: index * ROW_PITCH }
+    }
+    const link = (id: string, from: number, to: number): DependencyNode =>
+      edge({ id, dependsOn: nodeTask(`r${from}`), task: nodeTask(`r${to}`) })
+
+    function renderWindowed(
+      edges: DependencyNode[],
+      rowRange?: RowRange,
+      rowCount = 100,
+    ) {
+      return renderWithProviders(
+        <svg>
+          <GanttEdges
+            edges={edges}
+            rows={stack(rowCount)}
+            barGeometry={stackedGeometry}
+            rowRange={rowRange}
+          />
+        </svg>,
+      )
+    }
+    const drawn = (container: Element) =>
+      [...container.querySelectorAll('[data-testid="gantt-edge"]')].map(
+        (line) => line.getAttribute('points'),
+      )
+
+    const band = { start: 40, end: 60 }
+
+    it('skips an edge whose rows both sit above the window', () => {
+      const { container } = renderWindowed([link('a', 10, 20)], band)
+      expect(drawn(container)).toHaveLength(0)
+    })
+
+    it('skips an edge whose rows both sit below the window', () => {
+      const { container } = renderWindowed([link('b', 70, 90)], band)
+      expect(drawn(container)).toHaveLength(0)
+    })
+
+    it('keeps an edge with one end inside the window', () => {
+      const { container } = renderWindowed(
+        [link('c', 10, 45), link('d', 55, 90)],
+        band,
+      )
+      expect(drawn(container)).toHaveLength(2)
+    })
+
+    it('keeps an edge that crosses the window with both ends outside it', () => {
+      const { container } = renderWindowed([link('e', 5, 95)], band)
+      expect(drawn(container)).toHaveLength(1)
+    })
+
+    it('treats the window as half-open: its last row is end - 1', () => {
+      const { container } = renderWindowed(
+        [link('f', 59, 80), link('g', 60, 80), link('h', 10, 40)],
+        band,
+      )
+      expect(drawn(container)).toHaveLength(2)
+    })
+
+    it('keeps a broken edge inside the window and skips one outside it', () => {
+      const broken = (id: string, to: number) =>
+        edge({ id, dependsOn: null, isBroken: true, task: nodeTask(`r${to}`) })
+      const { container } = renderWindowed(
+        [broken('in', 50), broken('out', 80)],
+        band,
+      )
+      expect(
+        container.querySelectorAll('[data-testid="gantt-edge-broken"]'),
+      ).toHaveLength(1)
+    })
+
+    it('draws exactly the unwindowed edges that reach the window, point for point', () => {
+      // A fixed linear congruential sequence: reproducible, no Math.random.
+      let seed = 20261019
+      const next = (limit: number) => {
+        seed = (Math.imul(seed, 1103515245) + 12345) >>> 0
+        return (seed >>> 8) % limit
+      }
+      const edges = Array.from({ length: 400 }, (_, index) =>
+        link(`x${index}`, next(100), next(100)),
+      )
+      const all = renderWindowed(edges)
+      const everything = [
+        ...all.container.querySelectorAll('[data-testid="gantt-edge"]'),
+      ]
+      expect(everything).toHaveLength(400)
+
+      for (const range of [
+        { start: 0, end: 100 },
+        { start: 0, end: 12 },
+        { start: 40, end: 60 },
+        { start: 88, end: 100 },
+      ]) {
+        const top = range.start * ROW_PITCH
+        const bottom = range.end * ROW_PITCH
+        // The reference: every edge today, kept when its drawn vertical
+        // extent touches the window's band of pixels.
+        const expected = everything
+          .map((line) => line.getAttribute('points') ?? '')
+          .filter((points) => {
+            const ys = points
+              .split(' ')
+              .map((pair) => Number(pair.split(',')[1]))
+            return Math.max(...ys) >= top && Math.min(...ys) < bottom
+          })
+        const { container, unmount } = renderWindowed(edges, range)
+        expect(drawn(container)).toEqual(expected)
+        unmount()
+      }
+    })
   })
 })

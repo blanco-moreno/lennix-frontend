@@ -579,6 +579,7 @@ export function ScheduleGantt({
                 rows={rows}
                 barGeometry={barGeometry}
                 barHeight={barHeight}
+                rowRange={rowRange}
               />
 
               {mountedRows.map((row) => {

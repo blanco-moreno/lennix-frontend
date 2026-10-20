@@ -1,6 +1,11 @@
 import type { DependencyNode } from '@/types'
 
-import { BAR_HEIGHT, edgeAnchors, type BarGeometry } from '../../gantt-geometry'
+import {
+  BAR_HEIGHT,
+  edgeAnchors,
+  type BarGeometry,
+  type RowRange,
+} from '../../gantt-geometry'
 import type { ScheduleRow } from '../../gantt-model'
 import { EDGE_ARROW_ID, EDGE_BROKEN } from '../../schedule-palette'
 
@@ -15,6 +20,12 @@ interface GanttEdgesProps {
   barGeometry: (row: ScheduleRow) => BarGeometry | null
   /** The bar scale in force, so an edge lands on the centre of a touch bar. */
   barHeight?: number
+  /**
+   * The rows the chart has mounted, by index into `rows`. An edge whose rows
+   * all sit on one side of it cannot reach the screen and is not drawn; one
+   * that crosses it still is. Omitted, every edge is drawn.
+   */
+  rowRange?: RowRange
 }
 
 /** The dependency layer of the chart: one polyline per edge, and a stub +
@@ -24,11 +35,28 @@ export function GanttEdges({
   rows,
   barGeometry,
   barHeight = BAR_HEIGHT,
+  rowRange,
 }: GanttEdgesProps) {
   const rowById = new Map(rows.map((row) => [row.id, row]))
+  const indexById = new Map(rows.map((row, index) => [row.id, index]))
+  // Bars stack by row index, so an edge's vertical extent runs from its
+  // highest row to its lowest. It reaches the window unless that whole run
+  // ends above the window's first row or starts below its last.
+  const reachesWindow = (rowIds: string[]) => {
+    if (!rowRange) return true
+    const indices = rowIds.map((id) => indexById.get(id) ?? -1)
+    return (
+      Math.max(...indices) >= rowRange.start &&
+      Math.min(...indices) < rowRange.end
+    )
+  }
   return (
     <>
       {edges.map((edge) => {
+        const rowIds = edge.dependsOn
+          ? [edge.task.id, edge.dependsOn.id]
+          : [edge.task.id]
+        if (!reachesWindow(rowIds)) return null
         const successor = rowById.get(edge.task.id)
         const to = successor ? barGeometry(successor) : null
         if (!to) return null

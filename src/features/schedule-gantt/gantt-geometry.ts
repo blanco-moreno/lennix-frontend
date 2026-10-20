@@ -170,12 +170,18 @@ export const WINDOW_MIN_ROWS = 200
 export const ROW_OVERSCAN = 10
 
 /** The half-open row range `[start, end)` to mount for the current scroll. */
+/** A half-open run of row indices, `start` included and `end` excluded. */
+export interface RowRange {
+  start: number
+  end: number
+}
+
 export function rowWindow(
   rowCount: number,
   rowHeight: number,
   scrollTop: number,
   viewportHeight: number,
-): { start: number; end: number } {
+): RowRange {
   if (rowCount <= WINDOW_MIN_ROWS) return { start: 0, end: rowCount }
   const first = Math.floor(scrollTop / rowHeight)
   const last = Math.ceil((scrollTop + viewportHeight) / rowHeight)

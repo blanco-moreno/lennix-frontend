@@ -793,6 +793,45 @@ describe('ScheduleGantt', () => {
       expect(screen.queryByText('Row 0')).not.toBeInTheDocument()
     })
 
+    it('draws only the dependency edges that reach the mounted rows', () => {
+      const rows = many(1000)
+      // One finish-to-start chain through every row: 999 edges.
+      const chain = rows.slice(1).map((successor, index) =>
+        edge({
+          id: `e${index}`,
+          task: nodeTask(successor.id, successor.title),
+          dependsOn: nodeTask(rows[index].id, rows[index].title),
+        }),
+      )
+      renderWithProviders(
+        <ScheduleGantt rows={rows} edges={chain} onSelectRow={vi.fn()} />,
+      )
+
+      // Edge i links row i to row i + 1. At the top, the window starts at row
+      // 0, so the edges drawn are exactly those leaving a mounted row.
+      const mounted = screen.getAllByTestId('gantt-row-label').length
+      expect(mounted).toBeLessThan(200)
+      expect(screen.getAllByTestId('gantt-edge')).toHaveLength(mounted)
+
+      const area = screen.getByTestId('gantt-scroll-area')
+      area.scrollTop = 900 * ROW_HEIGHT
+      fireEvent.scroll(area)
+
+      // Mid-chain, one more reaches the window: the edge entering its first
+      // row from the row above it.
+      expect(screen.getAllByTestId('gantt-edge')).toHaveLength(
+        screen.getAllByTestId('gantt-row-label').length + 1,
+      )
+      const firstEdgeY = Number(
+        screen
+          .getAllByTestId('gantt-edge')[0]
+          .getAttribute('points')
+          ?.split(' ')[0]
+          .split(',')[1],
+      )
+      expect(firstEdgeY).toBeGreaterThan(800 * ROW_HEIGHT)
+    })
+
     it('keeps selection on the row it names once windowed', () => {
       const rows = many(1000)
       renderWithProviders(
