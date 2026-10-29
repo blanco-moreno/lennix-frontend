@@ -166,7 +166,20 @@ export interface ParseReport {
   /** Capped by the parser; `skippedEdgesTotal` is the full count. */
   skippedEdges: SkippedEdge[]
   skippedEdgesTotal: number
+  /** The file's cost column the rows' costs came from; null when none (2.5). */
+  costSource: CostSource | null
+  /** Cost cells the parser would not read with certainty (2.5). */
+  costsUnread: number
 }
+
+/** Which cost column a file's costs were read from (contract 2.5). */
+export type CostSource = 'baseline' | 'budgeted' | 'stated'
+
+/**
+ * What the draft's budget owes the file (ms-bk `IMP-13`): costs that pre-filled
+ * it, costs too large to store, or none stated.
+ */
+export type FileBudget = 'applied' | 'out_of_range' | 'none'
 
 /** `high` assumptions are the ones the receipt counts as "things to check". */
 export type ConsequenceClass = 'high' | 'cosmetic'
@@ -371,6 +384,7 @@ export interface ScheduleReviewState {
   dependencies: ReviewDependency[]
   unresolvedEdges: ReviewUnresolvedEdge[]
   stats: ReviewStats
+  fileBudget: FileBudget
 }
 
 /**

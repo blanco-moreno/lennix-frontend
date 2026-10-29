@@ -20,6 +20,32 @@ import {
 } from './schedule-import-mappers'
 
 describe('mapScheduleReviewStateDTO', () => {
+  it('reads where the file’s costs came from, and what the budget owes them', () => {
+    const dto = seedImportReviewStateDTO()
+    const state = mapScheduleReviewStateDTO({
+      ...dto,
+      file_budget: 'applied',
+      report: { ...dto.report, cost_source: 'budgeted', costs_unread: 3 },
+    })
+
+    expect(state.fileBudget).toBe('applied')
+    expect(state.report.costSource).toBe('budgeted')
+    expect(state.report.costsUnread).toBe(3)
+  })
+
+  it('reads a draft from before costs as one the file left to the review', () => {
+    const dto = seedImportReviewStateDTO()
+    const state = mapScheduleReviewStateDTO({
+      ...dto,
+      file_budget: undefined,
+      report: { ...dto.report, cost_source: 'invented' },
+    })
+
+    expect(state.fileBudget).toBe('none')
+    expect(state.report.costSource).toBeNull()
+    expect(state.report.costsUnread).toBe(0)
+  })
+
   it('maps the seeded draft with its trust outputs', () => {
     const state = mapScheduleReviewStateDTO(seedImportReviewStateDTO())
 

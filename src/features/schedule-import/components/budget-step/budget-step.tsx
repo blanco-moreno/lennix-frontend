@@ -13,12 +13,12 @@
  */
 
 import { Grid, Stack } from '@chakra-ui/react'
-import { Wallet } from 'lucide-react'
+import { AlertTriangle, FileSpreadsheet, Wallet } from 'lucide-react'
 import { useIntl } from 'react-intl'
 
-import { EmptyState, Label } from '@/components'
+import { Alert, EmptyState, Label, Text } from '@/components'
 import { CurrencyInput } from '@/components/ui/currency-input'
-import type { ReviewProject, ReviewTask } from '@/types'
+import type { CostSource, FileBudget, ReviewProject, ReviewTask } from '@/types'
 
 import {
   type ProjectDetailsDraft,
@@ -38,12 +38,19 @@ const BUDGET_COLUMNS = {
   md: 'minmax(0, 1fr) 14rem',
 }
 
+/** The largest amount a budget stores (ms-bk `MAX_STORED_AMOUNT`, IMP-13). */
+const MAX_STORED_AMOUNT = 9_999_999_999.99
+
 export interface BudgetStepProps {
   project: ReviewProject
   tasks: ReviewTask[]
   /** The wizard's one draft — the header edits the other half of it. */
   draft: ProjectDetailsDraft
   onEdit: (patch: Partial<ProjectDetailsDraft>) => void
+  /** What the amounts owe the file (IMP-13); `none` says nothing. */
+  fileBudget?: FileBudget
+  costSource?: CostSource | null
+  costsUnread?: number
 }
 
 export function BudgetStep({
@@ -51,6 +58,9 @@ export function BudgetStep({
   tasks,
   draft,
   onEdit: edit,
+  fileBudget = 'none',
+  costSource = null,
+  costsUnread = 0,
 }: BudgetStepProps) {
   const intl = useIntl()
 
@@ -78,6 +88,44 @@ export function BudgetStep({
 
   return (
     <Stack gap={6} data-testid="budget-step" maxW="56rem">
+      {fileBudget === 'applied' && (
+        <Alert icon={FileSpreadsheet} data-testid="file-budget-notice">
+          <Stack gap={1}>
+            <Text weight="medium" size="sm">
+              {intl.formatMessage(m.fileBudgetAppliedTitle)}
+            </Text>
+            <Text size="sm">
+              {intl.formatMessage(m.fileBudgetAppliedBody, {
+                source: costSource ?? 'stated',
+              })}
+            </Text>
+            <Text size="sm">{intl.formatMessage(m.fileBudgetNetNote)}</Text>
+            {costsUnread > 0 && (
+              <Text size="sm" color="muted">
+                {intl.formatMessage(m.fileBudgetUnread, { count: costsUnread })}
+              </Text>
+            )}
+          </Stack>
+        </Alert>
+      )}
+      {fileBudget === 'out_of_range' && (
+        <Alert
+          variant="overBudget"
+          icon={AlertTriangle}
+          data-testid="file-budget-notice"
+        >
+          <Stack gap={1}>
+            <Text weight="medium" size="sm">
+              {intl.formatMessage(m.fileBudgetOutOfRangeTitle)}
+            </Text>
+            <Text size="sm">
+              {intl.formatMessage(m.fileBudgetOutOfRangeBody, {
+                max: Math.floor(MAX_STORED_AMOUNT),
+              })}
+            </Text>
+          </Stack>
+        </Alert>
+      )}
       <Stack
         gap={0}
         rounded="lg"

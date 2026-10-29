@@ -376,6 +376,9 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
               tasks={state.tasks}
               draft={edits.draft}
               onEdit={edits.edit}
+              fileBudget={state.fileBudget}
+              costSource={state.report.costSource}
+              costsUnread={state.report.costsUnread}
             />
           )}
 

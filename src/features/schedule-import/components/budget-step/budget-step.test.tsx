@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { mapScheduleReviewStateDTO } from '@/services/schedule-import'
 import { seedImportReviewStateDTO } from '@/tests/fixtures'
 import { renderWithProviders } from '@/tests/render-with-providers'
-import type { ReviewProject, ReviewTask } from '@/types'
+import type { CostSource, FileBudget, ReviewProject, ReviewTask } from '@/types'
 
 import {
   draftFromProject,
@@ -20,9 +20,15 @@ const state = () => mapScheduleReviewStateDTO(seedImportReviewStateDTO())
 function Host({
   project = state().project,
   tasks = state().tasks,
+  fileBudget,
+  costSource,
+  costsUnread,
 }: {
   project?: ReviewProject
   tasks?: ReviewTask[]
+  fileBudget?: FileBudget
+  costSource?: CostSource | null
+  costsUnread?: number
 }) {
   const [draft, setDraft] = useState<ProjectDetailsDraft>(() =>
     draftFromProject(project, tasks),
@@ -33,6 +39,9 @@ function Host({
       tasks={tasks}
       draft={draft}
       onEdit={(patch) => setDraft((current) => ({ ...current, ...patch }))}
+      fileBudget={fileBudget}
+      costSource={costSource}
+      costsUnread={costsUnread}
     />
   )
 }
@@ -91,5 +100,48 @@ describe('BudgetStep', () => {
 
     expect(screen.getByText('No main activities to budget')).toBeInTheDocument()
     expect(screen.queryByTestId('budget-step')).not.toBeInTheDocument()
+  })
+
+  describe('amounts that came from the file (IMP-13)', () => {
+    it('says the amounts are the file’s, and which column they came from', () => {
+      renderWithProviders(
+        <Host fileBudget="applied" costSource="baseline" costsUnread={0} />,
+      )
+
+      const notice = screen.getByTestId('file-budget-notice')
+      expect(notice).toHaveTextContent('Amounts taken from the file')
+      expect(notice).toHaveTextContent(
+        'Each phase starts with the baseline cost the file states.',
+      )
+      expect(notice).not.toHaveTextContent('could not be read')
+      // A cost column never says whether VAT is in it; the budget is net.
+      expect(notice).toHaveTextContent(
+        'Lennix keeps budgets net, without VAT. The file does not say whether its amounts include VAT',
+      )
+    })
+
+    it('counts the amounts it declined to read instead of guessing them', () => {
+      renderWithProviders(
+        <Host fileBudget="applied" costSource="stated" costsUnread={2} />,
+      )
+
+      expect(screen.getByTestId('file-budget-notice')).toHaveTextContent(
+        '2 amounts in the file could not be read with certainty and were left empty.',
+      )
+    })
+
+    it('says when the file’s amounts are too large to store', () => {
+      renderWithProviders(<Host fileBudget="out_of_range" />)
+
+      expect(screen.getByTestId('file-budget-notice')).toHaveTextContent(
+        'Lennix stores amounts up to 9,999,999,999. Nothing was filled in; enter the budget by hand.',
+      )
+    })
+
+    it('says nothing when the file states no costs', () => {
+      renderWithProviders(<Host fileBudget="none" />)
+
+      expect(screen.queryByTestId('file-budget-notice')).not.toBeInTheDocument()
+    })
   })
 })

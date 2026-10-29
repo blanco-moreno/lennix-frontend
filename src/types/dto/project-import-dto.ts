@@ -177,6 +177,8 @@ export interface ScheduleReviewStateResponseDTO {
   dependencies: ReviewDependencyDTO[]
   unresolved_edges: ReviewUnresolvedEdgeDTO[]
   stats: ReviewStatsDTO
+  /** Absent from a backend before IMP-13; read as `none`. */
+  file_budget?: string
 }
 
 /**

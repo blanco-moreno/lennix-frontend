@@ -113,6 +113,8 @@ export {
   type ReviewTaskPatch,
   type ReviewUnresolvedEdge,
   type ScheduleReviewState,
+  type CostSource,
+  type FileBudget,
   type SectionSignal,
   type SheetEvidence,
   type SheetReasonCode,

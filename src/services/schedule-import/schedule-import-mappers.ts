@@ -15,9 +15,11 @@ import type {
   AssistedMappingDivert,
   AssumptionLedgerEntry,
   ConsequenceClass,
+  CostSource,
   DateAssumption,
   DateEvidence,
   DroppedRow,
+  FileBudget,
   ImportFailureCode,
   ImportJob,
   ImportJobStatus,
@@ -197,6 +199,9 @@ function mapSkippedEdge(value: unknown): SkippedEdge {
   }
 }
 
+const COST_SOURCES: readonly CostSource[] = ['baseline', 'budgeted', 'stated']
+const FILE_BUDGETS: readonly FileBudget[] = ['applied', 'out_of_range', 'none']
+
 export function mapParseReport(value: unknown): ParseReport {
   const report = asRecord(value)
   // Absent before contract 2.2: an older draft reads as nothing skipped.
@@ -217,6 +222,11 @@ export function mapParseReport(value: unknown): ParseReport {
       num(report.skipped_edges_total),
       skippedEdges.length,
     ),
+    // Absent before contract 2.5: an older draft read no costs.
+    costSource: COST_SOURCES.includes(report.cost_source as CostSource)
+      ? (report.cost_source as CostSource)
+      : null,
+    costsUnread: num(report.costs_unread),
   }
 }
 
@@ -343,6 +353,7 @@ export function mapScheduleReviewStateDTO(
       : null,
     outcome: dto.outcome,
     report: mapParseReport(dto.report),
+    fileBudget: token<FileBudget>(dto.file_budget, FILE_BUDGETS, 'none'),
     ledger: mapLedger(dto.ledger),
     quality: mapParseQuality(dto.quality),
     tasks: dto.tasks.map(mapReviewTask),
