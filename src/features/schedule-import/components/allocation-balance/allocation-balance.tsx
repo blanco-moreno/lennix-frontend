@@ -28,7 +28,7 @@ export interface AllocationBalanceProps {
 
 export function AllocationBalance({ allocation }: AllocationBalanceProps) {
   const intl = useIntl()
-  const { assigned, unassigned, overrun } = allocation
+  const { assigned, unassigned, overrun, currency } = allocation
   const budget = unassigned === null ? null : assigned + unassigned
 
   return (
@@ -44,14 +44,14 @@ export function AllocationBalance({ allocation }: AllocationBalanceProps) {
           value={
             budget === null
               ? intl.formatMessage(m.noBudget)
-              : formatMoney(budget)
+              : formatMoney(budget, currency)
           }
         />
         <StatCard
           icon={PiggyBank}
           semantic="info"
           label={intl.formatMessage(m.assigned)}
-          value={formatMoney(assigned)}
+          value={formatMoney(assigned, currency)}
         />
         {unassigned !== null && (
           <StatCard
@@ -66,7 +66,7 @@ export function AllocationBalance({ allocation }: AllocationBalanceProps) {
                 color={overrun ? 'overBudget' : undefined}
                 data-testid="allocation-remainder"
               >
-                {formatMoney(Math.abs(unassigned))}
+                {formatMoney(Math.abs(unassigned), currency)}
               </Text>
             }
           />
@@ -85,7 +85,7 @@ export function AllocationBalance({ allocation }: AllocationBalanceProps) {
       {overrun && unassigned !== null && (
         <Alert variant="overBudget" icon={AlertTriangle}>
           {intl.formatMessage(m.overrunNote, {
-            excess: formatMoney(-unassigned),
+            excess: formatMoney(-unassigned, currency),
           })}
         </Alert>
       )}

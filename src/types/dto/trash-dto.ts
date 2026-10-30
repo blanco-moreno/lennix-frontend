@@ -24,6 +24,8 @@ export interface TrashedExpenseResponseDTO {
   amount: string
   subtask_id: string | null
   project_id?: string | null
+  /** The owning project's currency (`BUD-10`); absent from older backends. */
+  currency?: string
   deleted_at: string | null
   deleted_by: string | null
 }

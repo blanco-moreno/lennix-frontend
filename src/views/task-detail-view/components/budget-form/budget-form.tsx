@@ -10,6 +10,7 @@ import {
   ModalFormFooter,
 } from '@/components'
 import { CurrencyInput } from '@/components/ui/currency-input'
+import { useProjectCurrency } from '@/hooks'
 import { useZodResolverIntl } from '@/i18n'
 import type { ApiError } from '@/services'
 import { serializeMoneyForApi } from '@/utils'
@@ -66,6 +67,7 @@ export function BudgetForm({
   onSubmit: submitBudget,
 }: BudgetFormProps) {
   const intl = useIntl()
+  const { currency } = useProjectCurrency()
 
   const {
     control,
@@ -114,7 +116,9 @@ export function BudgetForm({
     >
       <FormField
         htmlFor={inputId}
-        label={<FormattedMessage {...messages.fieldLabel} />}
+        label={
+          <FormattedMessage {...messages.fieldLabel} values={{ currency }} />
+        }
         error={errors.budget?.message}
       >
         <Controller
@@ -122,6 +126,7 @@ export function BudgetForm({
           name="budget"
           render={({ field }) => (
             <CurrencyInput
+              currency={currency}
               id={inputId}
               value={field.value}
               onValueChange={(details) => field.onChange(details.value)}

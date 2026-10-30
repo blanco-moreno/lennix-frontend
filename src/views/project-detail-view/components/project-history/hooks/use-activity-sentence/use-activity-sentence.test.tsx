@@ -7,6 +7,7 @@
 
 import { screen } from '@testing-library/react'
 
+import { makeStore } from '@/stores'
 import { displayedDate } from '@/tests/intl-date'
 import { renderWithProviders } from '@/tests/render-with-providers'
 import type { ProjectActivity } from '@/types'
@@ -33,7 +34,9 @@ const entry = (overrides: Partial<ProjectActivity>): ProjectActivity => ({
 })
 
 function renderSentence(overrides: Partial<ProjectActivity>): string {
-  renderWithProviders(<Sentence entry={entry(overrides)} />)
+  renderWithProviders(<Sentence entry={entry(overrides)} />, {
+    store: makeStore(),
+  })
   return screen.getByTestId('sentence').textContent ?? ''
 }
 

@@ -8,7 +8,12 @@ import type { BudgetApproval } from '@/types'
 import { budgetApprovalsMessages as m } from '@/utils'
 
 import { BUDGET_APPROVAL_GRID_COLUMNS } from '../../../../approval-grids'
-import { deltaLabel, formatAmount, snapshotName } from '../../approval-format'
+import {
+  deltaLabel,
+  formatAmount,
+  snapshotCurrency,
+  snapshotName,
+} from '../../approval-format'
 
 interface BudgetApprovalRowProps {
   row: BudgetApproval
@@ -32,12 +37,14 @@ export function BudgetApprovalRow({
   const formatDate = useFormatDate()
 
   const isPending = row.state === 'pending' && !readOnly
+  const currency = snapshotCurrency(row.stateSnapshot)
   const previous = formatAmount(
     row.previousAmount,
     intl.formatMessage(m.noPreviousAmount),
+    currency,
   )
-  const requested = formatAmount(row.requestedAmount, '')
-  const delta = deltaLabel(row.previousAmount, row.requestedAmount)
+  const requested = formatAmount(row.requestedAmount, '', currency)
+  const delta = deltaLabel(row.previousAmount, row.requestedAmount, currency)
   const deltaColor = delta.startsWith('+')
     ? 'overBudget'
     : delta.startsWith('-')

@@ -10,7 +10,7 @@ import { CurrencyInput } from '@/components/ui/currency-input'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { UNASSIGNED } from '@/constants'
-import { usePermission } from '@/hooks'
+import { usePermission, useProjectCurrency } from '@/hooks'
 import { useAssignableOptions } from '@/hooks/use-assignable-options/use-assignable-options'
 import { useZodResolverIntl } from '@/i18n'
 import {
@@ -37,6 +37,7 @@ interface TaskEditFormProps {
 
 export function TaskEditForm({ task, open, onOpenChange }: TaskEditFormProps) {
   const intl = useIntl()
+  const { currency } = useProjectCurrency(task.projectId)
   const [updateTask, { isLoading }] = useUpdateTaskMutation()
   const [updateBudget, { isLoading: isSavingBudget }] =
     useUpdateTaskBudgetMutation()
@@ -204,13 +205,14 @@ export function TaskEditForm({ task, open, onOpenChange }: TaskEditFormProps) {
         {canEditBudgetDirect && (
           <Stack gap={2}>
             <Label color="primary" htmlFor="task-edit-budget">
-              <FormattedMessage {...m.budgetLabel} />
+              <FormattedMessage {...m.budgetLabel} values={{ currency }} />
             </Label>
             <Controller
               control={control}
               name="budget"
               render={({ field }) => (
                 <CurrencyInput
+                  currency={currency}
                   id="task-edit-budget"
                   value={field.value}
                   onValueChange={(details) => field.onChange(details.value)}

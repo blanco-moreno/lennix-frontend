@@ -87,6 +87,8 @@ export interface ProjectResponseDTO {
   status: ProjectStatusDTO
   priority: ProjectPriorityDTO
   budget: string | null
+  /** ISO 4217; absent from a backend older than `BUD-10`. */
+  currency?: string
   manager_id: string | null
   manager_name: string | null
   is_draft: boolean
@@ -151,6 +153,8 @@ export interface ProjectUpdateRequestDTO {
   description?: string | null
   location?: string | null
   budget?: string | null
+  /** ISO 4217 (`BUD-10`); a relabel, never a conversion. */
+  currency?: string | null
   manager_id?: string | null
 }
 

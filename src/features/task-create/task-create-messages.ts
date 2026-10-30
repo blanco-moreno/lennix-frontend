@@ -51,7 +51,7 @@ export const taskCreateMessages = defineMessages({
   },
   budgetLabel: {
     id: 'taskCreate.budgetLabel',
-    defaultMessage: 'Allocated budget (USD)',
+    defaultMessage: 'Allocated budget ({currency})',
     description: 'Label for the budget field',
   },
   budgetHelp: {

@@ -145,6 +145,8 @@ export interface ReviewProjectDTO {
   description: string | null
   location: string | null
   budget: string | null
+  /** ISO 4217; absent from a backend older than `BUD-10`. */
+  currency?: string
   start_date: string | null
   due_date: string | null
   is_draft: boolean

@@ -27,6 +27,8 @@ interface BudgetSummaryProps {
   /** The caller picks the over-budget vs. remaining/available variant. */
   remainingLabel: ReactNode
   remaining: number
+  /** ISO 4217 code the amounts are in (`BUD-10`); USD when absent. */
+  currency?: string
   isOverBudget: boolean
   overBudgetAlertTitle: ReactNode
   overBudgetAlertBody: ReactNode
@@ -46,6 +48,7 @@ export function BudgetSummary({
   spent,
   remainingLabel,
   remaining,
+  currency,
   isOverBudget,
   overBudgetAlertTitle,
   overBudgetAlertBody,
@@ -95,7 +98,7 @@ export function BudgetSummary({
               weight="bold"
               {...getBudgetSpentTextColor(isOverBudget)}
             >
-              {formatMoney(spent)}
+              {formatMoney(spent, currency)}
             </Text>
           </Box>
         </Flex>
@@ -127,7 +130,7 @@ export function BudgetSummary({
               weight="bold"
               {...getBudgetRemainingTextColor(isOverBudget)}
             >
-              {formatMoney(Math.abs(remaining))}
+              {formatMoney(Math.abs(remaining), currency)}
             </Text>
           </Box>
         </Flex>

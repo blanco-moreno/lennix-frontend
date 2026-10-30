@@ -6,10 +6,10 @@ import { FormattedMessage, useIntl } from 'react-intl'
 
 import { Badge, EmptyState, ErrorState, Heading, Text } from '@/components'
 import { DataTable } from '@/components/ui/data-table'
+import { useProjectCurrency } from '@/hooks'
 import { useGetCostReportQuery } from '@/services/expense'
 import type { BudgetVariance } from '@/types'
 import {
-  formatMoney,
   formatPercent,
   EXPENSE_CATEGORY_VARIANT,
   expenseManagementMessages as m,
@@ -21,6 +21,7 @@ interface CostReportProps {
 
 export function CostReport({ projectId }: CostReportProps) {
   const intl = useIntl()
+  const { formatMoney } = useProjectCurrency(projectId)
   const { data: report, isLoading, isError } = useGetCostReportQuery(projectId)
 
   const varianceColumns = useMemo<ColumnDef<BudgetVariance>[]>(
@@ -76,7 +77,7 @@ export function CostReport({ projectId }: CostReportProps) {
           ),
       },
     ],
-    [intl],
+    [intl, formatMoney],
   )
 
   if (isLoading) {

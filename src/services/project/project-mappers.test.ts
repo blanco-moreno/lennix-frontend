@@ -57,6 +57,14 @@ describe('mapProjectDTOToProject', () => {
 
     expect(mapProjectDTOToProject(dto).budget).toBeNull()
   })
+
+  it('reads the currency, and a project from before it as USD (BUD-10)', () => {
+    const pesos = seedProjectDTO(DEFAULT_SEED_PROJECT_ID, { currency: 'CLP' })
+    const legacy = seedProjectDTO(DEFAULT_SEED_PROJECT_ID)
+
+    expect(mapProjectDTOToProject(pesos).currency).toBe('CLP')
+    expect(mapProjectDTOToProject(legacy).currency).toBe('USD')
+  })
 })
 
 describe('assignable member mapping', () => {

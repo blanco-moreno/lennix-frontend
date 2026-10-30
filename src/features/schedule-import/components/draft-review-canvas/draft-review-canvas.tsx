@@ -72,6 +72,7 @@ const EMPTY_PROJECT: ReviewProject = {
   description: null,
   location: null,
   budget: null,
+  currency: 'USD',
   startDate: null,
   dueDate: null,
   isDraft: true,
@@ -379,6 +380,7 @@ export function DraftReviewCanvas({ projectId }: DraftReviewCanvasProps) {
               fileBudget={state.fileBudget}
               costSource={state.report.costSource}
               costsUnread={state.report.costsUnread}
+              fileCurrency={state.report.costCurrency}
             />
           )}
 

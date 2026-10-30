@@ -22,7 +22,12 @@ import type {
   ProjectDetailResponseDTO,
   ProjectMemberResponseDTO,
 } from '@/types/dto/project-dto'
-import { parseMoney, ROLE_SLUGS, type RoleSlug } from '@/utils'
+import {
+  parseMoney,
+  ROLE_SLUGS,
+  type RoleSlug,
+  toProjectCurrency,
+} from '@/utils'
 
 import { mapPage } from '../pagination'
 
@@ -92,6 +97,7 @@ export function mapProjectDTOToProject(dto: ProjectResponseDTO): Project {
     status: dto.status,
     priority: dto.priority,
     budget: dto.budget ? parseMoney(dto.budget) : null,
+    currency: toProjectCurrency(dto.currency),
     managerId: dto.manager_id,
     managerName: dto.manager_name,
     isDraft: dto.is_draft,

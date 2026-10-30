@@ -24,7 +24,7 @@ export function ExpensesTab({
   const rows: TrashRow[] = rowsData.map((e) => ({
     id: e.id,
     primary: e.description,
-    secondary: formatMoney(e.amount),
+    secondary: formatMoney(e.amount, e.currency),
     deletedAt: e.deletedAt,
   }))
   return (

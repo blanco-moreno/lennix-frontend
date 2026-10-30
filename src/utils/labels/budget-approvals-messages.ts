@@ -26,7 +26,7 @@ export const budgetApprovalsMessages = defineMessages({
   },
   requestAmountLabel: {
     id: 'budgetApprovals.requestAmountLabel',
-    defaultMessage: 'New amount (USD)',
+    defaultMessage: 'New amount ({currency})',
     description: 'Label of the requested amount input',
   },
   requestReasonLabel: {

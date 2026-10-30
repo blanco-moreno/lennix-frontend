@@ -25,6 +25,7 @@ describe('projectEditSchema', () => {
     managerId: '4f2b8a1c-9d3e-4b6f-8a1c-2e5d7f9b0c3a',
     priority: 'medium',
     budget: '850000',
+    currency: 'CLP',
     budgetReason: '',
   }
 
@@ -59,6 +60,15 @@ describe('projectEditSchema', () => {
     expect(
       projectEditSchema.safeParse({ ...valid, managerId: '' }).success,
     ).toBe(true)
+  })
+
+  it('takes only a currency a project is kept in (BUD-10)', () => {
+    expect(
+      failures(projectEditSchema, { ...valid, currency: 'CLF' }),
+    ).not.toEqual([])
+    expect(failures(projectEditSchema, { ...valid, currency: 'USD' })).toEqual(
+      [],
+    )
   })
 })
 

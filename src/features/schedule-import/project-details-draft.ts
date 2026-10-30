@@ -6,6 +6,7 @@
 
 import type {
   ProjectActivationDetails,
+  ProjectCurrency,
   ReviewProject,
   ReviewTask,
   TaskBudgetAllocation,
@@ -17,6 +18,8 @@ export interface ProjectDetailsDraft {
   description: string
   location: string
   budget: string
+  /** What every amount below is in; picked on the budget step (`BUD-10`). */
+  currency: ProjectCurrency
   /** The split across main tasks, keyed by task id and held as typed. */
   taskBudgets: Record<string, string>
 }
@@ -31,6 +34,7 @@ export function draftFromProject(
     description: project.description ?? '',
     location: project.location ?? '',
     budget: project.budget === null ? '' : String(project.budget),
+    currency: project.currency,
     taskBudgets: Object.fromEntries(
       tasks.map((task) => [
         task.id,
@@ -82,6 +86,10 @@ export function buildProjectDetails(
     details.budget = budget
   }
 
+  if (draft.currency !== project.currency) {
+    details.currency = draft.currency
+  }
+
   return details
 }
 
@@ -125,6 +133,8 @@ export interface AllocationSummary {
   unassigned: number | null
   /** The split exceeds the budget — stated, never blocking. */
   overrun: boolean
+  /** What the amounts are in: the draft's currency. */
+  currency: ProjectCurrency
 }
 
 export function summarizeAllocation(
@@ -138,10 +148,16 @@ export function summarizeAllocation(
   }, 0)
 
   const budget = parseBudget(draft.budget) ?? project.budget
+  const { currency } = draft
   if (budget === null) {
-    return { assigned, unassigned: null, overrun: false }
+    return { assigned, unassigned: null, overrun: false, currency }
   }
-  return { assigned, unassigned: budget - assigned, overrun: assigned > budget }
+  return {
+    assigned,
+    unassigned: budget - assigned,
+    overrun: assigned > budget,
+    currency,
+  }
 }
 
 /** How many fields go-live would change — the panel's "you edited this" count. */

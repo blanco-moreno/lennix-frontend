@@ -144,6 +144,32 @@ describe('mapScheduleReviewStateDTO', () => {
     expect(state.ledger).toEqual([])
     expect(state.quality.reasons).toEqual([])
   })
+
+  it('reads the currency the file names and the one the draft is in (2.6)', () => {
+    const dto = seedImportReviewStateDTO()
+    const state = mapScheduleReviewStateDTO({
+      ...dto,
+      file_budget: 'foreign_currency',
+      project: { ...dto.project, currency: 'CLP' },
+      report: { ...dto.report, cost_currency: 'CLF' },
+    })
+
+    expect(state.fileBudget).toBe('foreign_currency')
+    expect(state.report.costCurrency).toBe('CLF')
+    expect(state.project.currency).toBe('CLP')
+  })
+
+  it('reads a draft from before currencies as USD, naming none for the file', () => {
+    const dto = seedImportReviewStateDTO()
+    const state = mapScheduleReviewStateDTO({
+      ...dto,
+      project: { ...dto.project, currency: undefined },
+      report: { ...dto.report, cost_currency: 'EUR' },
+    })
+
+    expect(state.project.currency).toBe('USD')
+    expect(state.report.costCurrency).toBeNull()
+  })
 })
 
 describe('mapImportJobStatusDTO', () => {

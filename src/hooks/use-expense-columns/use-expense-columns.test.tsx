@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react'
 
 import { DataTable } from '@/components/ui/data-table'
+import { makeStore } from '@/stores'
 import { displayedDate } from '@/tests/intl-date'
 import { renderWithProviders } from '@/tests/render-with-providers'
 import type { ProjectExpense } from '@/types'
@@ -29,7 +30,8 @@ function Harness() {
 
 describe('useExpenseColumns', () => {
   it('renders the six shared columns with formatted amount, date and category badge', () => {
-    renderWithProviders(<Harness />)
+    // Outside a project route the amounts read in USD, as before `BUD-10`.
+    renderWithProviders(<Harness />, { store: makeStore() })
 
     for (const header of [
       'Main activity',

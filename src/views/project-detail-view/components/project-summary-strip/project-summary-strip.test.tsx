@@ -16,6 +16,7 @@ const project: Project = {
   status: 'on_track',
   priority: 'high',
   budget: 1_000_000,
+  currency: 'USD',
   managerId: null,
   managerName: 'Miguel Hernandez',
   isDraft: false,

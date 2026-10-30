@@ -10,9 +10,10 @@ import type { ProjectExpense } from '@/types'
 import {
   CATEGORY_LABEL,
   expenseManagementMessages as m,
-  formatMoney,
   EXPENSE_CATEGORY_VARIANT,
 } from '@/utils'
+
+import { useProjectCurrency } from '../use-project-currency'
 
 import { ExpenseAttachmentButton } from './components/expense-attachment-button'
 
@@ -23,6 +24,7 @@ import { ExpenseAttachmentButton } from './components/expense-attachment-button'
 export function useExpenseColumns(): ColumnDef<ProjectExpense>[] {
   const intl = useIntl()
   const formatDate = useFormatDate()
+  const { formatMoney } = useProjectCurrency()
 
   return useMemo<ColumnDef<ProjectExpense>[]>(
     () => [
@@ -119,6 +121,6 @@ export function useExpenseColumns(): ColumnDef<ProjectExpense>[] {
         cell: ({ getValue }) => formatDate(getValue<string>()),
       },
     ],
-    [intl, formatDate],
+    [intl, formatDate, formatMoney],
   )
 }

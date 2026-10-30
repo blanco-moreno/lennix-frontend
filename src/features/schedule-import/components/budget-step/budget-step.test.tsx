@@ -5,7 +5,13 @@ import { useState } from 'react'
 import { mapScheduleReviewStateDTO } from '@/services/schedule-import'
 import { seedImportReviewStateDTO } from '@/tests/fixtures'
 import { renderWithProviders } from '@/tests/render-with-providers'
-import type { CostSource, FileBudget, ReviewProject, ReviewTask } from '@/types'
+import type {
+  CostCurrency,
+  CostSource,
+  FileBudget,
+  ReviewProject,
+  ReviewTask,
+} from '@/types'
 
 import {
   draftFromProject,
@@ -23,12 +29,14 @@ function Host({
   fileBudget,
   costSource,
   costsUnread,
+  fileCurrency,
 }: {
   project?: ReviewProject
   tasks?: ReviewTask[]
   fileBudget?: FileBudget
   costSource?: CostSource | null
   costsUnread?: number
+  fileCurrency?: CostCurrency | null
 }) {
   const [draft, setDraft] = useState<ProjectDetailsDraft>(() =>
     draftFromProject(project, tasks),
@@ -42,6 +50,7 @@ function Host({
       fileBudget={fileBudget}
       costSource={costSource}
       costsUnread={costsUnread}
+      fileCurrency={fileCurrency}
     />
   )
 }
@@ -142,6 +151,63 @@ describe('BudgetStep', () => {
       renderWithProviders(<Host fileBudget="none" />)
 
       expect(screen.queryByTestId('file-budget-notice')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('the currency the amounts are in (BUD-10)', () => {
+    it('opens on the draft’s currency and writes amounts in it', async () => {
+      const user = userEvent.setup()
+      const project = { ...state().project, currency: 'USD' as const }
+      renderWithProviders(<Host project={project} />)
+
+      expect(screen.getByText('US dollar (USD)')).toBeInTheDocument()
+
+      await user.click(screen.getByLabelText('Currency'))
+      await user.click(await screen.findByText('Chilean peso (CLP)'))
+
+      // A peso has no minor unit, so the field stops offering cents.
+      const amount = screen.getByLabelText('Project budget')
+      await user.clear(amount)
+      await user.type(amount, '1500000')
+      expect(amount).toHaveValue('1.500.000')
+    })
+
+    it('says the file’s UF amounts were left for the reviewer to convert', () => {
+      renderWithProviders(
+        <Host fileBudget="foreign_currency" fileCurrency="CLF" />,
+      )
+
+      const notice = screen.getByTestId('file-budget-notice')
+      expect(notice).toHaveTextContent("The file's amounts are in UF")
+      expect(notice).toHaveTextContent(
+        'Nothing was filled in: convert the amounts and enter them below.',
+      )
+    })
+
+    it('warns when the file names one currency and the project is in another', async () => {
+      const user = userEvent.setup()
+      const project = { ...state().project, currency: 'USD' as const }
+      renderWithProviders(
+        <Host project={project} fileBudget="applied" fileCurrency="USD" />,
+      )
+      expect(
+        screen.queryByTestId('currency-mismatch-notice'),
+      ).not.toBeInTheDocument()
+
+      await user.click(screen.getByLabelText('Currency'))
+      await user.click(await screen.findByText('Chilean peso (CLP)'))
+
+      expect(screen.getByTestId('currency-mismatch-notice')).toHaveTextContent(
+        "The file's amounts are in USD, and this project is in CLP",
+      )
+    })
+
+    it('asks to check the currency when the file names none', () => {
+      renderWithProviders(<Host fileBudget="applied" fileCurrency={null} />)
+
+      expect(screen.getByTestId('file-budget-notice')).toHaveTextContent(
+        'The file does not say which currency its amounts are in',
+      )
     })
   })
 })

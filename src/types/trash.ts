@@ -1,3 +1,5 @@
+import type { ProjectCurrency } from './project'
+
 /** Three soft-deletable entity types from the backend matrix. */
 export type TrashKind = 'project' | 'task' | 'expense'
 
@@ -23,6 +25,8 @@ export interface TrashedExpense {
   description: string
   /** Numeric(12,2) — Decimal kept as string for precision. */
   amount: string
+  /** The owning project's currency, which `amount` is in (`BUD-10`). */
+  currency: ProjectCurrency
   subtaskId: string | null
   projectId?: string | null
   deletedAt: string | null

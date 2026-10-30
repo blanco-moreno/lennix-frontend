@@ -1,5 +1,8 @@
 import {
   clampPercentage,
+  currencyFractionDigits,
+  currencyLocale,
+  toProjectCurrency,
   daysUntil,
   toISODay,
   formatMoney,
@@ -103,5 +106,32 @@ describe('percent', () => {
     expect(clampPercentage(-5)).toBe(0)
     expect(clampPercentage(150)).toBe(100)
     expect(clampPercentage(50)).toBe(50)
+  })
+})
+
+describe('currencies (ISO 4217, BUD-10)', () => {
+  it('writes each currency the way its market reads it', () => {
+    expect(formatMoney(18682420, 'CLP')).toBe('$18.682.420')
+    expect(formatMoney(18682420, 'USD')).toBe('$18,682,420.00')
+    // The default is unchanged: what every project showed before.
+    expect(formatMoney(1234.5)).toBe('$1,234.50')
+  })
+
+  it('takes the minor units from the code', () => {
+    expect(currencyFractionDigits('CLP')).toBe(0)
+    expect(currencyFractionDigits('USD')).toBe(2)
+  })
+
+  it('maps a currency to its market locale', () => {
+    expect(currencyLocale('CLP')).toBe('es-CL')
+    expect(currencyLocale('USD')).toBe('en-US')
+    expect(currencyLocale('XXX')).toBe('en-US')
+  })
+
+  it('reads anything that is not a project currency as USD', () => {
+    expect(toProjectCurrency('CLP')).toBe('CLP')
+    expect(toProjectCurrency('clp')).toBe('USD')
+    expect(toProjectCurrency(undefined)).toBe('USD')
+    expect(toProjectCurrency('CLF')).toBe('USD')
   })
 })

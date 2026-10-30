@@ -1,4 +1,4 @@
-import type { ProjectHealth } from './project'
+import type { ProjectCurrency, ProjectHealth } from './project'
 import type { ReviewStep } from './schedule-import'
 
 /**
@@ -29,6 +29,8 @@ export interface ProjectSubject {
   /** When the obra was created — a draft is read by how long it has waited. */
   createdAt?: string
   budget?: number | null
+  /** What `budget` and `spent` are in; absent reads as USD (`BUD-10`). */
+  currency?: ProjectCurrency
   spent?: number
   isOverBudget?: boolean
   isDraft?: boolean

@@ -62,7 +62,9 @@ function followServer(
   previous: ProjectDetailsDraft,
   next: ProjectDetailsDraft,
 ): ProjectDetailsDraft {
-  const take = <K extends 'name' | 'description' | 'location' | 'budget'>(
+  const take = <
+    K extends 'name' | 'description' | 'location' | 'budget' | 'currency',
+  >(
     key: K,
   ) => (draft[key] === previous[key] ? next[key] : draft[key])
 
@@ -80,6 +82,7 @@ function followServer(
     description: take('description'),
     location: take('location'),
     budget: take('budget'),
+    currency: take('currency'),
     taskBudgets,
   }
 }
@@ -133,6 +136,7 @@ export function useDraftEdits({
         if (details.location !== undefined) body.location = details.location
         // Money is a string on the project contract, a number on go-live's.
         if (details.budget !== undefined) body.budget = String(details.budget)
+        if (details.currency !== undefined) body.currency = details.currency
         await updateProject({ id: projectId, body }).unwrap()
       }
       if (taskBudgets.length > 0) {

@@ -1,4 +1,9 @@
-import { deltaLabel, formatAmount, snapshotName } from './approval-format'
+import {
+  deltaLabel,
+  formatAmount,
+  snapshotCurrency,
+  snapshotName,
+} from './approval-format'
 
 describe('snapshotName', () => {
   it('reads the name out of the state snapshot', () => {
@@ -35,5 +40,20 @@ describe('deltaLabel', () => {
 
   it('says nothing on a first budget — there is no delta from nothing', () => {
     expect(deltaLabel(null, '150000.00')).toBe('')
+  })
+})
+
+describe('snapshotCurrency', () => {
+  it('reads the currency the request was typed in (BUD-10)', () => {
+    expect(snapshotCurrency({ currency: 'CLP' })).toBe('CLP')
+  })
+
+  it('reads a request from before the field as USD', () => {
+    expect(snapshotCurrency({})).toBe('USD')
+  })
+
+  it('formats the amounts in that currency', () => {
+    expect(formatAmount('1500000.00', '', 'CLP')).toBe('$1.500.000')
+    expect(deltaLabel('1000000.00', '1500000.00', 'CLP')).toBe('+$500.000')
   })
 })

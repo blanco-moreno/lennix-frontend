@@ -4,11 +4,18 @@ import { mapScheduleReviewStateDTO } from '@/services/schedule-import'
 import { seedImportReviewStateDTO } from '@/tests/fixtures'
 import { renderWithProviders } from '@/tests/render-with-providers'
 
+import type { AllocationSummary } from '../../project-details-draft'
+
 import { ConfirmSummary } from './confirm-summary'
 
 const state = () => mapScheduleReviewStateDTO(seedImportReviewStateDTO())
 
-const FITS = { assigned: 90_000, unassigned: 10_000, overrun: false }
+const FITS: AllocationSummary = {
+  assigned: 90_000,
+  unassigned: 10_000,
+  overrun: false,
+  currency: 'USD',
+}
 
 describe('ConfirmSummary', () => {
   it('states what goes live with the schedule step’s own facts line', () => {
@@ -28,7 +35,12 @@ describe('ConfirmSummary', () => {
       <ConfirmSummary
         tasks={tasks}
         dependencyCount={0}
-        allocation={{ assigned: 90_000, unassigned: -40_000, overrun: true }}
+        allocation={{
+          assigned: 90_000,
+          unassigned: -40_000,
+          overrun: true,
+          currency: 'USD',
+        }}
       />,
     )
 

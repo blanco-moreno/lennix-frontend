@@ -2,7 +2,12 @@ import { InputGroup, Text } from '@chakra-ui/react'
 import { forwardRef, type ComponentProps } from 'react'
 import { NumericFormat, type NumberFormatValues } from 'react-number-format'
 
-import { currencySymbol, DEFAULT_CURRENCY, DEFAULT_LOCALE } from '@/utils'
+import {
+  currencyFractionDigits,
+  currencyLocale,
+  currencySymbol,
+  DEFAULT_CURRENCY,
+} from '@/utils'
 
 import { Input } from '../input'
 
@@ -22,7 +27,9 @@ export interface CurrencyInputProps extends Omit<
 > {
   value: string | undefined
   onValueChange: (details: NumberInputValueChangeDetails) => void
+  /** ISO 4217; sets the symbol, the separators and the decimals. */
   currency?: string
+  /** Overrides the currency's own market locale (`currencyLocale`). */
   locale?: string
   min?: number
 }
@@ -33,13 +40,14 @@ const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
       value,
       onValueChange,
       currency = DEFAULT_CURRENCY,
-      locale = DEFAULT_LOCALE,
+      locale = currencyLocale(currency),
       min = 0,
       ...rest
     },
     ref,
   ) {
     const { thousandSeparator, decimalSeparator } = localeSeparators(locale)
+    const decimals = currencyFractionDigits(currency)
 
     const handleValueChange = (values: NumberFormatValues) => {
       onValueChange({
@@ -65,13 +73,15 @@ const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
           thousandSeparator={thousandSeparator}
           decimalSeparator={decimalSeparator}
           allowedDecimalSeparators={['.', ',']}
-          decimalScale={2}
+          decimalScale={decimals}
           fixedDecimalScale
           allowNegative={min < 0}
           isAllowed={({ floatValue }) =>
             floatValue === undefined || floatValue >= min
           }
-          placeholder="0.00"
+          placeholder={
+            decimals > 0 ? `0${decimalSeparator}${'0'.repeat(decimals)}` : '0'
+          }
           textAlign="right"
           {...rest}
         />

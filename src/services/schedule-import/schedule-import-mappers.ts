@@ -15,6 +15,7 @@ import type {
   AssistedMappingDivert,
   AssumptionLedgerEntry,
   ConsequenceClass,
+  CostCurrency,
   CostSource,
   DateAssumption,
   DateEvidence,
@@ -54,7 +55,7 @@ import type {
   ReviewTaskDTO,
   ScheduleReviewStateResponseDTO,
 } from '@/types/dto/project-import-dto'
-import { parseMoney } from '@/utils'
+import { parseMoney, toProjectCurrency } from '@/utils'
 
 import type { ApiError } from '../api-injector'
 
@@ -200,7 +201,13 @@ function mapSkippedEdge(value: unknown): SkippedEdge {
 }
 
 const COST_SOURCES: readonly CostSource[] = ['baseline', 'budgeted', 'stated']
-const FILE_BUDGETS: readonly FileBudget[] = ['applied', 'out_of_range', 'none']
+const FILE_BUDGETS: readonly FileBudget[] = [
+  'applied',
+  'out_of_range',
+  'foreign_currency',
+  'none',
+]
+const COST_CURRENCIES: readonly CostCurrency[] = ['USD', 'CLP', 'CLF']
 
 export function mapParseReport(value: unknown): ParseReport {
   const report = asRecord(value)
@@ -227,6 +234,10 @@ export function mapParseReport(value: unknown): ParseReport {
       ? (report.cost_source as CostSource)
       : null,
     costsUnread: num(report.costs_unread),
+    // Absent before contract 2.6: an older draft named no currency.
+    costCurrency: COST_CURRENCIES.includes(report.cost_currency as CostCurrency)
+      ? (report.cost_currency as CostCurrency)
+      : null,
   }
 }
 
@@ -328,6 +339,7 @@ export function mapScheduleReviewStateDTO(
       location: dto.project.location,
       budget:
         dto.project.budget === null ? null : parseMoney(dto.project.budget),
+      currency: toProjectCurrency(dto.project.currency),
       startDate: dto.project.start_date,
       dueDate: dto.project.due_date,
       isDraft: dto.project.is_draft,

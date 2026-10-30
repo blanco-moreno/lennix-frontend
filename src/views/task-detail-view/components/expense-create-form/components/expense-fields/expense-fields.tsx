@@ -10,6 +10,7 @@ import { FormField, Select } from '@/components'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { DateInput } from '@/components/ui/date-input'
 import { Input } from '@/components/ui/input'
+import { useProjectCurrency } from '@/hooks'
 import { CATEGORY_OPTIONS, expenseManagementMessages as m } from '@/utils'
 
 /** The fields both expense modals edit; the create form adds subtaskId on top. */
@@ -44,6 +45,7 @@ export function ExpenseFields<T extends ExpenseFieldValues>({
   withPlaceholders = false,
 }: ExpenseFieldsProps<T>) {
   const intl = useIntl()
+  const { currency } = useProjectCurrency()
   // The create form's values are a superset of ExpenseFieldValues; RHF's
   // generics are invariant, so the plumbing is narrowed once here.
   const fieldsControl = control as unknown as Control<ExpenseFieldValues>
@@ -77,6 +79,7 @@ export function ExpenseFields<T extends ExpenseFieldValues>({
           name="amount"
           render={({ field }) => (
             <CurrencyInput
+              currency={currency}
               id={`${idPrefix}-amount`}
               value={field.value}
               onValueChange={(details) => field.onChange(details.value)}

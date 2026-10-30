@@ -37,6 +37,13 @@ two places** unless it is an explicit overview → drill-down.
   truncated projects page.
 - **One drafts home** (Borradores). A draft is not also a dashboard widget with
   its own semantics.
+- **The budget step names the currency first** (`BUD-10`). The reviewer picks
+  the project's currency (Chilean peso or US dollar) above the amounts, which
+  are then written the way that currency's market reads them: `$18.682.420` in
+  pesos, `$18,682,420.00` in dollars. Nothing converts. When the file's costs
+  are in UF they are not filled in, and the step says so (`IMP-13`); when the
+  file names one currency and the reviewer picks another, the step warns that
+  the filled-in amounts are still in the file's currency.
 - **One schedule surface.** Activities, dependencies and critical path are
   facets of the same schedule and share one destination.
 - **One KPI system.** Hero KPIs are schedule-intelligence signals — delay,
@@ -240,6 +247,7 @@ replaced, in place, by the request that leads to it.
 | Where                             | `owner` / `admin` / `manager`                                      | `user`                                                                                |
 | --------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | Project edit drawer, budget field | Types the new amount and saves — a direct edit                     | The same field plus a **required reason**: saving files a budget-approval request     |
+| Project edit drawer, currency     | Relabels the project's currency; the amounts are not converted     | Not offered: the currency is a budget decision                                        |
 | Activity detail, actions menu     | No separate budget item — the amount is a field of the edit drawer | A distinct **request budget change** action                                           |
 | A blocked activity                | **Forces the start outright**                                      | **Requests the force start** with a justification; only the approval force-starts it  |
 | `/approvals`                      | Decides                                                            | Watches their own requests; the sidebar count is theirs, not the organization's queue |

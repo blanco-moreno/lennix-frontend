@@ -71,6 +71,15 @@ export interface ProjectHealth {
   daysOverdue: number
 }
 
+/**
+ * The currency a project's money is kept in, as its ISO 4217 code (ms-bk
+ * `BUD-10`). Every amount of a project is in this one currency; nothing
+ * converts. `USD` is what every project held before the field existed.
+ */
+export const PROJECT_CURRENCIES = ['CLP', 'USD'] as const
+
+export type ProjectCurrency = (typeof PROJECT_CURRENCIES)[number]
+
 export interface Project {
   id: string
   organizationId: string
@@ -80,6 +89,8 @@ export interface Project {
   status: ProjectStatus
   priority: ProjectPriority
   budget: number | null
+  /** What every amount of this project is in. */
+  currency: ProjectCurrency
   managerId: string | null
   managerName: string | null
   isDraft: boolean
@@ -113,6 +124,7 @@ export const PROJECT_ACTIVITY_ACTIONS = [
   'project.activated',
   'project.renamed',
   'project.budget_changed',
+  'project.currency_changed',
   'project.location_changed',
   'project.description_changed',
   'project.manager_changed',

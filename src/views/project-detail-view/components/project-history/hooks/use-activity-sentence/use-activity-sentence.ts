@@ -1,9 +1,9 @@
 import { useIntl } from 'react-intl'
 
-import { useStatusLabel } from '@/hooks'
+import { useProjectCurrency, useStatusLabel } from '@/hooks'
 import { useFormatDate } from '@/i18n'
 import type { ProjectActivity, ProjectActivityAction } from '@/types'
-import { formatMoney, parseMoney } from '@/utils'
+import { parseMoney } from '@/utils'
 
 import {
   ACTIVITY_ACTION_MESSAGES,
@@ -54,6 +54,8 @@ export function useActivitySentence(): (entry: ProjectActivity) => string {
   const intl = useIntl()
   const statusLabel = useStatusLabel()
   const formatDate = useFormatDate()
+  // The Historial is the project's page: its amounts are in its currency.
+  const { formatMoney } = useProjectCurrency()
 
   return (entry) => {
     const descriptor =

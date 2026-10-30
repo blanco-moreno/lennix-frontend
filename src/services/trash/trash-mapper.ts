@@ -4,6 +4,7 @@ import type {
   TrashedProjectResponseDTO,
   TrashedTaskResponseDTO,
 } from '@/types/dto/trash-dto'
+import { toProjectCurrency } from '@/utils'
 
 export function mapTrashedProjectDTOToDomain(
   dto: TrashedProjectResponseDTO,
@@ -37,6 +38,7 @@ export function mapTrashedExpenseDTOToDomain(
     id: dto.id,
     description: dto.description,
     amount: dto.amount,
+    currency: toProjectCurrency(dto.currency),
     subtaskId: dto.subtask_id ?? null,
     projectId: dto.project_id ?? null,
     deletedAt: dto.deleted_at,

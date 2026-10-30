@@ -3,10 +3,10 @@ import { BarChart3 } from 'lucide-react'
 import { FormattedMessage, useIntl } from 'react-intl'
 
 import { Badge, BudgetSummary, Heading, Text } from '@/components'
+import { useProjectCurrency } from '@/hooks'
 import { useGetTaskVarianceQuery } from '@/services/expense'
 import type { Task } from '@/types'
 import {
-  formatMoney,
   calculateBudgetMetrics,
   formatPercent,
   getBudgetVarianceTextColor,
@@ -24,6 +24,7 @@ interface TaskBudgetTabProps {
 
 export function TaskBudgetTab({ task }: TaskBudgetTabProps) {
   const intl = useIntl()
+  const { currency, formatMoney } = useProjectCurrency(task.projectId)
   const { budgetRemaining, budgetPercentage, isOverBudget } =
     calculateBudgetMetrics(task.budget ?? 0, task.spent)
   const { data: variance } = useGetTaskVarianceQuery(task.id)
@@ -44,6 +45,7 @@ export function TaskBudgetTab({ task }: TaskBudgetTabProps) {
             {...(isOverBudget ? m.overbudgetLabel : m.availableLabel)}
           />
         }
+        currency={currency}
         remaining={budgetRemaining}
         isOverBudget={isOverBudget}
         overBudgetAlertTitle={<FormattedMessage {...m.budgetExceededTitle} />}

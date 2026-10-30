@@ -17,7 +17,7 @@ import { CurrencyInput } from '@/components/ui/currency-input'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { UNASSIGNED } from '@/constants'
-import { usePriorityLabel } from '@/hooks'
+import { usePriorityLabel, useProjectCurrency } from '@/hooks'
 import { useAssignableOptions } from '@/hooks/use-assignable-options/use-assignable-options'
 import { useZodResolverIntl } from '@/i18n'
 import {
@@ -28,7 +28,7 @@ import {
 import type { ApiError } from '@/services'
 import { useCreateTaskMutation } from '@/services/task'
 import type { SubtaskInputDTO } from '@/types/dto/subtask-dto'
-import { formatMoney, parseMoney, serializeMoneyForApi } from '@/utils'
+import { parseMoney, serializeMoneyForApi } from '@/utils'
 
 import { taskCreateMessages as m } from './task-create-messages'
 
@@ -68,6 +68,7 @@ export function TaskCreateDrawer({
 }: TaskCreateDrawerProps) {
   const intl = useIntl()
   const priorityLabel = usePriorityLabel()
+  const { currency, formatMoney } = useProjectCurrency(projectId)
   const [createTask, { isLoading: isCreating }] = useCreateTaskMutation()
   // `workAssignableOnly`: an assignee goes through the narrower gate than the
   // jefe de obra does, and the wide rows the endpoint also returns would 400.
@@ -213,7 +214,9 @@ export function TaskCreateDrawer({
 
           <FormField
             htmlFor="task-budget"
-            label={<FormattedMessage {...m.budgetLabel} />}
+            label={
+              <FormattedMessage {...m.budgetLabel} values={{ currency }} />
+            }
             error={errors.budget?.message}
           >
             <Controller
@@ -222,6 +225,7 @@ export function TaskCreateDrawer({
               render={({ field }) => (
                 <CurrencyInput
                   id="task-budget"
+                  currency={currency}
                   value={field.value}
                   onValueChange={(details) => field.onChange(details.value)}
                   aria-invalid={!!errors.budget}

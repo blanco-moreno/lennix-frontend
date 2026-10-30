@@ -33,6 +33,7 @@ const project: Project = {
   status: 'on_track',
   priority: 'medium',
   budget: 850000,
+  currency: 'USD',
   managerId: SEED_IDS.USER_MIGUEL_ID,
   managerName: 'Miguel Santos',
   isDraft: false,
@@ -333,5 +334,31 @@ describe('ProjectEditDrawer', () => {
       expect.anything(),
     )
     expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it('relabels the currency for a role with budget.edit.direct (BUD-10)', async () => {
+    const bodies = captureUpdates()
+    renderModal(ROLE_ID.owner)
+
+    await userEvent.click(await screen.findByLabelText('Currency'))
+    await userEvent.click(await screen.findByText('Chilean peso (CLP)'))
+    // The budget field now reads in pesos.
+    expect(screen.getByLabelText('Budget (CLP)')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    await waitFor(() => expect(bodies).toHaveLength(1))
+    expect(bodies[0]).toEqual({
+      name: project.name,
+      description: project.description,
+      location: project.location,
+      currency: 'CLP',
+    })
+  })
+
+  it('offers no currency to a role that only requests budget changes', async () => {
+    renderModal(ROLE_ID.user)
+
+    expect(await screen.findByLabelText(/Project name/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('Currency')).not.toBeInTheDocument()
   })
 })

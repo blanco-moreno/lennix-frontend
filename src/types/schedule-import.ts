@@ -9,6 +9,7 @@
  */
 
 import type { DependencySource, RelationshipType } from './dependency'
+import type { ProjectCurrency } from './project'
 
 /** `uploaded → parsing → draft_ready | needs_assisted_mapping | failed` */
 export type ImportJobStatus =
@@ -170,16 +171,29 @@ export interface ParseReport {
   costSource: CostSource | null
   /** Cost cells the parser would not read with certainty (2.5). */
   costsUnread: number
+  /** The currency the cost column names; null for a bare `$` or none (2.6). */
+  costCurrency: CostCurrency | null
 }
 
 /** Which cost column a file's costs were read from (contract 2.5). */
 export type CostSource = 'baseline' | 'budgeted' | 'stated'
 
 /**
- * What the draft's budget owes the file (ms-bk `IMP-13`): costs that pre-filled
- * it, costs too large to store, or none stated.
+ * The ISO 4217 currency a file's cost column names (contract 2.6): `CLF` is
+ * the UF. A bare `$` names none.
  */
-export type FileBudget = 'applied' | 'out_of_range' | 'none'
+export type CostCurrency = 'USD' | 'CLP' | 'CLF'
+
+/**
+ * What the draft's budget owes the file (ms-bk `IMP-13`): costs that pre-filled
+ * it, costs too large to store, costs in a currency no project is kept in (UF,
+ * for the reviewer to convert), or none stated.
+ */
+export type FileBudget =
+  | 'applied'
+  | 'out_of_range'
+  | 'foreign_currency'
+  | 'none'
 
 /** `high` assumptions are the ones the receipt counts as "things to check". */
 export type ConsequenceClass = 'high' | 'cosmetic'
@@ -346,6 +360,8 @@ export interface ReviewProject {
   description: string | null
   location: string | null
   budget: number | null
+  /** The currency the review is in: the file's, when its costs named one. */
+  currency: ProjectCurrency
   startDate: string | null
   dueDate: string | null
   isDraft: boolean
@@ -423,6 +439,8 @@ export interface ProjectActivationDetails {
   description?: string
   location?: string
   budget?: number
+  /** Chosen on the budget step; a relabel, never a conversion (`BUD-10`). */
+  currency?: ProjectCurrency
   /**
    * How the project budget is split across the main tasks.
    *

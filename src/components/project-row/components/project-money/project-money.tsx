@@ -26,7 +26,7 @@ import { projectRowMessages as m } from '../../project-row-messages'
  * - a real budget — the figure, the bar, and what has been spent against it.
  */
 export function ProjectMoney({ project }: { project: ProjectSubject }) {
-  const { budget, spent, isOverBudget } = project
+  const { budget, spent, isOverBudget, currency } = project
 
   if (budget === undefined) return null
 
@@ -45,7 +45,7 @@ export function ProjectMoney({ project }: { project: ProjectSubject }) {
       <Flex align="center" gap={1.5} minW={0}>
         <Box as={Wallet} boxSize={3.5} flexShrink={0} color="fg.subtle" />
         <Text as="span" size="sm" weight="semibold" color="primary">
-          {formatMoney(budget)}
+          {formatMoney(budget, currency)}
         </Text>
       </Flex>
 
@@ -79,7 +79,7 @@ export function ProjectMoney({ project }: { project: ProjectSubject }) {
           >
             <FormattedMessage
               {...m.spentOf}
-              values={{ amount: formatMoney(spent) }}
+              values={{ amount: formatMoney(spent, currency) }}
             />
           </Text>
         </Stack>

@@ -25,6 +25,7 @@ const project: Project = {
   status: 'on_track',
   priority: 'medium',
   budget: 850000,
+  currency: 'USD',
   managerId: SEED_IDS.USER_MIGUEL_ID,
   managerName: 'Miguel Santos',
   isDraft: false,

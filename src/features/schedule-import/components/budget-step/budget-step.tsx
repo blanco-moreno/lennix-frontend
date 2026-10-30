@@ -16,9 +16,15 @@ import { Grid, Stack } from '@chakra-ui/react'
 import { AlertTriangle, FileSpreadsheet, Wallet } from 'lucide-react'
 import { useIntl } from 'react-intl'
 
-import { Alert, EmptyState, Label, Text } from '@/components'
+import { Alert, CurrencySelect, EmptyState, Label, Text } from '@/components'
 import { CurrencyInput } from '@/components/ui/currency-input'
-import type { CostSource, FileBudget, ReviewProject, ReviewTask } from '@/types'
+import type {
+  CostCurrency,
+  CostSource,
+  FileBudget,
+  ReviewProject,
+  ReviewTask,
+} from '@/types'
 
 import {
   type ProjectDetailsDraft,
@@ -51,6 +57,8 @@ export interface BudgetStepProps {
   fileBudget?: FileBudget
   costSource?: CostSource | null
   costsUnread?: number
+  /** The currency the file's costs name (contract 2.6); null when none. */
+  fileCurrency?: CostCurrency | null
 }
 
 export function BudgetStep({
@@ -61,6 +69,7 @@ export function BudgetStep({
   fileBudget = 'none',
   costSource = null,
   costsUnread = 0,
+  fileCurrency = null,
 }: BudgetStepProps) {
   const intl = useIntl()
 
@@ -86,8 +95,67 @@ export function BudgetStep({
     })),
   ]
 
+  // The file named a currency and the reviewer picked another: nothing
+  // converts (`BUD-10`), so the amounts it filled in are in the wrong one.
+  const currencyMismatch =
+    fileBudget === 'applied' &&
+    fileCurrency !== null &&
+    fileCurrency !== draft.currency
+
   return (
     <Stack gap={6} data-testid="budget-step" maxW="56rem">
+      <Grid templateColumns={BUDGET_COLUMNS} alignItems="center" columnGap={4}>
+        <Stack gap={0.5}>
+          <Label htmlFor="budget-step-currency" mb={0}>
+            {intl.formatMessage(m.currencyLabel)}
+          </Label>
+          <Text size="xs" color="muted">
+            {intl.formatMessage(m.currencyHint)}
+          </Text>
+        </Stack>
+        <CurrencySelect
+          id="budget-step-currency"
+          value={draft.currency}
+          onChange={(currency) => edit({ currency })}
+        />
+      </Grid>
+      {fileBudget === 'foreign_currency' && (
+        <Alert
+          variant="overBudget"
+          icon={AlertTriangle}
+          data-testid="file-budget-notice"
+        >
+          <Stack gap={1}>
+            <Text weight="medium" size="sm">
+              {intl.formatMessage(m.fileBudgetForeignTitle, {
+                currency: fileCurrency ?? '',
+              })}
+            </Text>
+            <Text size="sm">{intl.formatMessage(m.fileBudgetForeignBody)}</Text>
+          </Stack>
+        </Alert>
+      )}
+      {currencyMismatch && (
+        <Alert
+          variant="overBudget"
+          icon={AlertTriangle}
+          data-testid="currency-mismatch-notice"
+        >
+          <Stack gap={1}>
+            <Text weight="medium" size="sm">
+              {intl.formatMessage(m.currencyMismatchTitle, {
+                fileCurrency,
+                currency: draft.currency,
+              })}
+            </Text>
+            <Text size="sm">
+              {intl.formatMessage(m.currencyMismatchBody, {
+                fileCurrency,
+              })}
+            </Text>
+          </Stack>
+        </Alert>
+      )}
       {fileBudget === 'applied' && (
         <Alert icon={FileSpreadsheet} data-testid="file-budget-notice">
           <Stack gap={1}>
@@ -100,6 +168,11 @@ export function BudgetStep({
               })}
             </Text>
             <Text size="sm">{intl.formatMessage(m.fileBudgetNetNote)}</Text>
+            {fileCurrency === null && (
+              <Text size="sm">
+                {intl.formatMessage(m.fileBudgetCurrencyUnknown)}
+              </Text>
+            )}
             {costsUnread > 0 && (
               <Text size="sm" color="muted">
                 {intl.formatMessage(m.fileBudgetUnread, { count: costsUnread })}
@@ -151,6 +224,7 @@ export function BudgetStep({
             </Label>
             <CurrencyInput
               id={row.id}
+              currency={draft.currency}
               value={row.value}
               onValueChange={(details) => row.onChange(details.value)}
             />

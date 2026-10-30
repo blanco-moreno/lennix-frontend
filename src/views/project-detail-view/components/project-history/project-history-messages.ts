@@ -53,6 +53,13 @@ export const activityMessages = defineMessages({
     defaultMessage: '{actor} changed the budget: {old} became {new}.',
     description: 'Historial sentence: project.budget_changed',
   },
+  projectCurrencyChanged: {
+    id: 'projectActivity.projectCurrencyChanged',
+    defaultMessage:
+      '{actor} changed the currency: {old} became {new}. The amounts were not converted.',
+    description:
+      'Historial sentence: project.currency_changed; old and new are ISO 4217 codes',
+  },
   projectLocationChanged: {
     id: 'projectActivity.projectLocationChanged',
     defaultMessage: '{actor} changed the location: {old} became {new}.',
@@ -324,6 +331,7 @@ export const ACTIVITY_ACTION_MESSAGES: Record<
   'project.activated': activityMessages.projectActivated,
   'project.renamed': activityMessages.projectRenamed,
   'project.budget_changed': activityMessages.projectBudgetChanged,
+  'project.currency_changed': activityMessages.projectCurrencyChanged,
   'project.location_changed': activityMessages.projectLocationChanged,
   'project.description_changed': activityMessages.projectDescriptionChanged,
   'project.manager_changed': activityMessages.projectManagerChanged,

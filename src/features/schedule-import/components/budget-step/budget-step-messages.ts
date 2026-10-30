@@ -43,6 +43,51 @@ export const budgetStepMessages = defineMessages({
     description:
       'Recovery guidance when the file budget is too large; max is the limit',
   },
+  currencyLabel: {
+    id: 'budgetStep.currencyLabel',
+    defaultMessage: 'Currency',
+    description: "Label of the project's currency picker on the budget step",
+  },
+  currencyHint: {
+    id: 'budgetStep.currencyHint',
+    defaultMessage:
+      'Every amount of this project is in this currency. Lennix does not convert between currencies.',
+    description:
+      'Helper under the currency picker; amounts are never converted',
+  },
+  fileBudgetCurrencyUnknown: {
+    id: 'budgetStep.fileBudgetCurrencyUnknown',
+    defaultMessage:
+      'The file does not say which currency its amounts are in: check the currency above before you confirm.',
+    description:
+      'The file costs carry no currency mark (or a bare $), so the reviewer picks it',
+  },
+  fileBudgetForeignTitle: {
+    id: 'budgetStep.fileBudgetForeignTitle',
+    defaultMessage:
+      "The file's amounts are in {currency, select, CLF {UF} other {{currency}}}",
+    description:
+      'Headline when the file costs are in a currency no project is kept in; currency is ISO 4217 (CLF is the UF)',
+  },
+  fileBudgetForeignBody: {
+    id: 'budgetStep.fileBudgetForeignBody',
+    defaultMessage:
+      'Lennix keeps each project in Chilean pesos or US dollars and does not convert. Nothing was filled in: convert the amounts and enter them below.',
+    description: 'Recovery guidance when the file costs are in UF',
+  },
+  currencyMismatchTitle: {
+    id: 'budgetStep.currencyMismatchTitle',
+    defaultMessage:
+      "The file's amounts are in {fileCurrency}, and this project is in {currency}",
+    description:
+      'Headline when the reviewer picked a currency other than the one the file names; both are ISO 4217 codes',
+  },
+  currencyMismatchBody: {
+    id: 'budgetStep.currencyMismatchBody',
+    defaultMessage:
+      'Lennix does not convert them. Convert the amounts below before you confirm, or choose {fileCurrency}.',
+    description: 'Recovery guidance for a currency mismatch',
+  },
   emptyTitle: {
     id: 'budgetStep.emptyTitle',
     defaultMessage: 'No main activities to budget',

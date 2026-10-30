@@ -25,6 +25,7 @@ describe('project details draft', () => {
       description: project.description ?? '',
       location: project.location ?? '',
       budget: String(project.budget),
+      currency: project.currency,
       taskBudgets: {},
     })
   })
@@ -175,6 +176,7 @@ describe('project details draft', () => {
         assigned: 55000,
         unassigned: 45000,
         overrun: false,
+        currency: project.currency,
       })
     })
 
@@ -188,6 +190,7 @@ describe('project details draft', () => {
         assigned: 140000,
         unassigned: -40000,
         overrun: true,
+        currency: project.currency,
       })
     })
 
@@ -213,7 +216,18 @@ describe('project details draft', () => {
         assigned: 30000,
         unassigned: null,
         overrun: false,
+        currency: project.currency,
       })
     })
+  })
+
+  it('sends the currency only when the reviewer picked another (BUD-10)', () => {
+    const project = { ...seededProject(), currency: 'USD' as const }
+    const same = { ...draftFromProject(project), currency: 'USD' as const }
+    const pesos = { ...draftFromProject(project), currency: 'CLP' as const }
+
+    expect(buildProjectDetails(project, same)).toEqual({})
+    expect(buildProjectDetails(project, pesos)).toEqual({ currency: 'CLP' })
+    expect(summarizeAllocation(project, pesos, []).currency).toBe('CLP')
   })
 })

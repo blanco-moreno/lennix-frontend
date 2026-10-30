@@ -74,4 +74,18 @@ describe('CurrencyInput', () => {
     )
     expect(screen.getByRole('textbox', { name: 'Amount' })).toHaveValue('')
   })
+
+  it('writes pesos the way Chile reads them: dots, and no cents', () => {
+    renderWithProviders(
+      <CurrencyInput
+        aria-label="Budget"
+        currency="CLP"
+        value="18682420"
+        onValueChange={vi.fn()}
+      />,
+    )
+    expect(screen.getByRole('textbox', { name: 'Budget' })).toHaveValue(
+      '18.682.420',
+    )
+  })
 })

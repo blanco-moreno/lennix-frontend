@@ -54,8 +54,20 @@ export const projectEditModalMessages = defineMessages({
   },
   budgetFieldLabel: {
     id: 'projectDetail.budgetFieldLabel',
-    defaultMessage: 'Budget (USD)',
+    defaultMessage: 'Budget ({currency})',
     description: 'Label of the budget input in the project edit drawer',
+  },
+  currencyFieldLabel: {
+    id: 'projectDetail.currencyFieldLabel',
+    defaultMessage: 'Currency',
+    description: 'Label of the currency picker in the project edit drawer',
+  },
+  currencyFieldHint: {
+    id: 'projectDetail.currencyFieldHint',
+    defaultMessage:
+      'Every amount of the project is in this currency. Changing it does not convert them.',
+    description:
+      'Helper under the currency picker; a relabel, never a conversion',
   },
   budgetRequestNotice: {
     id: 'projectDetail.budgetRequestNotice',

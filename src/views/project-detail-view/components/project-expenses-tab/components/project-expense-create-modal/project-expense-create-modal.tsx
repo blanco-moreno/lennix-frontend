@@ -18,6 +18,7 @@ import {
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { DateInput } from '@/components/ui/date-input'
 import { Input } from '@/components/ui/input'
+import { useProjectCurrency } from '@/hooks'
 import { useZodResolverIntl } from '@/i18n'
 import {
   expenseCreateSchema,
@@ -47,6 +48,7 @@ export function ProjectExpenseCreateModal({
   onOpenChange,
 }: ProjectExpenseCreateModalProps) {
   const intl = useIntl()
+  const { currency } = useProjectCurrency(projectId)
   const [createExpense, { isLoading: isCreating }] = useCreateExpenseMutation()
   const [uploadAttachment, { isLoading: isUploading }] =
     useUploadExpenseAttachmentMutation()
@@ -194,6 +196,7 @@ export function ProjectExpenseCreateModal({
             name="amount"
             render={({ field }) => (
               <CurrencyInput
+                currency={currency}
                 id="project-expense-amount"
                 value={field.value}
                 onValueChange={(details: { value: string }) =>

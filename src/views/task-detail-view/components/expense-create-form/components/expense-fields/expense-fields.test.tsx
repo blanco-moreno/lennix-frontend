@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
 
+import { makeStore } from '@/stores'
 import { renderWithProviders } from '@/tests/render-with-providers'
 
 import { ExpenseFields, type ExpenseFieldValues } from './expense-fields'
@@ -31,7 +32,7 @@ function Harness({ withPlaceholders }: { withPlaceholders?: boolean }) {
 
 describe('ExpenseFields', () => {
   it('renders the four fields with prefixed ids and no placeholders by default', () => {
-    renderWithProviders(<Harness />)
+    renderWithProviders(<Harness />, { store: makeStore() })
 
     const description = screen.getByLabelText('Description')
     expect(description).toHaveAttribute('id', 'expense-test-description')
@@ -42,7 +43,7 @@ describe('ExpenseFields', () => {
   })
 
   it('shows the description and category placeholders when asked', () => {
-    renderWithProviders(<Harness withPlaceholders />)
+    renderWithProviders(<Harness withPlaceholders />, { store: makeStore() })
 
     expect(
       screen.getByPlaceholderText('Expense description'),

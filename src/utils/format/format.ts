@@ -1,7 +1,42 @@
 import { differenceInCalendarDays, format, isValid } from 'date-fns'
 
-export const DEFAULT_CURRENCY = 'USD'
+import { PROJECT_CURRENCIES, type ProjectCurrency } from '@/types'
+
+export const DEFAULT_CURRENCY: ProjectCurrency = 'USD'
 export const DEFAULT_LOCALE = 'en-US'
+
+/**
+ * Each currency is written the way its own market reads it (BCP 47): a peso
+ * amount as `$18.682.420`, a dollar amount as `$18,682,420.00`. The minor
+ * units come from the ISO 4217 code itself, so CLP shows no decimals.
+ */
+const CURRENCY_LOCALES: Record<ProjectCurrency, string> = {
+  CLP: 'es-CL',
+  USD: 'en-US',
+}
+
+// 'CLP' -> 'es-CL' · an unknown code -> the default locale
+export function currencyLocale(currency: string): string {
+  return CURRENCY_LOCALES[currency as ProjectCurrency] ?? DEFAULT_LOCALE
+}
+
+// 'CLP' -> 'CLP' · 'clp' | null | 'EUR' -> 'USD'
+// What a project held before `BUD-10` is USD, so anything unknown reads as it.
+export function toProjectCurrency(value: unknown): ProjectCurrency {
+  return PROJECT_CURRENCIES.includes(value as ProjectCurrency)
+    ? (value as ProjectCurrency)
+    : DEFAULT_CURRENCY
+}
+
+// 'CLP' -> 0 · 'USD' -> 2
+export function currencyFractionDigits(currency: string): number {
+  return (
+    new Intl.NumberFormat(currencyLocale(currency), {
+      style: 'currency',
+      currency,
+    }).resolvedOptions().maximumFractionDigits ?? 2
+  )
+}
 
 // 12.34 -> 1234
 export function toCents(amount: number): number {
@@ -26,12 +61,12 @@ export function subtractMoney(a: number | string, b: number | string): number {
   return fromCents(toCents(parseMoney(a)) - toCents(parseMoney(b)))
 }
 
-// 1234.56 -> '$1,234.56'
+// 1234.56 -> '$1,234.56' · (1234567, 'CLP') -> '$1.234.567'
 export function formatMoney(
   value: number | string | null | undefined,
   currency: string = DEFAULT_CURRENCY,
 ): string {
-  return new Intl.NumberFormat(DEFAULT_LOCALE, {
+  return new Intl.NumberFormat(currencyLocale(currency), {
     style: 'currency',
     currency,
   }).format(parseMoney(value))

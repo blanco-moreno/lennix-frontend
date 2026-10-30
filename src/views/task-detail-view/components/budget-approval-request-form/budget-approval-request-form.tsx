@@ -8,6 +8,7 @@ import { FormField, ModalFormFooter } from '@/components'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { Modal } from '@/components/ui/modal'
 import { Textarea } from '@/components/ui/textarea'
+import { useProjectCurrency } from '@/hooks'
 import { useZodResolverIntl } from '@/i18n'
 import {
   budgetApprovalRequestSchema,
@@ -43,6 +44,7 @@ export function BudgetApprovalRequestForm({
   onOpenChange,
 }: BudgetApprovalRequestFormProps) {
   const intl = useIntl()
+  const { currency } = useProjectCurrency()
   const [createRequest, { isLoading }] = useCreateBudgetApprovalMutation()
 
   const {
@@ -114,7 +116,9 @@ export function BudgetApprovalRequestForm({
       <Stack gap="field">
         <FormField
           htmlFor="approval-amount"
-          label={<FormattedMessage {...m.requestAmountLabel} />}
+          label={
+            <FormattedMessage {...m.requestAmountLabel} values={{ currency }} />
+          }
           error={errors.amount?.message}
         >
           <Controller
@@ -122,6 +126,7 @@ export function BudgetApprovalRequestForm({
             name="amount"
             render={({ field }) => (
               <CurrencyInput
+                currency={currency}
                 id="approval-amount"
                 value={field.value}
                 onValueChange={(details) => field.onChange(details.value)}

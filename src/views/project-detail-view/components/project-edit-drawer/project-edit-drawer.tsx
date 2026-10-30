@@ -1,11 +1,12 @@
 import { Box, Stack } from '@chakra-ui/react'
 import { MapPin } from 'lucide-react'
 import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { FormattedMessage, useIntl, type MessageDescriptor } from 'react-intl'
 
 import {
+  CurrencySelect,
   FormDrawer,
   FormField,
   Label,
@@ -79,6 +80,7 @@ export function ProjectEditDrawer({
     managerId: project.managerId ?? '',
     priority: project.priority,
     budget: project.budget !== null ? String(project.budget) : '',
+    currency: project.currency,
     budgetReason: '',
   })
 
@@ -94,6 +96,7 @@ export function ProjectEditDrawer({
     defaultValues: defaults(),
     mode: 'onChange',
   })
+  const currency = useWatch({ control, name: 'currency' })
 
   useEffect(() => {
     if (open) reset(defaults())
@@ -134,6 +137,11 @@ export function ProjectEditDrawer({
         // is not a request to unassign.
         if (data.managerId && data.managerId !== project.managerId) {
           body.manager_id = data.managerId
+        }
+        // Relabelling the currency is a budget decision (`BUD-10`): only the
+        // roles that edit the budget directly see the picker.
+        if (canBudgetDirect && data.currency !== project.currency) {
+          body.currency = data.currency
         }
         await updateProject({ id: project.id, body }).unwrap()
         savedSomething = true
@@ -332,9 +340,35 @@ export function ProjectEditDrawer({
 
         {canEditBudget && (
           <>
+            {canBudgetDirect && (
+              <FormField
+                htmlFor="project-currency"
+                label={<FormattedMessage {...m.currencyFieldLabel} />}
+              >
+                <Controller
+                  control={control}
+                  name="currency"
+                  render={({ field }) => (
+                    <CurrencySelect
+                      id="project-currency"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+                <Text size="xs" color="muted">
+                  <FormattedMessage {...m.currencyFieldHint} />
+                </Text>
+              </FormField>
+            )}
             <FormField
               htmlFor="project-budget"
-              label={<FormattedMessage {...m.budgetFieldLabel} />}
+              label={
+                <FormattedMessage
+                  {...m.budgetFieldLabel}
+                  values={{ currency }}
+                />
+              }
               error={errors.budget?.message}
             >
               <Controller
@@ -343,6 +377,7 @@ export function ProjectEditDrawer({
                 render={({ field }) => (
                   <CurrencyInput
                     id="project-budget"
+                    currency={currency}
                     value={field.value}
                     onValueChange={(details) => field.onChange(details.value)}
                     aria-invalid={!!errors.budget}

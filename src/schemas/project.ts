@@ -14,6 +14,8 @@ export const projectEditSchema = z.object({
   // Empty budget means "leave it as it is"; the drawer only submits a change
   // when the value differs from the current budget.
   budget: z.string(),
+  // ISO 4217 (`BUD-10`). Sent only when it moved; a relabel, never a conversion.
+  currency: z.enum(['CLP', 'USD']),
   // Required only when the role edits budget via approval request — the
   // drawer enforces that contextually, not the schema.
   budgetReason: z.string(),

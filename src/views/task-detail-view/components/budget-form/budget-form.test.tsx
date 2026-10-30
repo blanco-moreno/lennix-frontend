@@ -5,6 +5,7 @@ import { defineMessages } from 'react-intl'
 import { describe, expect, it, vi } from 'vitest'
 
 import { taskBudgetSchema, taskValidationMessages } from '@/schemas'
+import { makeStore } from '@/stores'
 import { renderWithProviders } from '@/tests/render-with-providers'
 
 import { BudgetForm } from './budget-form'
@@ -47,6 +48,7 @@ function renderModal({
       messages={messages}
       onSubmit={onSubmit}
     />,
+    { store: makeStore() },
   )
   return { onSubmit, onOpenChange }
 }

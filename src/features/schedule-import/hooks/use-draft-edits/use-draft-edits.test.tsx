@@ -26,6 +26,7 @@ const PLACEHOLDER: ReviewProject = {
   description: null,
   location: null,
   budget: null,
+  currency: 'USD',
   startDate: null,
   dueDate: null,
   isDraft: true,

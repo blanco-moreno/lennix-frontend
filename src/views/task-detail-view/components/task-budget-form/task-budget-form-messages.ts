@@ -14,7 +14,7 @@ export const taskBudgetFormMessages = defineMessages({
   },
   budgetFieldLabel: {
     id: 'taskDetail.budgetFieldLabel',
-    defaultMessage: 'Budget (USD)',
+    defaultMessage: 'Budget ({currency})',
     description: 'Label of the task budget input',
   },
   taskBudgetUpdateSuccess: {

@@ -8,9 +8,9 @@ import {
   Progress,
   Text,
 } from '@/components'
+import { useProjectCurrency } from '@/hooks'
 import { useGetProjectBudgetQuery } from '@/services/project'
 import {
-  formatMoney,
   formatPercent,
   clampPercentage,
   getBudgetProgressBarColor,
@@ -25,6 +25,7 @@ interface ProjectBudgetPanelProps {
 export function ProjectBudgetPanel({ projectId }: ProjectBudgetPanelProps) {
   const intl = useIntl()
   const { data: budget, isLoading, error } = useGetProjectBudgetQuery(projectId)
+  const { currency, formatMoney } = useProjectCurrency(projectId)
 
   if (isLoading) {
     return (
@@ -60,6 +61,7 @@ export function ProjectBudgetPanel({ projectId }: ProjectBudgetPanelProps) {
           />
         }
         remaining={budget.remaining}
+        currency={currency}
         isOverBudget={budget.isOverBudget}
         overBudgetAlertTitle={<FormattedMessage {...m.budgetExceededTitle} />}
         overBudgetAlertBody={
