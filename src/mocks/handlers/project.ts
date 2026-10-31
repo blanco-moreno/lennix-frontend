@@ -5,6 +5,7 @@ import {
   resolveSeedProjectId,
   seedAssignableMembersDTO,
   seedDraftProjectListDTO,
+  seedIndirectBudgetDTO,
   seedProjectBudgetDTO,
   seedProjectDTO,
   seedProjectDetailDTO,
@@ -250,6 +251,39 @@ export const removeTeamMemberHandler = http.delete(
   },
 )
 
+export const getIndirectBudgetHandler = http.get(
+  '*/v1/projects/:projectId/indirect-budget',
+  ({ params }) =>
+    HttpResponse.json(
+      seedIndirectBudgetDTO(resolveSeedProjectId(params.projectId)),
+    ),
+)
+
+export const setIndirectBudgetLineHandler = http.put(
+  '*/v1/projects/:projectId/indirect-budget/:category',
+  async ({ params, request }) => {
+    const body = (await request.json()) as { amount: string }
+    return HttpResponse.json(
+      seedIndirectBudgetDTO(resolveSeedProjectId(params.projectId), [
+        {
+          category: String(params.category),
+          amount: body.amount,
+          spent: '0.00',
+          is_over_budget: false,
+        },
+      ]),
+    )
+  },
+)
+
+export const removeIndirectBudgetLineHandler = http.delete(
+  '*/v1/projects/:projectId/indirect-budget/:category',
+  ({ params }) =>
+    HttpResponse.json(
+      seedIndirectBudgetDTO(resolveSeedProjectId(params.projectId)),
+    ),
+)
+
 export const projectHandlers = [
   listProjectsHandler,
   getProjectHandler,
@@ -260,6 +294,9 @@ export const projectHandlers = [
   updateProjectPriorityHandler,
   updateProjectBudgetHandler,
   getProjectBudgetHandler,
+  getIndirectBudgetHandler,
+  setIndirectBudgetLineHandler,
+  removeIndirectBudgetLineHandler,
   archiveProjectHandler,
   unarchiveProjectHandler,
   getProjectTeamHandler,

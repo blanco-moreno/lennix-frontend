@@ -1,5 +1,11 @@
-import type { ProjectPriority, ProjectSortBy, ProjectStatus } from '@/types'
 import type {
+  IndirectCategory,
+  ProjectPriority,
+  ProjectSortBy,
+  ProjectStatus,
+} from '@/types'
+import type {
+  IndirectBudgetLineRequestDTO,
   ProjectUpdateRequestDTO,
   ProjectPriorityUpdateRequestDTO,
   ProjectBudgetUpdateRequestDTO,
@@ -146,6 +152,34 @@ export const updateProjectBudget = ({
 })
 
 export const getProjectBudget = (id: string) => `/v1/projects/${id}/budget`
+
+export const getIndirectBudget = (id: string) =>
+  `/v1/projects/${id}/indirect-budget`
+
+export const setIndirectBudgetLine = ({
+  projectId,
+  category,
+  body,
+}: {
+  projectId: string
+  category: IndirectCategory
+  body: IndirectBudgetLineRequestDTO
+}) => ({
+  url: `/v1/projects/${projectId}/indirect-budget/${category}`,
+  method: 'PUT',
+  body,
+})
+
+export const removeIndirectBudgetLine = ({
+  projectId,
+  category,
+}: {
+  projectId: string
+  category: IndirectCategory
+}) => ({
+  url: `/v1/projects/${projectId}/indirect-budget/${category}`,
+  method: 'DELETE',
+})
 
 export const archiveProject = (id: string) => ({
   url: `/v1/projects/${id}/archive`,

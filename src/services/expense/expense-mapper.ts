@@ -10,7 +10,7 @@ import type {
   ExpenseResponseDTO,
   ProjectExpenseResponseDTO,
 } from '@/types/dto/expense-dto'
-import { parseMoney } from '@/utils'
+import { parseMoney, toIndirectCategory } from '@/utils'
 
 export function mapExpenseResponseDTOToExpenseItem(
   dto: ExpenseResponseDTO,
@@ -22,6 +22,7 @@ export function mapExpenseResponseDTOToExpenseItem(
     description: dto.description,
     amount: parseMoney(dto.amount),
     category: dto.category,
+    indirectCategory: toIndirectCategory(dto.indirect_category),
     expenseDate: dto.expense_date,
     documentType: dto.document_type ?? null,
     documentNumber: dto.document_number ?? null,

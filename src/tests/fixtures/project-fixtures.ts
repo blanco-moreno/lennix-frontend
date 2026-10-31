@@ -8,6 +8,7 @@ import {
 } from '@/tests/seed'
 import type {
   AssignableMemberResponseDTO,
+  IndirectBudgetResponseDTO,
   ProjectBudgetResponseDTO,
   ProjectHealthDTO,
   ProjectDetailResponseDTO,
@@ -234,6 +235,27 @@ export function seedProjectBudgetDTO(
     is_over_budget: project.isOverBudget,
     utilization_percentage:
       budget > 0 ? Number(((spent / budget) * 100).toFixed(2)) : 0,
+  }
+}
+
+/**
+ * A seeded project's overheads (ms-bk `BUD-11`). The seed carries none, so
+ * every project reads as it did before overheads existed; a test that needs
+ * lines passes them.
+ */
+export function seedIndirectBudgetDTO(
+  projectId: string,
+  lines: IndirectBudgetResponseDTO['lines'] = [],
+): IndirectBudgetResponseDTO {
+  const project = seedProject(projectId)
+  const budget = Number(project.budget ?? 0)
+  const allocated = Number(project.allocated)
+  const indirect = lines.reduce((sum, line) => sum + Number(line.amount), 0)
+  return {
+    project_id: project.id,
+    lines,
+    indirect_allocated: indirect.toFixed(2),
+    unallocated: budget ? (budget - allocated - indirect).toFixed(2) : '0.00',
   }
 }
 

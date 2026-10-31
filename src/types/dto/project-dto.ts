@@ -96,6 +96,8 @@ export interface ProjectResponseDTO {
   start_date: string | null
   due_date: string | null
   allocated: string
+  /** Absent from a backend older than `BUD-11`. */
+  indirect_allocated?: string
   spent: string
   is_over_budget: boolean
   created_at: string
@@ -135,6 +137,7 @@ export interface ProjectBudgetResponseDTO {
   project_id: string
   budget: string | null
   allocated: string
+  indirect_allocated?: string
   unallocated: string
   spent: string
   remaining: string
@@ -181,4 +184,22 @@ export interface ProjectBudgetUpdateRequestDTO {
  */
 export interface ProjectTeamMemberAddRequestDTO {
   user_id: string
+}
+
+/** GET/PUT/DELETE /v1/projects/:id/indirect-budget[/:category] — response */
+export interface IndirectBudgetResponseDTO {
+  project_id: string
+  lines: {
+    category: string
+    amount: string
+    spent: string
+    is_over_budget: boolean
+  }[]
+  indirect_allocated: string
+  unallocated: string
+}
+
+/** PUT /v1/projects/:id/indirect-budget/:category — request */
+export interface IndirectBudgetLineRequestDTO {
+  amount: string
 }

@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl'
 import { Heading, Text } from '@/components'
 
 import { CostReport } from '../cost-report'
+import { IndirectBudgetPanel } from '../indirect-budget-panel'
 import { ProjectBudgetPanel } from '../project-budget-panel'
 import { ProjectExpensesTab } from '../project-expenses-tab'
 
@@ -14,8 +15,8 @@ interface ProjectBudgetTabProps {
 }
 
 /**
- * The one home for money, with an explicit hierarchy: budget → cost report →
- * expense list. The budget of record is the primary block, the report explains
+ * The one home for money, with an explicit hierarchy: budget → overheads →
+ * cost report → expense list. The budget of record is the primary block, the report explains
  * where it is going, and the expense list is the evidence underneath. Setting
  * the budget lives on the single permission-forking "Update budget" button on
  * the project header — no second editor appears here.
@@ -36,6 +37,8 @@ export function ProjectBudgetTab({ projectId }: ProjectBudgetTabProps) {
           <ProjectBudgetPanel projectId={projectId} />
         </Box>
       </Stack>
+
+      <IndirectBudgetPanel projectId={projectId} />
 
       <Stack gap="tight">
         <Box>

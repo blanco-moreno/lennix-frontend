@@ -29,12 +29,17 @@ import {
   useCreateExpenseMutation,
   useUploadExpenseAttachmentMutation,
 } from '@/services/expense'
+import { useGetIndirectBudgetQuery } from '@/services/project'
+import type { IndirectCategory } from '@/types'
 import type { ExpenseDocumentTypeDTO } from '@/types/dto/expense-dto'
 import {
   CATEGORY_OPTIONS,
+  indirectCategoryMessages,
   serializeMoneyForApi,
   expenseManagementMessages as em,
 } from '@/utils'
+
+import { projectExpenseCreateModalMessages as pm } from './project-expense-create-modal-messages'
 
 export interface ProjectExpenseCreateModalProps {
   projectId: string
@@ -53,6 +58,14 @@ export function ProjectExpenseCreateModal({
   const [uploadAttachment, { isLoading: isUploading }] =
     useUploadExpenseAttachmentMutation()
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null)
+  // The overhead line the expense is spent against (`BUD-11`); empty = none.
+  const [indirectCategory, setIndirectCategory] = useState<
+    IndirectCategory | ''
+  >('')
+  const { data: indirect } = useGetIndirectBudgetQuery(projectId, {
+    skip: !open,
+  })
+  const lines = indirect?.lines ?? []
 
   const {
     control,
@@ -119,6 +132,7 @@ export function ProjectExpenseCreateModal({
           document_type: (data.documentType ||
             null) as ExpenseDocumentTypeDTO | null,
           document_number: data.documentNumber?.trim() || null,
+          indirect_category: indirectCategory || null,
         },
         projectId,
       }).unwrap()
@@ -142,6 +156,7 @@ export function ProjectExpenseCreateModal({
       })
       reset(emptyForm)
       setAttachmentFile(null)
+      setIndirectCategory('')
       onOpenChange(false)
     } catch {
       toast.error(intl.formatMessage(em.createError), { id: em.createError.id })
@@ -152,6 +167,7 @@ export function ProjectExpenseCreateModal({
     if (!next) {
       reset(emptyForm)
       setAttachmentFile(null)
+      setIndirectCategory('')
     }
     onOpenChange(next)
   }
@@ -232,6 +248,32 @@ export function ProjectExpenseCreateModal({
             )}
           />
         </FormField>
+
+        {lines.length > 0 && (
+          <FormField
+            htmlFor="project-expense-indirect"
+            label={<FormattedMessage {...pm.indirectLabel} />}
+          >
+            <Select
+              id="project-expense-indirect"
+              value={indirectCategory}
+              onChange={(value) =>
+                setIndirectCategory(
+                  lines.find((line) => line.category === value)?.category ?? '',
+                )
+              }
+              options={[
+                { value: '', label: intl.formatMessage(pm.indirectNone) },
+                ...lines.map((line) => ({
+                  value: line.category,
+                  label: intl.formatMessage(
+                    indirectCategoryMessages[line.category],
+                  ),
+                })),
+              ]}
+            />
+          </FormField>
+        )}
 
         <FormField
           label={<FormattedMessage {...em.dateLabel} />}

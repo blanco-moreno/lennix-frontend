@@ -84,4 +84,18 @@ describe('useActivitySentence', () => {
     expect(sentence).toContain('a deleted item')
     expect(sentence).not.toMatch(/null|undefined/)
   })
+
+  it('names an overhead line in the reader language, with its amounts (BUD-11)', () => {
+    const sentence = renderSentence({
+      action: 'indirect_budget.over_budget',
+      entityType: 'indirect_budget',
+      entityName: 'site_setup',
+      oldValue: '100000.00',
+      newValue: '120000.00',
+    })
+
+    expect(sentence).toBe(
+      'The overhead line Site setup went over budget: $120,000.00 against $100,000.00.',
+    )
+  })
 })

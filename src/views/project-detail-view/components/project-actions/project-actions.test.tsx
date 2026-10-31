@@ -33,6 +33,7 @@ const project: Project = {
   startDate: '2025-06-01',
   dueDate: '2026-08-01',
   allocated: 580000,
+  indirectAllocated: 0,
   spent: 637000,
   isOverBudget: false,
   createdAt: '2025-06-01T00:00:00Z',

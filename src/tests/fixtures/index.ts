@@ -34,6 +34,7 @@ export {
   DEFAULT_SEED_PROJECT_ID,
   resolveSeedProjectId,
   seedDraftProjectListDTO,
+  seedIndirectBudgetDTO,
   seedProjectBudgetDTO,
   seedProjectDetailDTO,
   seedProjectDTO,

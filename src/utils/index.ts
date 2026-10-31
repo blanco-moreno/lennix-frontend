@@ -70,7 +70,7 @@ export {
   DEFAULT_LOCALE,
 } from './format/format'
 
-export { calculateBudgetMetrics } from './money/budget'
+export { calculateBudgetMetrics, toIndirectCategory } from './money/budget'
 
 export { groupTasksByProject } from './task/task-grouping'
 
@@ -115,6 +115,7 @@ export {
   CATEGORY_LABEL,
   CATEGORY_OPTIONS,
 } from './labels/expense-category-labels'
+export { indirectCategoryMessages } from './labels/indirect-category-messages'
 export {
   buildPortfolioKpis,
   buildProjectKpis,

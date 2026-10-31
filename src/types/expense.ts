@@ -1,5 +1,7 @@
 /** Expense domain types — matches the backend contract for /v1/expenses. */
 
+import type { IndirectCategory } from './project'
+
 export type ExpenseDocumentType = 'invoice' | 'receipt' | 'purchase_order'
 
 export interface ExpenseItem {
@@ -9,6 +11,8 @@ export interface ExpenseItem {
   description: string
   amount: number
   category: ExpenseCategory
+  /** The overhead line a project-level expense is filed under (`BUD-11`). */
+  indirectCategory?: IndirectCategory | null
   expenseDate: string
   documentType?: ExpenseDocumentType | null
   documentNumber?: string | null

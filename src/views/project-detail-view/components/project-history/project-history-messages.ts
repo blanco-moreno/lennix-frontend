@@ -161,6 +161,30 @@ export const activityMessages = defineMessages({
     defaultMessage: 'The project went over budget: {new} against {old}.',
     description: 'Historial sentence: project.over_budget',
   },
+  indirectBudgetChanged: {
+    id: 'projectActivity.indirectBudgetChanged',
+    defaultMessage:
+      '{actor} set the overhead line {entity}: {hasOld, select, yes {{old} became {new}} other {{new}}}.',
+    description:
+      'Historial sentence: indirect_budget.changed; entity is the overhead line',
+  },
+  indirectBudgetRemoved: {
+    id: 'projectActivity.indirectBudgetRemoved',
+    defaultMessage: '{actor} removed the overhead line {entity} ({old}).',
+    description: 'Historial sentence: indirect_budget.removed',
+  },
+  indirectOverBudget: {
+    id: 'projectActivity.indirectOverBudget',
+    defaultMessage:
+      'The overhead line {entity} went over budget: {new} against {old}.',
+    description: 'Historial sentence: indirect_budget.over_budget',
+  },
+  indirectWithinBudget: {
+    id: 'projectActivity.indirectWithinBudget',
+    defaultMessage:
+      'The overhead line {entity} is back within budget: {new} against {old}.',
+    description: 'Historial sentence: indirect_budget.within_budget',
+  },
   projectWithinBudget: {
     id: 'projectActivity.projectWithinBudget',
     defaultMessage: 'The project is back within budget: {new} against {old}.',
@@ -366,6 +390,10 @@ export const ACTIVITY_ACTION_MESSAGES: Record<
   'project.recovered': activityMessages.projectRecovered,
   'project.over_budget': activityMessages.projectOverBudget,
   'project.within_budget': activityMessages.projectWithinBudget,
+  'indirect_budget.changed': activityMessages.indirectBudgetChanged,
+  'indirect_budget.removed': activityMessages.indirectBudgetRemoved,
+  'indirect_budget.over_budget': activityMessages.indirectOverBudget,
+  'indirect_budget.within_budget': activityMessages.indirectWithinBudget,
   'project.critical_path_changed': activityMessages.projectCriticalPathChanged,
   'project.completed': activityMessages.projectCompleted,
   'project.archived': activityMessages.projectArchived,

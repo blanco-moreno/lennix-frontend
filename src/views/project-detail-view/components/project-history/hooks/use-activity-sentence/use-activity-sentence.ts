@@ -3,7 +3,11 @@ import { useIntl } from 'react-intl'
 import { useProjectCurrency, useStatusLabel } from '@/hooks'
 import { useFormatDate } from '@/i18n'
 import type { ProjectActivity, ProjectActivityAction } from '@/types'
-import { parseMoney } from '@/utils'
+import {
+  indirectCategoryMessages,
+  parseMoney,
+  toIndirectCategory,
+} from '@/utils'
 
 import {
   ACTIVITY_ACTION_MESSAGES,
@@ -35,6 +39,8 @@ function moneyPlaceholders(action: ProjectActivityAction): {
       return { old: false, new: true }
     // Budget before → after.
     case 'project.budget_changed':
+    case 'indirect_budget.changed':
+    case 'indirect_budget.removed':
     case 'budget_approval.requested':
     case 'budget_approval.approved':
     case 'budget_approval.rejected':
@@ -44,6 +50,8 @@ function moneyPlaceholders(action: ProjectActivityAction): {
     case 'task.within_budget':
     case 'project.over_budget':
     case 'project.within_budget':
+    case 'indirect_budget.over_budget':
+    case 'indirect_budget.within_budget':
       return { old: true, new: true }
     default:
       return { old: false, new: false }
@@ -56,6 +64,19 @@ export function useActivitySentence(): (entry: ProjectActivity) => string {
   const formatDate = useFormatDate()
   // The Historial is the project's page: its amounts are in its currency.
   const { formatMoney } = useProjectCurrency()
+
+  // An overhead line is named by its category key; the sentence says it in
+  // the reader's language.
+  const entityName = (entry: ProjectActivity): string => {
+    const category =
+      entry.entityType === 'indirect_budget'
+        ? toIndirectCategory(entry.entityName)
+        : null
+    if (category) return intl.formatMessage(indirectCategoryMessages[category])
+    return (
+      entry.entityName ?? intl.formatMessage(activityMessages.unnamedEntity)
+    )
+  }
 
   return (entry) => {
     const descriptor =
@@ -82,8 +103,7 @@ export function useActivitySentence(): (entry: ProjectActivity) => string {
     return intl.formatMessage(descriptor, {
       actor:
         entry.actorName ?? intl.formatMessage(activityMessages.systemActor),
-      entity:
-        entry.entityName ?? intl.formatMessage(activityMessages.unnamedEntity),
+      entity: entityName(entry),
       old: readable(entry.oldValue, money.old),
       new: readable(entry.newValue, money.new),
       hasOld: entry.oldValue === null ? 'no' : 'yes',

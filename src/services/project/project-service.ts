@@ -2,6 +2,8 @@ import type { FetchBaseQueryMeta } from '@reduxjs/toolkit/query'
 
 import type {
   AssignableMember,
+  IndirectBudget,
+  IndirectCategory,
   Page,
   Project,
   ProjectActivity,
@@ -16,6 +18,7 @@ import type {
 import type { PageDTO } from '@/types/dto/pagination-dto'
 import type {
   AssignableMemberResponseDTO,
+  IndirectBudgetLineRequestDTO,
   ProjectUpdateRequestDTO,
   ProjectPriorityUpdateRequestDTO,
   ProjectBudgetUpdateRequestDTO,
@@ -23,7 +26,7 @@ import type {
 } from '@/types/dto/project-dto'
 
 import { api } from '../api-injector'
-import { providesPageTags } from '../cache-tags'
+import { type AppTagType, providesPageTags } from '../cache-tags'
 import { filenameFromContentDisposition } from '../content-disposition'
 
 import {
@@ -34,6 +37,9 @@ import {
   updateProjectPriority,
   updateProjectBudget,
   getProjectBudget,
+  getIndirectBudget,
+  setIndirectBudgetLine,
+  removeIndirectBudgetLine,
   archiveProject,
   unarchiveProject,
   exportProjectSchedule,
@@ -49,10 +55,29 @@ import {
   mapPageOfProjects,
   mapProjectDetailDTOToProjectDetail,
   mapProjectBudgetResponseDTOToProjectBudget,
+  mapIndirectBudgetDTO,
   mapProjectMemberResponseDTOToProjectMember,
   mapProjectMemberArrayToProjectMembers,
   mapPageOfProjectActivity,
 } from './project-mappers'
+
+/**
+ * What an overhead line write moves: the lines, the wallet (budget summary,
+ * project row, cost report), and the Historial row it writes (`BUD-11`).
+ */
+function indirectBudgetInvalidationTags(
+  projectId: string,
+): { type: AppTagType; id: string }[] {
+  return [
+    { type: 'IndirectBudget', id: projectId },
+    { type: 'ProjectBudget', id: projectId },
+    { type: 'Project', id: projectId },
+    { type: 'Project', id: 'LIST' },
+    { type: 'CostReport', id: projectId },
+    { type: 'Dashboard', id: projectId },
+    { type: 'ProjectActivity', id: projectId },
+  ]
+}
 
 export const projectApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -192,6 +217,36 @@ export const projectApi = api.injectEndpoints({
       query: getProjectBudget,
       transformResponse: mapProjectBudgetResponseDTOToProjectBudget,
       providesTags: (_result, _error, id) => [{ type: 'ProjectBudget', id }],
+    }),
+
+    getIndirectBudget: builder.query<IndirectBudget, string>({
+      query: getIndirectBudget,
+      transformResponse: mapIndirectBudgetDTO,
+      providesTags: (_result, _error, id) => [{ type: 'IndirectBudget', id }],
+    }),
+
+    setIndirectBudgetLine: builder.mutation<
+      IndirectBudget,
+      {
+        projectId: string
+        category: IndirectCategory
+        body: IndirectBudgetLineRequestDTO
+      }
+    >({
+      query: setIndirectBudgetLine,
+      transformResponse: mapIndirectBudgetDTO,
+      invalidatesTags: (_result, _error, { projectId }) =>
+        indirectBudgetInvalidationTags(projectId),
+    }),
+
+    removeIndirectBudgetLine: builder.mutation<
+      IndirectBudget,
+      { projectId: string; category: IndirectCategory }
+    >({
+      query: removeIndirectBudgetLine,
+      transformResponse: mapIndirectBudgetDTO,
+      invalidatesTags: (_result, _error, { projectId }) =>
+        indirectBudgetInvalidationTags(projectId),
     }),
 
     archiveProject: builder.mutation<Project, string>({
@@ -345,6 +400,9 @@ export const {
   useUpdateProjectPriorityMutation,
   useUpdateProjectBudgetMutation,
   useGetProjectBudgetQuery,
+  useGetIndirectBudgetQuery,
+  useSetIndirectBudgetLineMutation,
+  useRemoveIndirectBudgetLineMutation,
   useArchiveProjectMutation,
   useUnarchiveProjectMutation,
   useExportProjectScheduleMutation,

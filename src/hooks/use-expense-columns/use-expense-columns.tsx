@@ -11,6 +11,7 @@ import {
   CATEGORY_LABEL,
   expenseManagementMessages as m,
   EXPENSE_CATEGORY_VARIANT,
+  indirectCategoryMessages,
 } from '@/utils'
 
 import { useProjectCurrency } from '../use-project-currency'
@@ -69,14 +70,23 @@ export function useExpenseColumns(): ColumnDef<ProjectExpense>[] {
         accessorKey: 'category',
         header: intl.formatMessage(m.columnCategory),
         enableSorting: false,
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const category = getValue<string>()
           const descriptor =
             CATEGORY_LABEL[category as keyof typeof CATEGORY_LABEL]
+          const line = row.original.indirectCategory
           return (
-            <Badge variant={EXPENSE_CATEGORY_VARIANT[category] ?? 'default'}>
-              {descriptor ? intl.formatMessage(descriptor) : category}
-            </Badge>
+            <HStack gap={1} wrap="wrap">
+              <Badge variant={EXPENSE_CATEGORY_VARIANT[category] ?? 'default'}>
+                {descriptor ? intl.formatMessage(descriptor) : category}
+              </Badge>
+              {/* The overhead line it is spent against (BUD-11). */}
+              {line && (
+                <Badge variant="secondary">
+                  {intl.formatMessage(indirectCategoryMessages[line])}
+                </Badge>
+              )}
+            </HStack>
           )
         },
       },

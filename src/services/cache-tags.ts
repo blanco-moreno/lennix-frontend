@@ -15,6 +15,7 @@ export const CACHE_TAG_TYPES = [
   'Expense',
   'ForceStartRequest',
   'ImportJob',
+  'IndirectBudget',
   'OrgDashboard',
   'OrgMembers',
   'OrgUsage',
@@ -65,6 +66,8 @@ export function buildExpenseInvalidationTags({
     { type: 'CostReport', id: projectId },
     { type: 'Task', id: `project-${projectId}` },
     { type: 'ProjectBudget', id: projectId },
+    // An overhead expense spends its line (`BUD-11`).
+    { type: 'IndirectBudget', id: projectId },
     { type: 'Project', id: projectId },
     { type: 'Dashboard', id: projectId },
     // Every consumer of this builder (expense create/update/delete, subtask

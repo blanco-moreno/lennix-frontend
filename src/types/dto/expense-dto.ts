@@ -24,6 +24,8 @@ export interface ExpenseCreateRequestDTO {
   expense_date: string
   document_type?: ExpenseDocumentTypeDTO | null
   document_number?: string | null
+  /** ms-bk `IndirectCategory`; project-level expenses only (`BUD-11`). */
+  indirect_category?: string | null
 }
 
 /** PUT /v1/expenses/:id — request */
@@ -44,6 +46,7 @@ export interface ExpenseResponseDTO {
   description: string
   amount: string
   category: ExpenseCategoryDTO
+  indirect_category?: string | null
   expense_date: string
   document_type?: ExpenseDocumentTypeDTO | null
   document_number?: string | null

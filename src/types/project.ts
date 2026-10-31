@@ -98,6 +98,8 @@ export interface Project {
   startDate: string | null
   dueDate: string | null
   allocated: number
+  /** The overheads' share of the wallet (ms-bk `BUD-11`). */
+  indirectAllocated: number
   spent: number
   isOverBudget: boolean
   createdAt: string
@@ -125,6 +127,10 @@ export const PROJECT_ACTIVITY_ACTIONS = [
   'project.renamed',
   'project.budget_changed',
   'project.currency_changed',
+  'indirect_budget.changed',
+  'indirect_budget.removed',
+  'indirect_budget.over_budget',
+  'indirect_budget.within_budget',
   'project.location_changed',
   'project.description_changed',
   'project.manager_changed',
@@ -190,6 +196,7 @@ export type ProjectActivityEntity =
   | 'dependency'
   | 'expense'
   | 'risk'
+  | 'indirect_budget'
 
 /**
  * One entry of the project Historial.
@@ -216,6 +223,9 @@ export interface ProjectBudget {
   projectId: string
   budget: number | null
   allocated: number
+  /** The overheads' share of the wallet (ms-bk `BUD-11`). */
+  indirectAllocated: number
+  /** What is left after the phases and the overheads (`BUD-2`). */
   unallocated: number
   spent: number
   remaining: number
@@ -257,4 +267,36 @@ export type ProjectSortBy =
 export interface ScheduleExportFile {
   blob: Blob
   filename: string
+}
+
+/**
+ * The lines an obra's overheads (gastos generales) are budgeted in, mirroring
+ * `IndirectCategory` in ms-bk (`BUD-11`). `general` holds overheads stated
+ * without a breakdown.
+ */
+export const INDIRECT_CATEGORIES = [
+  'staff',
+  'transport',
+  'site_setup',
+  'food_lodging',
+  'general',
+  'other',
+] as const
+
+export type IndirectCategory = (typeof INDIRECT_CATEGORIES)[number]
+
+/** One overhead line: what the obra may spend, and what it has. */
+export interface IndirectBudgetLine {
+  category: IndirectCategory
+  amount: number
+  spent: number
+  isOverBudget: boolean
+}
+
+/** The obra's overheads, and the wallet left after phases and them. */
+export interface IndirectBudget {
+  projectId: string
+  lines: IndirectBudgetLine[]
+  indirectAllocated: number
+  unallocated: number
 }

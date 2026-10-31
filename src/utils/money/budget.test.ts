@@ -1,4 +1,4 @@
-import { calculateBudgetMetrics } from './budget'
+import { calculateBudgetMetrics, toIndirectCategory } from './budget'
 
 describe('calculateBudgetMetrics', () => {
   it('computes remaining, percentage and flag for an under-budget project', () => {
@@ -37,5 +37,16 @@ describe('calculateBudgetMetrics', () => {
     expect(m.budgetPercentage).toBe(0)
     expect(m.isOverBudget).toBe(true)
     expect(m.budgetRemaining).toBe(-500)
+  })
+})
+
+describe('toIndirectCategory', () => {
+  it('reads a known overhead line', () => {
+    expect(toIndirectCategory('site_setup')).toBe('site_setup')
+  })
+
+  it('reads anything else as no line', () => {
+    expect(toIndirectCategory('profit')).toBeNull()
+    expect(toIndirectCategory(null)).toBeNull()
   })
 })

@@ -1,5 +1,7 @@
 import type {
   AssignableMember,
+  IndirectBudget,
+  IndirectBudgetLine,
   Page,
   Project,
   ProjectActivity,
@@ -15,6 +17,7 @@ import { REVIEW_STEPS } from '@/types'
 import type { PageDTO } from '@/types/dto/pagination-dto'
 import type {
   AssignableMemberResponseDTO,
+  IndirectBudgetResponseDTO,
   ProjectActivityResponseDTO,
   ProjectBudgetResponseDTO,
   ProjectHealthDTO,
@@ -26,6 +29,7 @@ import {
   parseMoney,
   ROLE_SLUGS,
   type RoleSlug,
+  toIndirectCategory,
   toProjectCurrency,
 } from '@/utils'
 
@@ -68,6 +72,7 @@ export function mapProjectBudgetResponseDTOToProjectBudget(
     projectId: dto.project_id,
     budget: dto.budget ? parseMoney(dto.budget) : null,
     allocated: parseMoney(dto.allocated) || 0,
+    indirectAllocated: parseMoney(dto.indirect_allocated) || 0,
     unallocated: parseMoney(dto.unallocated) || 0,
     spent: parseMoney(dto.spent) || 0,
     remaining: parseMoney(dto.remaining) || 0,
@@ -105,6 +110,7 @@ export function mapProjectDTOToProject(dto: ProjectResponseDTO): Project {
     startDate: dto.start_date,
     dueDate: dto.due_date,
     allocated: parseMoney(dto.allocated) || 0,
+    indirectAllocated: parseMoney(dto.indirect_allocated) || 0,
     spent: parseMoney(dto.spent) || 0,
     isOverBudget: dto.is_over_budget,
     createdAt: dto.created_at,
@@ -165,4 +171,26 @@ export function mapPageOfProjectActivity(
   dto: PageDTO<ProjectActivityResponseDTO>,
 ): Page<ProjectActivity> {
   return mapPage(dto, mapProjectActivityDTOToProjectActivity)
+}
+
+export function mapIndirectBudgetDTO(
+  dto: IndirectBudgetResponseDTO,
+): IndirectBudget {
+  const lines: IndirectBudgetLine[] = []
+  for (const line of dto.lines) {
+    const category = toIndirectCategory(line.category)
+    if (category === null) continue
+    lines.push({
+      category,
+      amount: parseMoney(line.amount),
+      spent: parseMoney(line.spent),
+      isOverBudget: line.is_over_budget,
+    })
+  }
+  return {
+    projectId: dto.project_id,
+    lines,
+    indirectAllocated: parseMoney(dto.indirect_allocated),
+    unallocated: parseMoney(dto.unallocated),
+  }
 }

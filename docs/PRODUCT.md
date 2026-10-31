@@ -37,6 +37,11 @@ two places** unless it is an explicit overview → drill-down.
   truncated projects page.
 - **One drafts home** (Borradores). A draft is not also a dashboard widget with
   its own semantics.
+- **Overheads have their own lines** (`BUD-11`). The budget tab shows the
+  obra's gastos generales by category under the budget, each with what it may
+  spend, what it has spent and its own over-budget badge, and what the budget
+  has left for phases and overheads together. A project-level expense can be
+  filed under one of its lines.
 - **The budget step names the currency first** (`BUD-10`). The reviewer picks
   the project's currency (Chilean peso or US dollar) above the amounts, which
   are then written the way that currency's market reads them: `$18.682.420` in
@@ -248,6 +253,7 @@ replaced, in place, by the request that leads to it.
 | --------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
 | Project edit drawer, budget field | Types the new amount and saves — a direct edit                     | The same field plus a **required reason**: saving files a budget-approval request     |
 | Project edit drawer, currency     | Relabels the project's currency; the amounts are not converted     | Not offered: the currency is a budget decision                                        |
+| Budget tab, overheads             | Adds, re-amounts and removes overhead lines (`BUD-11`)             | Reads the lines, their spend and their alerts                                         |
 | Activity detail, actions menu     | No separate budget item — the amount is a field of the edit drawer | A distinct **request budget change** action                                           |
 | A blocked activity                | **Forces the start outright**                                      | **Requests the force start** with a justification; only the approval force-starts it  |
 | `/approvals`                      | Decides                                                            | Watches their own requests; the sidebar count is theirs, not the organization's queue |
