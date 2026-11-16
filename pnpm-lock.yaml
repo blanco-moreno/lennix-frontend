@@ -16,7 +16,7 @@ importers:
         version: 11.14.0(@types/react@19.2.7)(react@19.2.3)(supports-color@8.1.1)
       '@hookform/resolvers':
         specifier: ^5.2.2
-        version: 5.2.2(react-hook-form@7.75.0(react@19.2.3))
+        version: 5.2.2(react-hook-form@7.92.0(@types/react@19.2.7)(react@19.2.3))
       '@reduxjs/toolkit':
         specifier: 2.11.2
         version: 2.11.2(react-redux@9.2.0(@types/react@19.2.7)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
@@ -48,8 +48,8 @@ importers:
         specifier: ^6.1.2
         version: 6.1.2(react@19.2.3)
       react-hook-form:
-        specifier: ^7.75.0
-        version: 7.75.0(react@19.2.3)
+        specifier: ^7.92.0
+        version: 7.92.0(@types/react@19.2.7)(react@19.2.3)
       react-hot-toast:
         specifier: ^2.6.0
         version: 2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -3100,11 +3100,15 @@ packages:
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
 
-  react-hook-form@7.75.0:
-    resolution: {integrity: sha512-Ovv94H+0p3sJ7B9B5QxPuCP1u8V/cHuVGyH55cSwodYDtoJwK+fqk3vjfIgSX59I2U/bU4z0nRJ9HMLpNiWEmw==}
+  react-hook-form@7.92.0:
+    resolution: {integrity: sha512-O5ILyY5fYHN7N13Pfxpe55KboyNFsJdM03BHpshQkClJd8raugiAUGY7VjifITrfhVxyx81ko25azXCoayhf1w==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
+      '@types/react': '*'
       react: ^16.8.0 || ^17 || ^18 || ^19
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   react-hot-toast@2.6.0:
     resolution: {integrity: sha512-bH+2EBMZ4sdyou/DPrfgIouFpcRLCJ+HoCA32UoAYHn6T3Ur5yfcDCeSr5mwldl6pFOsiocmrXMuoCJ1vV8bWg==}
@@ -4373,10 +4377,10 @@ snapshots:
       '@formatjs/icu-messageformat-parser': 3.5.7
       intl-messageformat: 11.2.4
 
-  '@hookform/resolvers@5.2.2(react-hook-form@7.75.0(react@19.2.3))':
+  '@hookform/resolvers@5.2.2(react-hook-form@7.92.0(@types/react@19.2.7)(react@19.2.3))':
     dependencies:
       '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.75.0(react@19.2.3)
+      react-hook-form: 7.92.0(@types/react@19.2.7)(react@19.2.3)
 
   '@humanfs/core@0.19.1': {}
 
@@ -7215,9 +7219,11 @@ snapshots:
     dependencies:
       react: 19.2.3
 
-  react-hook-form@7.75.0(react@19.2.3):
+  react-hook-form@7.92.0(@types/react@19.2.7)(react@19.2.3):
     dependencies:
       react: 19.2.3
+    optionalDependencies:
+      '@types/react': 19.2.7
 
   react-hot-toast@2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:

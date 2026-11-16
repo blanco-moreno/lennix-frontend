@@ -50,7 +50,7 @@
     "react-dom": "^19.2.3",
     "react-dropzone": "^15.0.0",
     "react-error-boundary": "^6.1.2",
-    "react-hook-form": "^7.75.0",
+    "react-hook-form": "^7.92.0",
     "react-hot-toast": "^2.6.0",
     "react-intl": "^10.1.5",
     "react-number-format": "^5.4.5",
