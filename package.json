@@ -89,7 +89,7 @@
     "msw": "^2.14.6",
     "node-fetch": "^3.3.2",
     "playwright-bdd": "^9.2.1",
-    "postcss": "^8.5.14",
+    "postcss": "^8.5.33",
     "prettier": "^3.8.3",
     "serve": "^14.2.8",
     "typescript": "^5.9.3",
