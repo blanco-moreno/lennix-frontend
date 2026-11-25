@@ -39,7 +39,7 @@
   "dependencies": {
     "@chakra-ui/react": "^3.36.0",
     "@emotion/react": "^11.14.0",
-    "@hookform/resolvers": "^5.2.2",
+    "@hookform/resolvers": "^7.0.8",
     "@reduxjs/toolkit": "2.11.2",
     "@tanstack/react-table": "^8.21.3",
     "async-mutex": "^0.5.0",
